@@ -71,7 +71,6 @@ class Payment extends MobileBase {
             }
             $user = session('user');
             $user = M('users')->where("user_id", $user['user_id'])->find();
-            // dump($user);exit;
             if($order['pay_status'] == 1){
             	$this->error('此订单，已完成支付!');
             }
@@ -241,6 +240,9 @@ class Payment extends MobileBase {
             }
             $results = Db::name('order')->where("order_id = {$order_id}")->save(['pay_status'=>1,'pay_time'=>time()]);
             if($result && $results){
+
+                userUpgradeByShoppingTimes($order);
+
                 //收益积分日志
 //                if($order['type'] == 1){
 //                    //活动区 专用累计业绩

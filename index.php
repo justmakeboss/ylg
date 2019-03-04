@@ -1,4 +1,5 @@
 <?php
+//var_dump(strtotime('+1month'));die;
 // [ 应用入口文件 ]
 // 应用入口文件
 if (extension_loaded('zlib')){
