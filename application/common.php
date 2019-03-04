@@ -213,13 +213,18 @@ function userUpgradeByShoppingTimes($order)
     $neverUpgrade = empty($user['check_point']) && empty($user['expired_at']);
     //过期的
     $expired = time() >= $user['expired_at'];
+    file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$neverUpgrade", FILE_APPEND);
+    file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$expired", FILE_APPEND);
     if($neverUpgrade || $expired) {
+
         //当月消费次数
         $orderModel = new Order();
         $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($order['user_id']);
         $userLevels = UserLevel::all();
         krsort($userLevels);
         foreach ($userLevels as $userLevel) {
+            file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$currMonthShoppingNum", FILE_APPEND);
+            file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/".$userLevel['amount'], FILE_APPEND);
             if($currMonthShoppingNum>=$userLevel['amount']){
                 Db::name('users')->where(['user_id'=>$user['user_id']])->update([
                     'level' => $user['level'] < 4 ? $user['level']++ : 4,
