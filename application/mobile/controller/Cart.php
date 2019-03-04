@@ -162,7 +162,10 @@ class Cart extends MobileBase {
             }
             $goods = Db::name('goods')->where('goods_id',$goods_id)->find();
             if($goods['type_id'] == 6 && $goods['status'] == 1){
-
+                $frozen_status = Db::name('forzen')->where(['frozen_status'=>1,'user_id'=>$this->user_id])->find();
+                if($frozen_status){
+                    $this->error('请批发完后再购买活动区产品');
+                }
                 $order_num = Db::name('order')->alias('o')->join('order_goods g','o.order_id = g.order_id')
                     ->where("user_id = {$this->user_id} AND goods_id = {$goods['goods_id']} AND o.pay_status = 1 AND o.type = 1")->field('sum(goods_num) sums')->find();
 //                dump($goods_num['goods_num']+$order_num['sums']);

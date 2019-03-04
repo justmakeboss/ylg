@@ -251,6 +251,7 @@ class Member extends MobileBase
                             $result = Db::name('order_goods')->where("order_id = {$goodsnum['order_id']}")->setInc('sell', $data['num']);
                             // $results = Db::name('goods')->where("goods_id = {$data['goods_id']}")->setInc('store_count', $data['num']);
                             if ($result){
+                                Db::name('forzen')->where(['order_id'=>$goodsnum['order_id']])->update(['frozen_status'=>0]);
                                 Db::commit();
                                 $this->success('寄售成功!');
                             } else {
@@ -545,7 +546,7 @@ $goodslist = Db::name('agent_order')->alias('a')
 //                        Db::startTrans();
                         if (Db::name('self_mention_order')->insert($arr)) {
                             if (Db::name('order_goods')->where("order_id = {$goodsnum['order_id']}")->setInc('self_mention', $data['num'])) {
-
+                                Db::name('forzen')->where(['order_id'=>$goodsnum['order_id']])->update(['frozen_status'=>0]);
 //                                Db::commit();
                                 $this->success('提货成功!');
                             } else {

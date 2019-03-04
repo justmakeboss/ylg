@@ -167,6 +167,16 @@ class Payment extends MobileBase {
 //                dump($order['goods_price']*$system['invite_integral']);exit;
                 $result = Db::name('users')->where('user_id',$user['user_id'])->dec('user_money',$order['order_amount'])->inc('frozen_money',$order['goods_price']*$system['invite_integral'])->update();
 
+                $result = Db::name('users')->where('user_id',$user['user_id'])->dec('user_money',$order['order_amount'])->update();
+
+                $dasss['user_id'] = $user['user_id'];
+                $dasss['reg_time'] = time();
+                $dasss['frozen_dongjie'] = $order['goods_price']*$system['invite_integral'];
+                $dasss['shifang_time'] = time() + (5*86400);
+                $dasss['frozen_status'] = 1;
+                $dasss['order_id'] = $order['order_id'];
+                Db::name('forzen')->insertGetId($dasss);
+
             	if($result){
                     $order_goods = Db::name('order_goods')->where('order_id',$order['order_id'])->field('goods_id,goods_num,goods_price')->find();
                     //获取代理商出售的商品
