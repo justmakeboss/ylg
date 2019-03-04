@@ -43,7 +43,6 @@
                 </dd>
             </dl>
             <dl class="row">
-                <?php if(true):?>
                 <dt class="tit">
                     <label for="level_name"><em>*</em>累计订单金额（元）</label>
                 </dt>
@@ -53,32 +52,26 @@
                     <span class="err" id="err_level_name"></span>
                     <p class="notic">设置累计订单金额（元）</p>
                 </dd>
-                <?php else:?>
                 <dt class="tit">
                     <label for="level_name"><em>*</em>购买活动区次数</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" name="amount" value="{$info.amount}" id="level_name" class="input-txt">
+                    <input type="text" name="times" value="{$info.times}" id="level_name" class="input-txt">
                     <span class="err" id="err_level_name"></span>
                     <p class="notic">每月购买</p>
                 </dd>
-                <?php endif;?>
-
             </dl>
-            <?php if(false):?>
             <dl class="row">
                 <dt class="tit">
                     <label for="level_name"><em>*</em>团队达到</label>
                 </dt>
                 <dd class="opt">
-                    <input type="text" name="team" value="{$info.team}" id="level_name" class="input-txt">
+                    <input type="text" name="team_num" value="{$info.team_num}" id="level_name" class="input-txt">
                     <span class="err" id="err_level_name"></span>
                     <p class="notic">人</p>
                 </dd>
 
-
             </dl>
-            <?php endif;?>
             <dl class="row">
                 <dt class="tit">
                     <label for="level_name"><em>*</em>直推消费商（个）</label>

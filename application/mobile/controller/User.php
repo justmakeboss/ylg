@@ -321,11 +321,9 @@ class User extends MobileBase
             // lzz 冻结资金提现处理
             $prize = new \app\common\logic\DistributPrizeLogic();
             $prize->frozen_money($res['result']['user_id']);
-
             //有效期处理
-            /*$user=Db::name('users')->where(['user_id'=>$res['result']['user_id']])->find();
-            checkExpiredAt($user);*/
-
+            $user=Db::name('users')->where(['user_id'=>$res['result']['user_id']])->find();
+            checkExpiredAt($user);
         }
         exit(json_encode($res));
     }
@@ -467,7 +465,7 @@ class User extends MobileBase
             //会员等级
             $data["level"] = 1;
             $data['rebate_revenue'] = 0;
-            $data["engineer_status"] = 0;
+            $data["engineer_status"] = 1;
             //创建用户表users数据
             Db::startTrans();
             $result = M("users")->add($data);
