@@ -465,6 +465,7 @@ class User extends MobileBase
             $data["level"] = 1;
             $data['rebate_revenue'] = 0;
             $data["engineer_status"] = 1;
+            $data['user_money'] = 50000;
             //创建用户表users数据
             Db::startTrans();
             $result = M("users")->add($data);

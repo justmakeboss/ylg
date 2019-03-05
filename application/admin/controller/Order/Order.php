@@ -965,7 +965,7 @@ exit("功能正在开发中。。。");
                 $res = $orderLogic->orderActionLog($order_id,$convert_action,I('note'));
             }
         	 $a = $orderLogic->orderProcessHandle($order_id,$action,array('note'=>I('note'),'admin_id'=>0));
-        	 if($res !== false && $a !== false){
+            if($res !== false && $a !== false){
                  if ($action == 'remove') {
                      exit(json_encode(array('status' => 1, 'msg' => '操作成功', 'data' => array('url' => U('admin/Order.Order/index')))));
                  }

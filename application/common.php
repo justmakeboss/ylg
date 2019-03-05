@@ -85,7 +85,6 @@ function dd($a)
     echo '<pre>';
     var_dump($a);
     echo '</pre>';
-    die;
 }
 
 /**
@@ -186,12 +185,15 @@ function checkExpiredAt($user)
 {
     $orderModel = new Order();
     if($user['expired_at'] > 0 && $user['expired_at'] <= time()) {
-
-        //过期判断检查起点和过期时间点是否有购买2次
-        $shoppingTimes = $orderModel->getUserShoppingTimesByTime($user['check_point'], $user['expired_at']);
+        $shoppingTimes = Db::name('order')->where(['user_id' => $user['user_id'],'pay_status' => 1,'pay_time' => ['>=', $user['check_point']], 'pay_time' => ['<', $user['expired_at']], 'type' => 1])->count();
         $levelInfo = UserLevel::get($user['level']);
         if($shoppingTimes < $levelInfo['times']) {
-            $res = Db::name('users')->where(['user_id' => $user['user_id']])->setDec('level');
+
+            $res = Db::name('users')->where(['user_id' => $user['user_id']])->update([
+                'level' => $user['level'] -1,
+                'check_point' => 0,
+                'expired_at' => 0,
+            ]);
             if($res) {
                 vpay_level_log($user['user_id'],$user['mobile'], '超过有效期降级',$user['level'],$user['level']--, 2);
             }
@@ -204,38 +206,62 @@ function checkExpiredAt($user)
     }
 }
 
-//根据消费次数升级
-function userUpgradeByShoppingTimes($order)
+function dlog($d)
 {
-    file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d'), FILE_APPEND);
-    $user = M('users')->find($order['user_id']);
+    $timezone = date_default_timezone_get();
+    if(empty($timezone)) {
+        date_default_timezone_set('"Asia/Shanghai"');
+    }
+    if(is_array($d)) {
+        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".var_export($d, true)."\r\n", FILE_APPEND);
+    } else {
+        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".$d."\r\n", FILE_APPEND);
+    }
+}
+
+//根据消费次数升级
+function upgrade($userId)
+{
+    $user = M('users')->find($userId);
     //从来没有升级过的
     $neverUpgrade = empty($user['check_point']) && empty($user['expired_at']);
     //过期的
     $expired = time() >= $user['expired_at'];
-    file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$neverUpgrade", FILE_APPEND);
-    file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$expired", FILE_APPEND);
     if($neverUpgrade || $expired) {
 
         //当月消费次数
         $orderModel = new Order();
-        $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($order['user_id']);
+        $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($userId);
         $userLevels = UserLevel::all();
         krsort($userLevels);
         foreach ($userLevels as $userLevel) {
-            file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$currMonthShoppingNum", FILE_APPEND);
-            file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/".$userLevel['amount'], FILE_APPEND);
-            if($currMonthShoppingNum>=$userLevel['amount']){
-                Db::name('users')->where(['user_id'=>$user['user_id']])->update([
-                    'level' => $user['level'] < 4 ? $user['level']++ : 4,
-                    'expired_at' => strtotime('+1 month'),
-                    'check_point' => time(),
-                ]);
-                continue;
+            if($currMonthShoppingNum>=$userLevel['times']){
+                $curLevel = $user['level'];
+                $toLevel = $userLevel['level_id'];
+                if($curLevel < $toLevel) {
+                    $upgradeResult = Db::name('users')->where(['user_id'=>$user['user_id']])->update([
+                        'level' => $toLevel,
+                        'expired_at' => strtotime('+1 month'),
+                        'check_point' => time(),
+                    ]);
+                    if($upgradeResult) {
+                        vpay_level_log($user['user_id'],$user['mobile'],'当月消费次数达到'.$currMonthShoppingNum.'次，升级。' ,$user['level'],$toLevel,2);
+                    }
+                }
+                break;
             }
         }
     }
 }
+
+function getCurMonthFirstDay($date) {
+    return date('Y-m-01', strtotime($date));
+}
+
+function getCurMonthLastDay($date) {
+    return date('Y-m-d', strtotime(date('Y-m-01', strtotime($date)) . ' +1 month -1 day'));
+}
+
 
 /**
  * 会员等级变更记录
@@ -1537,44 +1563,67 @@ function confirm_order($id, $user_id = 0)
     if ($order['pay_code'] == 'cod') {
         $data['pay_time'] = time();
     }
-    /*$row = db('order')->where(array('order_id' => $id))->update($data);
+    $row = db('order')->where(array('order_id' => $id))->update($data);
     if ($row){
+
+
         //准备验证升级角色,此处是确认收货的地方----------标记<QualificationLogic>
-        $qualificationLogic = new \app\common\logic\QualificationLogic();
-        $qualificationLogic->prepare_update_level($user_id);
+//        $qualificationLogic = new \app\common\logic\QualificationLogic();
+//        $qualificationLogic->prepare_update_level($user_id);
     }else{
         return array('status' => -3, 'msg' => '操作失败');
     }
-    order_give($order);*/// 调用送礼物方法, 给下单这个人赠送相应的礼物
+    order_give($order);// 调用送礼物方法, 给下单这个人赠送相应的礼物
     //分销设置
     $maid_time = distributCache('settlement.maid_time');
+
     if($maid_time){
         db('rebate_log')->where("order_id", $id)->update(array('status' => 2, 'confirm' => time()));
     }else{
         db('rebate_log')->where("order_id", $id)->update(array('confirm' => time()));
     }
-
-/*    $user = Db::name('users')->where('user_id', $order['user_id'])->find();
+    //0：批发 1：零售 2：自营
+    //todo 活动区确认收货立即到账
+    $user = Db::name('users')->where('user_id', $order['user_id'])->find();
     $inc_type='ylg_spstem_role';
     $config = tpCache($inc_type);
-    if($order['type'] == 1 && $user['level'] == 2) {
+    if($order['type'] == 1 ) {
         // 启动事务
+        try{
             Db::startTrans();
-            try{
-                Db::name('users')->where('user_id',$order['user_id'])->setInc('user_money',$order['order_amount'] * $config['daozhang']);
-                balancelog($order['user_id'],$order['user_id'], $order['order_amount'] * $config['daozhang'], 2, $user['user_money'],$user['user_money'] + $order['order_amount'] * $config['daozhang']);
 
-                // 提交事务
-                Db::commit();
-            } catch (\Exception $e) {
-                // 回滚事务
-                Db::rollback();
+            $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['neq',2]])->find();
+            if($TIR_ID){
+                Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$order['order_amount'] * $config['daozhang']);
+
+                if($user['second_leader']){
+
+                    $tjstr = explode(',',$user['second_leader']);
+                    $a = 1;
+                    foreach ($tjstr as $key=>$value){
+                        $pids = Db::name('users')->where(['user_id'=>$value,'level'=>['neq',3]])->find();
+                        if($pids && $a<3){
+                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money',$order['order_amount'] * $config['daili'.$a]);
+                            $a ++;
+                        }
+                    }
+                }
             }
-    }*/
+
+//                file_put_contents('b.txt', 'userId:'$user['id'].',order_amount:'. $order['amount']."\r\n", FILE_APPEND);
+
+//                balancelog($res,$order['user_id'], $order['order_amount'] * $config['daozhang'], 2, $user['user_money'],$user['user_money'] + $order['order_amount'] * $config['daozhang']);
+
+            // 提交事务
+            Db::commit();
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+        }
+    }
 
     return array('status' => 1, 'msg' => '操作成功', 'url' => U('Order/order_detail', ['id' => $id]));
 }
-
 /**
  * 下单赠送活动：优惠券，积分
  * @param $order |订单数组

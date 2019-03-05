@@ -168,9 +168,10 @@ class OrderLogic extends Model
 
     public function orderProcessHandle($order_id,$act,$ext=array()){
     	$updata = array();
+        $d = M('order')->where("order_id = $order_id")->find();
     	switch ($act){
     		case 'pay': //付款
-               	$order_sn = M('order')->where("order_id = $order_id")->getField("order_sn");
+               	$order_sn = $d['order_sn'];
                 update_pay_status($order_sn,$ext); // 调用确认收货按钮
     			return true;
     		case 'pay_cancel': //取消付款
@@ -178,10 +179,11 @@ class OrderLogic extends Model
     			$this->order_pay_cancel($order_id);
     			return true;
     		case 'confirm': //确认订单
+
     			$updata['order_status'] = 1;
     			break;
     		case 'cancel': //取消确认
-    			$updata['order_status'] = 0;
+                $updata['order_status'] = 0;
     			break;
     		case 'invalid': //作废订单
     			$updata['order_status'] = 5;
@@ -195,9 +197,8 @@ class OrderLogic extends Model
     		default:
     			return true;
     	}
-    	return M('order')->where("order_id=$order_id")->save($updata);//改变订单状态
+        return M('order')->where("order_id=$order_id")->save($updata);//改变订单状态
     }
-
 
     //管理员取消付款
     function order_pay_cancel($order_id)

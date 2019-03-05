@@ -241,8 +241,6 @@ class Payment extends MobileBase {
             $results = Db::name('order')->where("order_id = {$order_id}")->save(['pay_status'=>1,'pay_time'=>time()]);
             if($result && $results){
 
-                userUpgradeByShoppingTimes($order);
-
                 //收益积分日志
 //                if($order['type'] == 1){
 //                    //活动区 专用累计业绩
@@ -251,6 +249,9 @@ class Payment extends MobileBase {
 //
 //                }
 
+                if($order['type'] == 1) {
+                    upgrade($order['user_id']);
+                }
                 if($order['type'] == 0){
                     $logs = integrallog($order_id,$user['user_id'],-$order['quota'],8,$user['frozen_money'],$user['frozen_money']-$order['quota']);
                     $log = balancelog($order_id,$user['user_id'],-$order['order_amount'],8,$user['user_money'],$user['user_money']-$order['order_amount']);
@@ -261,8 +262,6 @@ class Payment extends MobileBase {
                     //普通专区购买
                     $log = balancelog($order_id,$user['user_id'],-$order['order_amount'],16,$user['user_money'],$user['user_money']-$order['order_amount']);
                 }else{
-
-                    //todo 活动区购买
                     $log = balancelog($order_id,$user['user_id'],-$order['order_amount'],15,$user['user_money'],$user['user_money']-$order['order_amount']);
                     $logs = integrallog($order_id,$user['user_id'],$order['order_amount']*$system['invite_integral'],9,$user['frozen_money'],$user['frozen_money']+$order['order_amount']*$system['invite_integral']);;
 

@@ -2,7 +2,6 @@
 
 namespace app\admin\model;
 use think\Model;
-use think\Db;
 class Order extends Model {
 
 
@@ -13,8 +12,9 @@ class Order extends Model {
      */
     public function getUserCurMonthShoppingTimes($userId)
     {
-        $currMonthFirstDay = date('Y-m-01');
-        return $this->where(['user_id' => $userId,'order_status' => 4,'pay_time' => ['>=', strtotime(date('Y-m-01'))], 'pay_time' => ['<', strtotime("{$currMonthFirstDay} + 1 month")], 'type' => 1])->count();
+        $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
+        $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
+        return $this->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
     }
 
     /**
@@ -26,6 +26,5 @@ class Order extends Model {
      */
     public function getUserShoppingTimesByTime($userId, $start, $end)
     {
-        return $this->where(['user_id' => $userId,'order_status' => 4,'pay_time' => ['>=', $start], 'pay_time' => ['<', $end], 'type' => 1])->count();
     }
 }
