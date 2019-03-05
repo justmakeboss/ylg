@@ -221,7 +221,7 @@ function userUpgradeByShoppingTimes($order)
         $orderModel = new Order();
         $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($order['user_id']);
         $userLevels = UserLevel::all();
-        krsort($userLevels);
+//        krsort($userLevels);
         foreach ($userLevels as $userLevel) {
             file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/$currMonthShoppingNum", FILE_APPEND);
             file_put_contents('userUpgradeByShoppingTimes.txt', date('Y-m-d')."/".$userLevel['amount'], FILE_APPEND);
