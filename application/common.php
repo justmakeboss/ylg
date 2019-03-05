@@ -233,7 +233,7 @@ function upgrade($userId)
         $orderModel = new Order();
         $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($userId);
         $userLevels = UserLevel::all();
-        krsort($userLevels);
+//        krsort($userLevels);
         foreach ($userLevels as $userLevel) {
             if($currMonthShoppingNum>=$userLevel['times']){
                 $curLevel = $user['level'];
