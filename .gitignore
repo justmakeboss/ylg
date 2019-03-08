@@ -7,3 +7,4 @@ thinkphp
 application/database.php
 public/upload/*
 /public/cert
+/public/qrcode

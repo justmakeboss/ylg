@@ -20,9 +20,9 @@ class Index extends MobileBase {
             $signPackage = $jssdk->GetSignPackage();
             print_r($signPackage);
         */
-        if(!isMobile()){
-            $this->redirect(U('Home/Index/index'));
-        }
+//        if(!isMobile()){
+//            $this->redirect(U('Home/Index/index'));
+//        }
         $hot_goods = M('goods')->field('original_img,goods_name,goods_id')->where("is_hot=1 and is_on_sale=1")->order('sort')->limit(4)->cache(true,TPSHOP_CACHE_TIME)->select();//首页热卖商品
         $thems = M('goods_category')->field('image,id,mobile_name')->where('is_hot=1 and is_show=1')->order('sort_order')->limit(3)->cache(true,TPSHOP_CACHE_TIME)->select();
         $this->assign('thems',$thems);
