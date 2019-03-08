@@ -14,7 +14,7 @@ class Order extends Model {
     {
         $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
         $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
-        return $this->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
+        return M('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
     }
 
     /**

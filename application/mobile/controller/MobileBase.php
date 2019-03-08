@@ -5,6 +5,7 @@ use app\common\logic\CartLogic;
 use app\common\logic\UsersLogic;
 use app\common\model\Users;
 use think\Controller;
+use think\Db;
 use think\Session;
 
 class MobileBase extends Controller {
@@ -136,6 +137,28 @@ class MobileBase extends Controller {
 //        $this->public_assign();
     }
 
+    /**验证是否五天可收批发卷
+     * @param $userid
+     */
+
+    public function forzens($userid){
+
+        if($userid){
+            $forzens = Db::name('forzen')->where(['user_id'=>$userid,'five_status'=>0,'shifang_time'=>['EGT',time()]])->select();
+            foreach ($forzens as $key=>$value){
+
+                if($value['shifang_time']>=time()){
+                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('frozen_dongjie')->find();
+
+                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['frozen_money'=>$value['frozen_dongjie']+$userss['frozen_money']]);
+
+                    $forzen_status =  Db::name('forzen')->where(['id'=>$value['id']])->update(['five_status'=>1]);
+
+                }
+            }
+        }
+    }
+
 
     /**
      * 保存公告变量到 smarty中 比如 导航
@@ -171,6 +194,7 @@ class MobileBase extends Controller {
            $user_id = $users['user_id'];
            $uname = $users['nickname'];
        }
+       $this->forzens($user_id);
        $this->assign('user_id',$user_id);
        $this->assign('uname',$uname);
 
