@@ -105,7 +105,6 @@ class User extends MobileBase
     public function sums($id,$level,$strid = ''){
 //        dump($strid);
         $users  = Db::name('users')->where("first_leader in($id) AND level <= $level")->column('user_id');
-
         $id = implode(',',$users);
         if(empty($strid)){
             $strid = $id;
@@ -465,7 +464,6 @@ class User extends MobileBase
             $data["level"] = 1;
             $data['rebate_revenue'] = 0;
             $data["engineer_status"] = 1;
-            $data['user_money'] = 50000;
             //创建用户表users数据
             Db::startTrans();
             $result = M("users")->add($data);
@@ -2529,9 +2527,12 @@ class User extends MobileBase
 
     public function test()
     {
-        $a =  time() - 1523343949;
+        $users = Users::all();
+        foreach ($users as $user) {
+            $a = $this->sums($user['user_id'],$user['level']);
+            file_put_contents('/bbc.txt', '手机号:'. $user['mobile'].',等级:'.$user['level'].',业绩:'.$a."\r\n",8);
+        }
     }
-
 
     /**
      * 生成宣传海报

@@ -87,19 +87,145 @@ function dd($a)
     echo '</pre>';
 }
 
+
+
 /**
  * 会员升级
  * @param
  * @return bool
+ *
+ *
+ * amount 累计订单金额
+ *
+ *
  */
 function user_upgrade($userId)
 {
     $user=Db::name('users')->where(['user_id'=>$userId])->find();
-    //消费商升级代理商
+    switch ($user['level']) {
+
+        case 1:
+
+            $canUpgrade = 0;
+            $user_level=Db::name('user_level')->where('level_id=2')->find();
+            $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>1])->column('user_id');
+            //直推会员
+            if(count($userids)>=$user_level['discount']){
+                $ids=implode(',',$userids);
+                //其中一个直推消费商业绩
+                $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$user_level['is_promote']]])->select();
+                if($userlist['0']['user_id']||$userlist['user_id']){
+                    $userid=$userlist['0']['user_id']?:$userlist['user_id'];
+                    //其他直推消费商总业绩
+                    $monthly_performance=Db::name('users')->where(['user_id'=>['in',$ids],'user_id'=>['<>',$userid]])->sum('monthly_performance');
+
+                    if($monthly_performance>=$user_level['is_region_agent']){
+                        //获取团队下级
+                        $userids2=get_team($userId,2);
+
+                        $users=Db::name('users')->where(['level'=>1])->column('user_id');
+                        $userids3=array_intersect($userids2,$users);
+
+                        $ids2=implode(',',$userids3);
+                        $team_performance=Db::name('users')->where(['user_id'=>['in',$ids2]])->sum('monthly_performance');
+
+                        //累计订单金额
+                        if($team_performance>=$user_level['amount']){
+                            if(sizeof($userids2) >= $user_level['team_num']) {
+                                $res=Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
+                            }
+                        }else{
+                            return 0;
+                        }
+
+                    }else{
+                        return 0;
+                    }
+                }else{
+                    return 0;
+                }
+            }else{
+                return 0;
+            }
+            if($res){
+                vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'],$user['level']+1,2);
+                $user2=Db::name('users')->where(['user_id'=>$user['first_leader']])->find();
+                //代理商升级代理商合伙人
+                if($user2['level']==2){
+                    //自己是代理商
+                    $user_level2=Db::name('user_level')->where('level_id=3')->find();
+                    $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>'2'])->count();
+                    //直推代理商
+                    if($count>=$user_level2['region_code']){
+
+                        Db::name('users')->where(['user_id'=>$user2['user_id']])->setInc('level');
+                        return vpay_level_log($user2['user_id'],$user2['mobile'],'前台升级',$user2['level'],$user2['level']+1,2);
+                    }else{
+                        return $res;
+                    }
+                }else{
+                    return $res;
+                }
+            }else{
+                return 0;
+            }
+
+            break;
+
+
+        case 2:
+            //代理商升级代理商合伙人
+
+            //自己是代理商
+            $user_level2=Db::name('user_level')->where('level_id=3')->find();
+            $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>'2'])->count();
+            //直推代理商
+            if($count>=$user_level2['region_code']){
+
+                //服务中心团队多少人
+                $userIds =get_team($userId,2);
+                $usersLevelGt1 = Db::name('users')->where(['level>1'])->column('user_id');
+                $userIdsMyTeam = array_intersect($userIds, $usersLevelGt1);
+                $myTeamTotal = sizeof($userIdsMyTeam);
+                file_put_contents('3838.txt', '$myTeamTotal:'. $myTeamTotal. ',userId:'. $userId, 8);
+                if($myTeamTotal >= 200) {
+                    Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
+                    return vpay_level_log($user['user_id'],$user['mobile'],'直推'. $user_level2['region_code'] .'人，且团队人数超过200人,前台升级',$user['level'],$user['level']+1,2);
+                }
+            }else{
+                return 0;
+            }
+
+            break;
+
+
+        case 3:
+
+
+
+            break;
+
+
+        case 4:
+
+
+
+            break;
+    }
+}
+
+
+function user_upgrade_old($userId)
+{
+    $user=Db::name('users')->where(['user_id'=>$userId])->find();
+
+
+    $canUpgrade = 0;
+
     if($user['level']==1){
         $user_level=Db::name('user_level')->where('level_id=2')->find();
         $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>1])->column('user_id');
-        //直推消费商
+        //直推会员
         if(count($userids)>=$user_level['discount']){
             $ids=implode(',',$userids);
             //其中一个直推消费商业绩
@@ -143,10 +269,11 @@ function user_upgrade($userId)
             //代理商升级代理商合伙人
             if($user2['level']==2){
                 //自己是代理商
-
-
+                $user_level2=Db::name('user_level')->where('level_id=3')->find();
+                $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>'2'])->count();
                 //直推代理商
                 if($count>=$user_level2['region_code']){
+
                     Db::name('users')->where(['user_id'=>$user2['user_id']])->setInc('level');
                     return vpay_level_log($user2['user_id'],$user2['mobile'],'前台升级',$user2['level'],$user2['level']+1,2);
                 }else{
@@ -158,7 +285,11 @@ function user_upgrade($userId)
         }else{
             return 0;
         }
-    }elseif($user['level']==2){
+    }
+
+
+
+    if($user['level']==2){
         //代理商升级代理商合伙人
 
         //自己是代理商
@@ -168,16 +299,21 @@ function user_upgrade($userId)
         if($count>=$user_level2['region_code']){
 
             //服务中心团队多少人
-            $userids2=get_team($userId,2);
-            Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
-            return vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'],$user['level']+1,2);
-
+            $userIds =get_team($userId,2);
+            $usersLevelGt1 = Db::name('users')->where(['level>1'])->column('user_id');
+            $userIdsMyTeam = array_intersect($userIds, $usersLevelGt1);
+            $myTeamTotal = sizeof($userIdsMyTeam);
+            file_put_contents('3838.txt', '$myTeamTotal:'. $myTeamTotal. ',userId:'. $userId, 8);
+            if($myTeamTotal >= 200) {
+                Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
+                return vpay_level_log($user['user_id'],$user['mobile'],'直推'. $user_level2['region_code'] .'人，且团队人数超过200人,前台升级',$user['level'],$user['level']+1,2);
+            }
         }else{
             return 0;
         }
-    }else{
-        return 0;
     }
+
+    return 0;
 }
 
 //检查所有vip会员的过期时间
@@ -227,11 +363,16 @@ function upgrade($userId)
     $neverUpgrade = empty($user['check_point']) && empty($user['expired_at']);
     //过期的
     $expired = time() >= $user['expired_at'];
+
     if($neverUpgrade || $expired) {
 
         //当月消费次数
         $orderModel = new Order();
-        $currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($userId);
+
+        $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
+        $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
+        $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
+        //$currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($userId);
         $userLevels = UserLevel::all();
 //        krsort($userLevels);
         foreach ($userLevels as $userLevel) {
@@ -1592,7 +1733,7 @@ function confirm_order($id, $user_id = 0)
         try{
             Db::startTrans();
 
-            $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['neq',2]])->find();
+            $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['egt',2]])->find();
             if($TIR_ID){
                 Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$order['order_amount'] * $config['daozhang']);
 
@@ -1600,10 +1741,15 @@ function confirm_order($id, $user_id = 0)
 
                     $tjstr = explode(',',$user['second_leader']);
                     $a = 1;
-                    foreach ($tjstr as $key=>$value){
-                        $pids = Db::name('users')->where(['user_id'=>$value,'level'=>['neq',3]])->find();
+                    foreach (array_reverse($tjstr) as $key=>$value){
+                        $pids = Db::name('users')->where(['user_id'=>$value,'level'=>['egt',3]])->find();
                         if($pids && $a<3){
-                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money',$order['order_amount'] * $config['daili'.$a]);
+                            if($a == 1){
+                              $bblili = 0.02;
+                            }elseif($a == 2){
+                              $bblili = 0.004;
+                            }
+                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money',$order['order_amount'] * $bblili);
                             $a ++;
                         }
                     }

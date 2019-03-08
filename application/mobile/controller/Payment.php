@@ -48,7 +48,7 @@ class Payment extends MobileBase {
      *  提交支付方式
      */
     public function getCode(){
-            //C('TOKEN_ON',false); // 关闭 TOKEN_ON
+        //C('TOKEN_ON',false); // 关闭 TOKEN_ON
             header("Content-type:text/html;charset=utf-8");
             $order_id = I('id/d'); // 订单id
             $num = I('num/d'); // 数量
@@ -238,7 +238,9 @@ class Payment extends MobileBase {
                     //自营
                     $result = Db::name('users')->where("user_id = {$user['user_id']}")->dec('user_money',$order['order_amount'])->dec('distribut_money',$order['shop_integral'])->update();
             }
-            $results = Db::name('order')->where("order_id = {$order_id}")->save(['pay_status'=>1,'pay_time'=>time()]);
+
+
+        $results = Db::name('order')->where("order_id = {$order_id}")->save(['pay_status'=>1,'pay_time'=>time()]);
             if($result && $results){
 
                 //收益积分日志
@@ -248,7 +250,6 @@ class Payment extends MobileBase {
 //                }else{
 //
 //                }
-
                 if($order['type'] == 1) {
                     upgrade($order['user_id']);
                 }

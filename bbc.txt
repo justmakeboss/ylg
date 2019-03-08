@@ -1,1 +1,3 @@
 sizeof($userids2):1,$user_level2['team_num']:1
+mobile:15088131939,level:1,performance:0
+mobile:15088131900,level:1,performance:0

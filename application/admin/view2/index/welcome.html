@@ -64,14 +64,14 @@
                 <div class="section_order_select">
                     <ul>
                         <li>
-                            <a href="{:U('Admin/Order/index',array('order_status'=>0))}">
+                            <a href="{:U('Admin/Order.Order/index',array('order_status'=>0))}">
                                 <i class="ice ice_w"></i>
                                 <div class="t">待处理订单</div>
                                 <span class="number">{$count.handle_order}</span>
                             </a>
                         </li>
                         <li>
-                            <a  href="{:U('Admin/Goods/goodsList')}">
+                            <a  href="{:U('Admin/Goods.Goods/goodsList')}">
                                 <i class="ice ice_y"></i>
                                 <div class="t">商品数量</div>
                                 <span class="number">{$count.goods}</span>
@@ -85,7 +85,7 @@
                             <!--</a>-->
                         <!--</li>-->
                         <li>
-                            <a href="{:U('Admin/User/index')}">
+                            <a href="{:U('Admin/User.User/index')}">
                                 <i class="ice ice_n"></i>
                                 <div class="t">会员总数</div>
                                 <span class="number">{$count.users}</span>
