@@ -321,7 +321,9 @@ class User extends MobileBase
             $prize = new \app\common\logic\DistributPrizeLogic();
             $prize->frozen_money($res['result']['user_id']);
             $user=M('users')->find($res['result']['user_id']);
-            checkExpiredAt($user);
+            Db::transaction(function() use($user){
+                checkExpiredAt($user);
+            });
         }
         exit(json_encode($res));
     }

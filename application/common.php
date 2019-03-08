@@ -79,16 +79,6 @@ function get_subordinate($id,$arr=[]){
     }
 }
 
-//打印
-function dd($a)
-{
-    echo '<pre>';
-    var_dump($a);
-    echo '</pre>';
-}
-
-
-
 /**
  * 会员升级
  * @param
@@ -103,8 +93,7 @@ function user_upgrade($userId)
 {
     $user=Db::name('users')->where(['user_id'=>$userId])->find();
 
-    $levels = Db::name('user_level')->where('level_id>0')->find();
-
+    $levels = Db::name('user_level')->where('level_id>0')->select();
     if(count($levels) == 0) {
         return false;
     }
@@ -116,32 +105,54 @@ function user_upgrade($userId)
     }
 
     krsort($levels);
-    foreach ($levels as $key => $level) {
 
+    foreach ($levels as $key => $level) {
+        debug('/////////////////////////////////////////////////////////////////////////////////////////');
+
+        debug('$level'. var_export($level, true));
+        debug('$user[\'level\']'. $user['level']);
         if($user['level'] >= $level['level_id']) {
             continue;
         }
 
-        $user_level=Db::name('user_level')->where('level_id=2')->find();
-
         $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>2])->column('user_id');
         //直推会员多少個
-        if(count($userids) < $user_level['discount']){
+        debug('pullNum:'. count($userids).',$level[\'discount\']:'.$level['discount']);
+
+        if(!empty($level['discount']) && count($userids) < $level['discount']){
             continue;
         }
 
-        $ids=implode(',',$userids);
-        //其中一个會員直推消费商业绩需要大於多少
-        $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$user_level['is_promote']]])->select();
-
-        if(sizeof($userlist) <= 0) {
-            continue;
+        if(!empty($level['is_promote'])) {
+            $ids=implode(',',$userids);
+            //其中一个直推的會員业绩需要大於多少
+            $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$level['is_promote']]])->select();
+            debug('$userlist:'. var_export($userlist, true));
+            if(sizeof($userlist) <= 0) {
+                continue;
+            }
         }
 
-        //其他直推消费商总业绩大於多少
+        //其他所有直推会员总业绩大於多少
         $userid=$userlist['0']['user_id']?:$userlist['user_id'];
         $monthly_performance=Db::name('users')->where(['user_id'=>['in',$ids],'user_id'=>['<>',$userid]])->sum('monthly_performance');
-        if($monthly_performance < $user_level['is_region_agent']){
+        debug('$monthly_performance:'. $monthly_performance. ',$level[\'is_region_agent\']:'. $level['is_region_agent']);
+        if(!empty($level['is_region_agent']) && $monthly_performance < $level['is_region_agent']){
+            continue;
+        }
+
+        //直推服务中心多少个
+        $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>3])->count();
+        //直推服务中心
+        debug('$count'. $count. ',$level[\'region_code\']:'. $level['region_code']);
+        if(!empty($level['region_code']) && $count < $level['region_code']){
+            continue;
+        }
+
+        //每月购买活动区多少次
+        $f = upgrade($user, $level);
+        debug('$f'. var_export($f, true));
+        if(!empty($level['times']) && $f == false) {
             continue;
         }
 
@@ -152,28 +163,27 @@ function user_upgrade($userId)
         $myTeamIdsLevelGt2Str=implode(',',$myTeamIdsLevelGt2);
         $team_performance=Db::name('users')->where(['user_id'=>['in', $myTeamIdsLevelGt2Str]])->sum('monthly_performance');
         //累计团队订单总金额
-        if($team_performance < $user_level['amount']){
+        debug('$team_performance:'. $team_performance. ',$level[\'amount\']:'. $level['amount']);
+        if(!empty($level['amount']) && $team_performance < $level['amount']){
             continue;
         }
 
         //团队总人数
-        if(sizeof($myTeamIdsLevelGt2) < $user_level['team_num']) {
+        debug('sizeof($myTeamIdsLevelGt2):'. sizeof($myTeamIdsLevelGt2). ',$level[\'team_num\']:'. $level['team_num']);
+        if(!empty($level['team_num']) && sizeof($myTeamIdsLevelGt2) < $level['team_num']) {
             continue;
         }
         //更新等级
-        Db::name('users')->update(['user_id'=>$user['user_id'], 'level' => $level]);
+        debug('updateUserLevel:'. $level['level_id']);
+        Db::name('users')->update(['user_id'=>$user['user_id'], 'level' => $level['level_id']]);
         //升级日志
-        vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'], $level,2);
-    }     
+        vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'], $level['level_id'],2);
+    }
 }
-
 
 function user_upgrade_old($userId)
 {
     $user=Db::name('users')->where(['user_id'=>$userId])->find();
-
-
-    $canUpgrade = 0;
 
     if($user['level']==1){
         $user_level=Db::name('user_level')->where('level_id=2')->find();
@@ -277,76 +287,60 @@ function checkExpiredAt($user)
         $shoppingTimes = Db::name('order')->where(['user_id' => $user['user_id'],'pay_status' => 1,'pay_time' => ['>=', $user['check_point']], 'pay_time' => ['<', $user['expired_at']], 'type' => 1])->count();
         $levelInfo = UserLevel::get($user['level']);
         if($shoppingTimes < $levelInfo['times']) {
-
-            $res = Db::name('users')->where(['user_id' => $user['user_id']])->update([
+            Db::name('users')->where(['user_id' => $user['user_id']])->update([
                 'level' => $user['level'] -1,
                 'check_point' => 0,
                 'expired_at' => 0,
             ]);
-            if($res) {
-                vpay_level_log($user['user_id'],$user['mobile'], '超过有效期降级',$user['level'],$user['level']--, 2);
-            }
+            vpay_level_log($user['user_id'],$user['mobile'], '超过有效期降级',$user['level'],$user['level']--, 2);
         } else {
-            $res = Users::update(['check_point' => time(), 'expired_at' => strtotime('+1month')], ['user_id' => $user['user_id']]);
-            if($res) {
-                vpay_level_log($user['user_id'],$user['mobile'], '保持级别',$user['level'],$user['level'], 2);
-            }
+            Users::update(['check_point' => time(), 'expired_at' => strtotime('+1month')], ['user_id' => $user['user_id']]);
+            vpay_level_log($user['user_id'],$user['mobile'], '等級继续保持',$user['level'],$user['level'], 2);
         }
     }
 }
 
-function dlog($d)
+function debug($d)
 {
-    $timezone = date_default_timezone_get();
-    if(empty($timezone)) {
-        date_default_timezone_set('"Asia/Shanghai"');
-    }
-    if(is_array($d)) {
-        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".var_export($d, true)."\r\n", FILE_APPEND);
-    } else {
+    if(is_string($d)) {
         file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".$d."\r\n", FILE_APPEND);
+    } else {
+        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".var_export($d, true)."\r\n", FILE_APPEND);
     }
 }
 
 //根据消费次数升级
-function upgrade($userId)
+function upgrade($user, $level)
 {
-    $user = M('users')->find($userId);
+    $currMonthShoppingNum = getShoppingTimesOfCurrentMonth($user['user_id']);
+    debug('$currMonthShoppingNum:'. $currMonthShoppingNum.',$level[\'times\']:'.$level['times']);
+    if($currMonthShoppingNum < $level['times']){
+        return false;     
+    }
+
     //从来没有升级过的
     $neverUpgrade = empty($user['check_point']) && empty($user['expired_at']);
     //过期的
     $expired = time() >= $user['expired_at'];
-
     if($neverUpgrade || $expired) {
-
-        //当月消费次数
-        $orderModel = new Order();
-
-        $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
-        $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
-        $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
-        //$currMonthShoppingNum = $orderModel->getUserCurMonthShoppingTimes($userId);
-        $userLevels = UserLevel::all();
-//        krsort($userLevels);
-        foreach ($userLevels as $userLevel) {
-            if($currMonthShoppingNum>=$userLevel['times']){
-                $curLevel = $user['level'];
-                $toLevel = $userLevel['level_id'];
-                if($curLevel < $toLevel) {
-                    $upgradeResult = Db::name('users')->where(['user_id'=>$user['user_id']])->update([
-                        'level' => $toLevel,
-                        'expired_at' => strtotime('+1 month'),
-                        'check_point' => time(),
-                    ]);
-                    if($upgradeResult) {
-                        vpay_level_log($user['user_id'],$user['mobile'],'当月消费次数达到'.$currMonthShoppingNum.'次，升级。' ,$user['level'],$toLevel,2);
-                    }
-                }
-                break;
-            }
-        }
+         Db::name('users')->where(['user_id'=>$user['user_id']])->update([
+                'expired_at' => strtotime('+1 month'),
+                'check_point' => time(),
+            ]);  
     }
+    return true;
 }
+
+function getShoppingTimesOfCurrentMonth($userId)
+{
+    //当月消费次数
+    $orderModel = new Order();
+    $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
+    $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
+    $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
+    return $currMonthShoppingNum;
+}
+
 
 function getCurMonthFirstDay($date) {
     return date('Y-m-01', strtotime($date));
@@ -441,6 +435,7 @@ function balancelog($reflectId, $userId, $num, $type, $before,$after)
                 krsort($list);
                 foreach ($list as $key => $value) {
                     //升级
+                    debug(__FILE__);
                     user_upgrade($value);
                 }
             }

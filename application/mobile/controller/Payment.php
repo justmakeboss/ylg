@@ -251,7 +251,10 @@ class Payment extends MobileBase {
 //
 //                }
                 if($order['type'] == 1) {
-                    upgrade($order['user_id']);
+
+                    //活动区购买升级
+                    user_upgrade($user['user_id']);
+
                 }
                 if($order['type'] == 0){
                     $logs = integrallog($order_id,$user['user_id'],-$order['quota'],8,$user['frozen_money'],$user['frozen_money']-$order['quota']);
