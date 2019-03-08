@@ -1,4 +1,6 @@
 <?php
+ini_set('date.timezone','Asia/Shanghai');
+
 // [ 应用入口文件 ]
 // 应用入口文件
 if (extension_loaded('zlib')){
