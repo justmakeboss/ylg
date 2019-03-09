@@ -289,6 +289,7 @@ class User extends MobileBase
      */
     public function do_login()
     {
+
         $username = trim(I('post.username'));
         $password = trim(I('post.password'));
         //验证码验证
@@ -300,9 +301,11 @@ class User extends MobileBase
                 exit(json_encode($res));
             }
         }
+
         $logic = new UsersLogic();
         $res = $logic->login($username, $password);
         if ($res['status'] == 1) {
+
             $res['url'] = urldecode(I('post.referurl'));
             session('user', $res['result']);
             setcookie('user_id', $res['result']['user_id'], null, '/');
@@ -311,12 +314,15 @@ class User extends MobileBase
             setcookie('uname', urlencode($nickname), null, '/');
             setcookie('cn', 0, time() - 3600, '/');
             $cartLogic = new CartLogic();
+
             $cartLogic->setUserId($res['result']['user_id']);
             $cartLogic->doUserLoginHandle();// 用户登录后 需要对购物车 一些操作
+
             $orderLogic = new OrderLogic();
+
             $orderLogic->setUserId($res['result']['user_id']);//登录后将超时未支付订单给取消掉
             $orderLogic->abolishOrder();
-            
+
             // lzz 冻结资金提现处理
             $prize = new \app\common\logic\DistributPrizeLogic();
             $prize->frozen_money($res['result']['user_id']);
@@ -389,7 +395,7 @@ class User extends MobileBase
                 //判断推荐人账户是否存在
                 $parent = Db::name("users")
                     ->where('mobile',$first_leader)
-                    ->whereOr('user_id','=',$first_leader)
+                    //->whereOr('user_id','=',$first_leader)
                     ->find();
                 //填写的推荐人不存在
                 if (empty($parent)) {
