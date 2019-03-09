@@ -211,7 +211,7 @@ class Payment extends MobileBase {
 //                        dump($system['handling_fee']);
 //                        dump($money);
 //                        dump($goods_integral);exit;
-                        //寄售商品收入
+                        //贼难找的寄售商品收入
                         $res = Db::name('users')->where('user_id',$consignment[$i]['user_id'])->Inc('user_money',$money)->Inc('distribut_money',$goods_integral)->update();
                         // $ress = Db::name('goods')->where('goods_id',$order_goods['goods_id'])->setDec('store_count',$order_goods['goods_num']);
                         if(!$res){
