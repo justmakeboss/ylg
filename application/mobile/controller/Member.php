@@ -99,7 +99,6 @@ class Member extends MobileBase
      */
     public function sell_goods()
     {
-
         if ($this->request->isAjax()) {
             $p = $this->request->post('p');
             $num = 15;
@@ -118,7 +117,6 @@ class Member extends MobileBase
             }
             $data['data'] = $goodslist;
             $data['code'] = 1;
-
             return $data;
         } else {
             return $this->fetch();
@@ -277,7 +275,6 @@ class Member extends MobileBase
      */
     public function sell_list()
     {
-
         if ($this->request->isAjax()) {
             $p = $this->request->post('p');
             $num = 15;
@@ -297,7 +294,6 @@ $goodslist = Db::name('agent_order')->alias('a')
                 ->join('order_goods g', 'g.order_id = a.order_id')
                 ->join('goods_consignment c', "c.setmeal_id = g.setmeal_id AND c.user_id = {$this->user_id}")
                 ->where("a.agent_id = {$this->user_id}")->group('a.id')->field('a.id,g.order_id,c.goods_price,g.goods_id,c.goods_name,g.setmeal_id,c.num,a.sell_num,a.create_time')->limit($num * $p, $num * $p + $num)->select();
-
             foreach ($goodslist as $k => $v) {
                 $goodslist[$k]['create_time'] = date('Y-m-d',strtotime($v['create_time']));
                 $setmeal = Db::name('goods_setmeal')->where('goods_id', $v['goods_id'])->select();
@@ -327,7 +323,6 @@ $goodslist = Db::name('agent_order')->alias('a')
 //            }
             $data['data'] = $goodslist;
             $data['code'] = 1;
-
             return $data;
         } else {
             return $this->fetch();

@@ -74,7 +74,7 @@
                 <a href="{:U('Mobile/User/logout')}" class="setting"><img src="__STATIC__/assets/images/quit.png"></a>
                 <div><img class="avatar" src="{$user[head_pic]|default="__STATIC__/images/user68.jpg"}"></div>
                 <div class="fs12 mt5">{$user['nickname']}</div>
-                <div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {$user['user_id']} </div>
+                <div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {:alphaID($user['user_id']).rand(0,100)} </div>
                 <div class="fs12 mt5">
                     <if condition="$user['level'] eq 1">用户
                     <elseif condition="$user['level'] eq 2">会员

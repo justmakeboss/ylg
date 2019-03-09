@@ -566,6 +566,8 @@ class User extends MobileBase
             exit;*/
         }
         $this->assign('id',I('id')); // 邀请人id：
+        $this->assign('mobile', I('get.mobile'));
+        $this->assign('first_leader', $first_leader);
         $this->assign('regis_sms_enable',$reg_sms_enable); // 注册启用短信：
         $this->assign('regis_smtp_enable',$reg_smtp_enable); // 注册启用邮箱：
         $sms_time_out = tpCache('sms.sms_time_out')>0 ? tpCache('sms.sms_time_out') : 120;
@@ -2406,7 +2408,7 @@ class User extends MobileBase
         //加载第三方类库
         vendor('phpqrcode.phpqrcode');
         //获取个人
-        $url = request()->domain().U('reg',['id'=>$this->user_id]);
+        $url = request()->domain().U('reg',['id'=>$this->user_id, 'mobile'=> $this->user['mobile']]);
 
         $after_path = 'public/qrcode/'.md5($url).'.png';
         //保存路径

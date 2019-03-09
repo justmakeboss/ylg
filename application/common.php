@@ -107,17 +107,17 @@ function user_upgrade($userId)
     krsort($levels);
 
     foreach ($levels as $key => $level) {
-        debug('/////////////////////////////////////////////////////////////////////////////////////////');
+//        debug('/////////////////////////////////////////////////////////////////////////////////////////');
 
-        debug('$level'. var_export($level, true));
-        debug('$user[\'level\']'. $user['level']);
+//        debug('$level'. var_export($level, true));
+//        debug('$user[\'level\']'. $user['level']);
         if($user['level'] >= $level['level_id']) {
             continue;
         }
 
         $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>2])->column('user_id');
         //直推会员多少個
-        debug('pullNum:'. count($userids).',$level[\'discount\']:'.$level['discount']);
+//        debug('pullNum:'. count($userids).',$level[\'discount\']:'.$level['discount']);
 
         if(!empty($level['discount']) && count($userids) < $level['discount']){
             continue;
@@ -127,7 +127,7 @@ function user_upgrade($userId)
             $ids=implode(',',$userids);
             //其中一个直推的會員业绩需要大於多少
             $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$level['is_promote']]])->select();
-            debug('$userlist:'. var_export($userlist, true));
+//            debug('$userlist:'. var_export($userlist, true));
             if(sizeof($userlist) <= 0) {
                 continue;
             }
@@ -136,7 +136,7 @@ function user_upgrade($userId)
         //其他所有直推会员总业绩大於多少
         $userid=$userlist['0']['user_id']?:$userlist['user_id'];
         $monthly_performance=Db::name('users')->where(['user_id'=>['in',$ids],'user_id'=>['<>',$userid]])->sum('monthly_performance');
-        debug('$monthly_performance:'. $monthly_performance. ',$level[\'is_region_agent\']:'. $level['is_region_agent']);
+//        debug('$monthly_performance:'. $monthly_performance. ',$level[\'is_region_agent\']:'. $level['is_region_agent']);
         if(!empty($level['is_region_agent']) && $monthly_performance < $level['is_region_agent']){
             continue;
         }
@@ -144,14 +144,14 @@ function user_upgrade($userId)
         //直推服务中心多少个
         $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>3])->count();
         //直推服务中心
-        debug('$count'. $count. ',$level[\'region_code\']:'. $level['region_code']);
+//        debug('$count'. $count. ',$level[\'region_code\']:'. $level['region_code']);
         if(!empty($level['region_code']) && $count < $level['region_code']){
             continue;
         }
 
         //每月购买活动区多少次
         $f = upgrade($user, $level);
-        debug('$f'. var_export($f, true));
+//        debug('$f'. var_export($f, true));
         if(!empty($level['times']) && $f == false) {
             continue;
         }
@@ -163,18 +163,18 @@ function user_upgrade($userId)
         $myTeamIdsLevelGt2Str=implode(',',$myTeamIdsLevelGt2);
         $team_performance=Db::name('users')->where(['user_id'=>['in', $myTeamIdsLevelGt2Str]])->sum('monthly_performance');
         //累计团队订单总金额
-        debug('$team_performance:'. $team_performance. ',$level[\'amount\']:'. $level['amount']);
+//        debug('$team_performance:'. $team_performance. ',$level[\'amount\']:'. $level['amount']);
         if(!empty($level['amount']) && $team_performance < $level['amount']){
             continue;
         }
 
         //团队总人数
-        debug('sizeof($myTeamIdsLevelGt2):'. sizeof($myTeamIdsLevelGt2). ',$level[\'team_num\']:'. $level['team_num']);
+//        debug('sizeof($myTeamIdsLevelGt2):'. sizeof($myTeamIdsLevelGt2). ',$level[\'team_num\']:'. $level['team_num']);
         if(!empty($level['team_num']) && sizeof($myTeamIdsLevelGt2) < $level['team_num']) {
             continue;
         }
         //更新等级
-        debug('updateUserLevel:'. $level['level_id']);
+//        debug('updateUserLevel:'. $level['level_id']);
         Db::name('users')->update(['user_id'=>$user['user_id'], 'level' => $level['level_id']]);
         //升级日志
         vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'], $level['level_id'],2);
@@ -313,7 +313,7 @@ function debug($d)
 function upgrade($user, $level)
 {
     $currMonthShoppingNum = getShoppingTimesOfCurrentMonth($user['user_id']);
-    debug('$currMonthShoppingNum:'. $currMonthShoppingNum.',$level[\'times\']:'.$level['times']);
+//    debug('$currMonthShoppingNum:'. $currMonthShoppingNum.',$level[\'times\']:'.$level['times']);
     if($currMonthShoppingNum < $level['times']){
         return false;     
     }
@@ -329,6 +329,85 @@ function upgrade($user, $level)
             ]);  
     }
     return true;
+}
+
+
+function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
+{
+    $index = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if ($passKey !== null) {
+        // Although this function's purpose is to just make the
+        // ID short - and not so much secure,
+        // with this patch by Simon Franz (http://blog.snaky.org/)
+        // you can optionally supply a password to make it harder
+        // to calculate the corresponding numeric ID
+
+
+        for ($n = 0; $n<strlen($index); $n++) {
+            $i[] = substr( $index,$n ,1);
+        }
+
+
+        $passhash = hash('sha256',$passKey);
+        $passhash = (strlen($passhash) < strlen($index))
+            ? hash('sha512',$passKey)
+            : $passhash;
+
+
+        for ($n=0; $n < strlen($index); $n++) {
+            $p[] =  substr($passhash, $n ,1);
+        }
+
+
+        array_multisort($p,  SORT_DESC, $i);
+        $index = implode($i);
+    }
+
+
+    $base  = strlen($index);
+
+
+    if ($to_num) {
+        // Digital number  <<--  alphabet letter code
+        $in  = strrev($in);
+        $out = 0;
+        $len = strlen($in) - 1;
+        for ($t = 0; $t <= $len; $t++) {
+            $bcpow = bcpow($base, $len - $t);
+            $out   = $out + strpos($index, substr($in, $t, 1)) * $bcpow;
+        }
+
+
+        if (is_numeric($pad_up)) {
+            $pad_up--;
+            if ($pad_up > 0) {
+                $out -= pow($base, $pad_up);
+            }
+        }
+        $out = sprintf('%F', $out);
+        $out = substr($out, 0, strpos($out, '.'));
+    } else {
+        // Digital number  -->>  alphabet letter code
+        if (is_numeric($pad_up)) {
+            $pad_up--;
+            if ($pad_up > 0) {
+                $in += pow($base, $pad_up);
+            }
+        }
+
+
+        $out = "";
+        for ($t = floor(log($in, $base)); $t >= 0; $t--) {
+            $bcp = bcpow($base, $t);
+            $a   = floor($in / $bcp) % $base;
+            $out = $out . substr($index, $a, 1);
+            $in  = $in - ($a * $bcp);
+        }
+        $out = strrev($out); // reverse
+    }
+
+
+    return $out;
 }
 
 function getShoppingTimesOfCurrentMonth($userId)
