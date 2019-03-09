@@ -28,7 +28,7 @@
         text-decoration: none;
     }
 </style>
-<form id="recharge_form" enctype="multipart/form-data">
+<form id="recharge_form" enctype="multipart/form-data" method="post">
 <div class="loginsingup-input mobil_topup">
         <input type="hidden" id="pay_type" name="pay_name" value="微信支付">
         <div class="lsu">
@@ -139,10 +139,19 @@
     //提交表单
     function recharge_submit(){
         var account = $('#add_money').val();
-        if(isNaN(account) || parseInt(account)<=0 || account==''){
+        if(isNaN(account) || account<=0 || account==''){
             layer.open({content:'请输入正确的充值数量',time:2});
             return false;
         }
+
+
+        if ($('#pay_type').val()=='支付宝支付')
+        {
+
+            $("#recharge_form").submit();
+            return false;
+        }
+
         uploadImage();
     }
     function changediv(num){
@@ -183,7 +192,7 @@
         }
     }
     // 文件上传
-    function uploadImage(){
+    function  uploadImage(){
         // FormData对象，来发送二进制文件。
         var formdata = new FormData($('#recharge_form')[0]);
         $.ajax({

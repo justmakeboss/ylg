@@ -27,8 +27,12 @@ class User extends MobileBase
     */
     public function _initialize()
     {
+
+
+
         parent::_initialize();
         if (session('?user')) {
+
             $user = session('user');
             $user = M('users')->where("user_id", $user['user_id'])->find();
             session('user', $user);  //覆盖session 中的 user
@@ -1519,28 +1523,55 @@ class User extends MobileBase
     //充值
     public function recharge()
     {
+
         if(IS_POST){
             if (!empty(session("recharge")) && time() - session("recharge") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("recharge", time());
             $file =request()->file('img');
+
+
+            if(I('pay_name')!='支付宝支付')
+            {
+
             if($file){
                 $info = $file->move(ROOT_PATH . 'public' . DS . 'upload/img');
                 $data['pay_code'] ='public' . DS . 'upload/img\\'.$info->getSaveName();
             }else{
+
                 $this->ajaxReturn(['status'=>0,'msg'=>"未上传收款凭证！"]);
+
             }
+
+            }
+
             if(I('account')<=0||empty(I('account'))){
                 $this->ajaxReturn(['status'=>0,'msg'=>"充值金额要大于0"]);
             }
+
+            //生产订单号
+            $time = date("YmdHis");
+            $ms = substr(microtime(true),11);
+
+            $order_sn = $time.$ms;
+
             $data['user_id']=$this->user_id;
+            $data['order_sn'] = $order_sn;
             $data['nickname']=session('user.nickname');
             $data['account']=I('account');
             $data['ctime']=time();
             $data['pay_name']=I('pay_name');
             $res=M('recharge')->add($data);
             if($res){
+
+
+                if(I('pay_name')=='支付宝支付')
+                {
+                    alipay($order_sn,'recharge_'.I('account'),I('account'));
+
+                }
+
                 $this->ajaxReturn(['status'=>1,'msg'=>"申请成功"]);
             }else{
                 $this->ajaxReturn(['status'=>0,'msg'=>"申请失败"]);

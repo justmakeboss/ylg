@@ -2491,3 +2491,32 @@ function draw_txt_to($card,$pos,$string)
         return false;
     }
 }
+
+
+/**
+ * @param $out_trade_no string 外部订单号
+ * @param $subject string 订单名称
+ * @param $total_amount double 支付金额
+ * @param string $body 内容描述
+ * @throws Exception
+ */
+function alipay($out_trade_no,$subject,$total_amount,$body='')
+{
+    require_once ALIPAYSDK_PATH .'/wappay/service/AlipayTradeService.php';
+    require_once   ALIPAYSDK_PATH .'/wappay/buildermodel/AlipayTradeWapPayContentBuilder.php';
+    require  ALIPAYSDK_PATH .'/config.php';
+
+    //超时时间
+    $timeout_express="1m";
+
+    $payRequestBuilder = new AlipayTradeWapPayContentBuilder();
+    $payRequestBuilder->setBody($body);
+    $payRequestBuilder->setSubject($subject);
+    $payRequestBuilder->setOutTradeNo($out_trade_no);
+    $payRequestBuilder->setTotalAmount($total_amount);
+    $payRequestBuilder->setTimeExpress($timeout_express);
+
+    $payResponse = new AlipayTradeService($config);
+
+    $result=$payResponse->wapPay($payRequestBuilder,$config['return_url'],$config['notify_url']);
+}

@@ -1287,6 +1287,7 @@ class User extends Base {
             ->field('u.user_id,u.user_money,r.account')
             ->find();
         if($lists){
+//            print_r($data);die;
             $data['pay_time']=time();
             $res = M('recharge')->update($data);
             if ($res) {

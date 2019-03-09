@@ -38,6 +38,8 @@ define('SERIALNUMBER','20160520065303oCWIoa');
 define('APP_PATH', __DIR__ . '/application/');
 // 定义时间
 define('NOW_TIME',$_SERVER['REQUEST_TIME']);
+
+define('ALIPAYSDK_PATH', __DIR__ .'/vendor/alipay');
 //define('BIND_MODULE','vpay');
 // 加载框架引导文件
 require __DIR__ . '/thinkphp/start.php';
