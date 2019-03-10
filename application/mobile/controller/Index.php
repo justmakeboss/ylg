@@ -8,6 +8,41 @@ use app\common\logic\CartLogic;
 
 class Index extends MobileBase {
 
+    public function rankingListOfWeek()
+    {
+        $page = (int)I('p') ? (int)I('p') : 0;
+        $rowsOfPerPage = 15;
+//        $res = M('user')->where('user_id', 'gt', 0)->order('my_num_week desc')->limit($page*$rowsOfPerPage, $rowsOfPerPage)->select();
+
+        $allUsers = M('users')->alias('a')
+                ->join('tp_users b', 'a.user_id = b.first_leader')
+                ->where('a.user_id', 'gt', 0)
+                ->field('a.user_id')->select();
+
+
+
+        $res = M('users')->where('user_id', 'gt', 0);
+
+
+
+
+
+        if (IS_POST) {
+            $this->ajaxReturn($res);
+        }
+        return $this->fetch();
+    }
+
+    public function rankingListOfMonth()
+    {
+        $page = (int)I('p') ? (int)I('p') : 0;
+        $rowsOfPerPage = 15;
+        $res = M('user')->where('user_id', 'gt', 0)->order('my_num_month desc')->limit($page*$rowsOfPerPage, $rowsOfPerPage)->select();
+        if (IS_POST) {
+            $this->ajaxReturn($res);
+        }
+        return $this->fetch();
+    }
 
     public function index(){
         /*

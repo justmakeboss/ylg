@@ -343,7 +343,6 @@ class User extends MobileBase
      */
     public function reg()
     {
-
         if($this->user_id > 0) {
             $this->redirect(U('Mobile/User/index'));
         }
