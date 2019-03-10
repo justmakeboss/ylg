@@ -159,6 +159,24 @@ class MobileBase extends Controller {
         }
     }
 
+    public function forzenss($userid){
+
+        if($userid){
+            $forzens = Db::name('goods_consignments')->where(['user_id'=>$userid,'five_status'=>0,'create_time'=>['ELT',time()]])->select();
+            foreach ($forzens as $key=>$value){
+
+                if($value['create_time']<=time()){
+                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('user_money')->find();
+
+                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$value['goods_price']+$userss['user_money']]);
+
+                    $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
+
+                }
+            }
+        }
+    }
+
 
     /**
      * 保存公告变量到 smarty中 比如 导航
@@ -194,6 +212,7 @@ class MobileBase extends Controller {
            $user_id = $users['user_id'];
            $uname = $users['nickname'];
        }
+        $this->forzenss($user_id);
        $this->forzens($user_id);
        $this->assign('user_id',$user_id);
        $this->assign('uname',$uname);
