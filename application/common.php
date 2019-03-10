@@ -514,7 +514,7 @@ function balancelog($reflectId, $userId, $num, $type, $before,$after)
                 krsort($list);
                 foreach ($list as $key => $value) {
                     //升级
-                    debug(__FILE__);
+                    //debug(__FILE__);
                     user_upgrade($value);
                 }
             }

@@ -142,14 +142,11 @@ class MobileBase extends Controller {
      */
 
     public function forzens($userid){
-
         if($userid){
-            $forzens = Db::name('forzen')->where(['user_id'=>$userid,'five_status'=>0,'shifang_time'=>['EGT',time()]])->select();
+            $forzens = Db::name('forzen')->where(['user_id'=>$userid,'five_status'=>0,'shifang_time'=>['ELT',time()]])->select();
             foreach ($forzens as $key=>$value){
-
-                if($value['shifang_time']>=time()){
-                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('frozen_dongjie')->find();
-
+                if($value['shifang_time'] <= time()){
+                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('frozen_money')->find();
                     $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['frozen_money'=>$value['frozen_dongjie']+$userss['frozen_money']]);
 
                     $forzen_status =  Db::name('forzen')->where(['id'=>$value['id']])->update(['five_status'=>1]);

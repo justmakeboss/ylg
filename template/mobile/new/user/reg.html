@@ -58,9 +58,7 @@
         <div class="lsu">
             <span class="ico ico-referee"></span>
             <input type="text" name="invite" id="invite" value="<?php echo  $mobile;?>" placeholder="推荐人手机号"
-                   {if condition="$a eq 'on'"}
-                   readonly="readonly"
-                   {/if}
+                   {php} if(!empty($mobile)) {echo 'readonly="readonly"';}{/php}
 
                    class="c-form-txt-normal" >
             <span id="invite_phone_notice"></span>
