@@ -246,6 +246,20 @@ class Member extends MobileBase
                         );
                         Db::startTrans();
                         if (Db::name('goods_consignment')->insert($arr)) {
+
+                            $d = array(
+                                'user_id' => $this->user_id,
+                                'setmeal_id' => $goodslist[$i]['id'],
+                                'goods_id' => $data['goods_id'],
+                                'order_id' => $goodsnum['order_id'],
+                                'num' => $data['num'],
+                                'surplus_num' => $data['num'],
+                                'goods_name' => $goodslist[$i]['goods_name'],
+                                'goods_price' => $goodslist[$i]['shop_price'],
+                                'create_time' => time() + (5*86400),
+                            );
+                            Db::name('goods_consignments')->insert($d);
+
                             $result = Db::name('order_goods')->where("order_id = {$goodsnum['order_id']}")->setInc('sell', $data['num']);
                             // $results = Db::name('goods')->where("goods_id = {$data['goods_id']}")->setInc('store_count', $data['num']);
                             if ($result){
@@ -625,6 +639,7 @@ $goodslist = Db::name('agent_order')->alias('a')
                         if($result){
                             //                        Db::commit();
                             Db::name('goods_consignment')->where("user_id = {$this->user_id} AND id = $id")->delete();
+                            Db::name('goods_consignments')->where("user_id = {$this->user_id} AND id = $id")->delete();
                             $this->success('取消成功');
                         }else{
                             //                        Db::rollback();
