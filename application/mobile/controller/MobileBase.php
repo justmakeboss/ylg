@@ -157,16 +157,15 @@ class MobileBase extends Controller {
     }
 
     public function forzenss($userid){
-
+        $system = tpCache('ylg_spstem_role');
         if($userid){
             $forzens = Db::name('goods_consignments')->where(['user_id'=>$userid,'five_status'=>0,'create_time'=>['ELT',time()]])->select();
             foreach ($forzens as $key=>$value){
 
                 if($value['create_time']<=time()){
                     $userss = Db::name('users')->where(['user_id'=>$userid])->field('user_money')->find();
-
-                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$value['goods_price']+$userss['user_money']]);
-
+                    $money = $value['goods_price']*$value['num']*(1-$system['handling_fee']);
+                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$money+$userss['user_money']]);
                     $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
 
                 }

@@ -583,6 +583,9 @@ class User extends MobileBase
         return $this->fetch();
     }
 
+
+
+
     /**
      * 绑定已有账号
      * @return \think\mixed
