@@ -1644,10 +1644,17 @@ class User extends MobileBase
                 $this->ajaxReturn(['status'=>0,'msg'=>'验证码错误']);
             };*/
 
+
+            //生产订单号
+            $time = date("YmdHis");
+            $ms = substr(microtime(true),11);
+
+            $order_sn = $time.$ms;
             $data = I('post.');
             $data['user_id'] = $this->user_id;
             $data['create_time'] = time();
-            
+            $data['order_sn'] = $order_sn;
+
             $taxfee = $ylg_spstem_role['bill_charge'];
 
             $money=Db::name('withdrawals')->where(array('user_id'=>$data['user_id']))->whereTime('create_time', 'today')->sum('money');

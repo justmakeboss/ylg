@@ -1,6 +1,7 @@
 <?php
 
 require_once 'AopEncrypt.php';
+require_once 'SignData.php';
 
 class AopClient {
 	//应用ID
@@ -367,16 +368,25 @@ class AopClient {
 
 		$this->setupCharsets($request);
 
-		//		//  如果两者编码不一致，会出现签名验签或者乱码
+
+        //		//  如果两者编码不一致，会出现签名验签或者乱码
 		if (strcasecmp($this->fileCharset, $this->postCharset)) {
 
-			// writeLog("本地文件字符集编码与表单提交编码不一致，请务必设置成一样，属性名分别为postCharset!");
+
+            // writeLog("本地文件字符集编码与表单提交编码不一致，请务必设置成一样，属性名分别为postCharset!");
 			throw new Exception("文件编码：[" . $this->fileCharset . "] 与表单提交编码：[" . $this->postCharset . "]两者不一致!");
-		}
 
-		$iv = null;
 
-		if (!$this->checkEmpty($request->getApiVersion())) {
+
+        }
+
+
+
+        $iv = null;
+
+
+
+        if (!$this->checkEmpty($request->getApiVersion())) {
 			$iv = $request->getApiVersion();
 		} else {
 			$iv = $this->apiVersion;
@@ -427,19 +437,20 @@ class AopClient {
 			$apiParams['biz_content'] = $enCryptContent;
 
 		}
+//        echo 23;die;
 
 
 		//签名
 		$sysParams["sign"] = $this->generateSign(array_merge($apiParams, $sysParams), $this->signType);
 
 
-		//系统参数放入GET请求串
+
+        //系统参数放入GET请求串
 		$requestUrl = $this->gatewayUrl . "?";
 		foreach ($sysParams as $sysParamKey => $sysParamValue) {
 			$requestUrl .= "$sysParamKey=" . urlencode($this->characet($sysParamValue, $this->postCharset)) . "&";
 		}
 		$requestUrl = substr($requestUrl, 0, -1);
-
 
 		//发起HTTP请求
 		try {
@@ -463,12 +474,19 @@ class AopClient {
 
 		if ("json" == $this->format) {
 
-			$respObject = json_decode($r);
+
+
+            $respObject = json_decode($r);
+
+//            var_dump($respObject);die;
 			if (null !== $respObject) {
+
 				$respWellFormed = true;
 				$signData = $this->parserJSONSignData($request, $resp, $respObject);
-			}
-		} else if ("xml" == $this->format) {
+
+            }
+
+        } else if ("xml" == $this->format) {
 
 			$respObject = @ simplexml_load_string($resp);
 			if (false !== $respObject) {
@@ -484,9 +502,9 @@ class AopClient {
 			$this->logCommunicationError($sysParams["method"], $requestUrl, "HTTP_RESPONSE_NOT_WELL_FORMED", $resp);
 			return false;
 		}
-
 		// 验签
-		$this->checkResponseSign($request, $signData, $resp, $respObject);
+//		$this->checkResponseSign($request, $signData, $resp, $respObject);
+//        echo 123;die;
 
 		// 解密
 		if (method_exists($request,"getNeedEncrypt") &&$request->getNeedEncrypt()){
@@ -771,7 +789,7 @@ class AopClient {
 
 	function parserJSONSignData($request, $responseContent, $responseJSON) {
 
-		$signData = new SignData();
+        $signData = new SignData();
 
 		$signData->sign = $this->parserJSONSign($responseJSON);
 		$signData->signSourceData = $this->parserJSONSignSource($request, $responseContent);

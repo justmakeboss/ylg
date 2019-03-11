@@ -1796,6 +1796,31 @@ exit("功能正在开发中。。。");
         //$data['pay_time'] = time();
         $data['status'] = 1;
 
+
+        if ($withInfo['bank_name']=='支付宝'){
+
+            if (empty($withInfo['order_sn']))
+            {
+                $this->error('操作失败，请拒绝后，让用户重新提交');
+            }
+
+
+           $rs =  negotiation($withInfo['order_sn'],$withInfo['bank_card'],$withInfo['money']-$withInfo['taxfee'],$withInfo['realname']);
+
+
+//            $responseNode = str_replace(".", "_", $rs->getApiMethodName()) . "_response";
+            $resultCode = $rs->alipay_fund_trans_toaccount_transfer_response->code;
+
+            if(!empty($resultCode)&&$resultCode == 10000){
+
+            } else {
+                $this->error($rs->alipay_fund_trans_toaccount_transfer_response->sub_msg);
+            }
+
+
+//            if ()
+        }
+
         $res = M('withdrawals')->where(['id' => $id, 'status' => 0])->save($data);
 
         if ($res) {

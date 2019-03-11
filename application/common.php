@@ -2599,3 +2599,64 @@ function alipay($out_trade_no,$subject,$total_amount,$body='')
 
     $result=$payResponse->wapPay($payRequestBuilder,$config['return_url'],$config['notify_url']);
 }
+
+function negotiation($order_sn,$payee_account,$amount,$payee_real_name='')
+{header("Content-Type: text/html;charset=utf-8");
+
+    require  ALIPAYSDK_PATH .'/config.php';
+//    error_reporting(E_ALL);
+    include(ALIPAYSDK_PATH.'/aop/AopClient.php');
+
+    include(ALIPAYSDK_PATH.'/aop/request/AlipayFundTransToaccountTransferRequest.php');
+
+//    require_once ALIPAYSDK_PATH .'/AopSdk.php';
+
+
+//    print_r($config);die;
+
+    $aop = new AopClient ();
+
+    $aop->gatewayUrl = 'https://openapi.alipay.com/gateway.do';
+    $aop->appId = $config['app_id'];
+    $aop->rsaPrivateKey = $config['merchant_private_key'];
+    $aop->alipayrsaPublicKey=$config['alipay_public_key'];
+    $aop->apiVersion = '1.0';
+    $aop->signType = 'RSA2';
+    $aop->postCharset='UTF-8';
+    $aop->format='json';
+
+
+    $request = new \AlipayFundTransToaccountTransferRequest();
+
+//    echo 12;die;
+
+
+
+    $data = array();
+    $data['out_biz_no'] = $order_sn;
+    $data['payee_type'] = 'ALIPAY_LOGONID';
+    $data['payee_account'] = $payee_account;
+    $data['amount'] = $amount;
+    $data['payer_show_name'] = '提现';
+    $data['payee_real_name'] = $payee_real_name;
+    $data['remark'] = '提现';
+
+
+
+//    print_r(json_encode($data));die;
+    $request->setBizContent(json_encode($data));
+
+    $result = $aop->execute ( $request);
+
+    return $result;
+
+//    print_r($result->alipay_fund_trans_toaccount_transfer_response->sub_msg);die;
+
+//    $responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
+//    $resultCode = $result->$responseNode->code;
+//    if(!empty($resultCode)&&$resultCode == 10000){
+//        echo "成功";
+//    } else {
+//        echo "失败";
+//    }
+}
