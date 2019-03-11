@@ -658,7 +658,7 @@ $goodslist = Db::name('agent_order')->alias('a')
             }
             $p = $this->request->post('p');
             $num = 15;
-            $goodslist = Db::name('goods_consignment')->where("user_id = {$this->user_id} AND surplus_num > 0")->limit($num * $p, $num * $p + $num)->select();
+            $goodslist = Db::name('goods_consignment')->where("user_id = {$this->user_id} AND surplus_num > 0")->order('id', 'desc')->limit($num * $p, $num * $p + $num)->select();
             foreach ($goodslist as $k => $v) {
                 $d = Db::name('goods_consignments')->where('gid='.$v['id'])->find();;
                 $goodslist[$k]['status'] = $d['five_status'] == 0 ? '进行中' :'已完成';
