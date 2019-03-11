@@ -74,7 +74,7 @@
                 <a href="{:U('Mobile/User/logout')}" class="setting"><img src="__STATIC__/assets/images/quit.png"></a>
                 <div><img class="avatar" src="{$user[head_pic]|default="__STATIC__/images/user68.jpg"}"></div>
                 <div class="fs12 mt5">{$user['nickname']}</div>
-                <div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {:alphaID($user['user_id']).rand(0,100)} </div>
+                <!--<div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {:alphaID($user['user_id']).rand(0,100)} </div>-->
                 <div class="fs12 mt5">
                     <if condition="$user['level'] eq 1">用户
                     <elseif condition="$user['level'] eq 2">会员
@@ -82,7 +82,7 @@
                     <elseif condition="$user['level'] eq 4">合伙人
                     </if>
                 </div>
-                <div class="fs12 mt5" style="font-size: .5rem;">上级：  {$mobile|default="无"} </div>
+                <!--<div class="fs12 mt5" style="font-size: .5rem;">上级：  {$mobile|default="无"} </div>-->
                 <div class="fs12 mt5" style="font-size: .5rem;">个人业绩：  {$user['monthly_performance']} </div>
                 <div class="fs12 mt5" style="font-size: .5rem;">团队业绩：  {$agentnum} </div>
                 <!--<a href="###" class="weui-badge mt5">您有<b>2</b>条新通知 ></a>-->

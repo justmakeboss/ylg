@@ -168,12 +168,11 @@ class MobileBase extends Controller {
                     $money = $value['goods_price']*$value['num']*(1-$system['handling_fee']);
                     $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$money+$userss['user_money']]);
                     $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
-                    GoodsConsignment::destroy($value['gid']);
+                    //GoodsConsignment::destroy($value['gid']);
                 }
             }
         }
     }
-
 
     /**
      * 保存公告变量到 smarty中 比如 导航

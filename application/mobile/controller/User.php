@@ -362,8 +362,8 @@ class User extends MobileBase
             $username = I('post.username', '');
             $password = I('post.password', '');
             $password2 = I('post.password2', '');
-            $aliNo = I('post.ali_no');
-            $aliName = I('post.ali_name');
+//            $aliNo = I('post.ali_no');
+//            $aliName = I('post.ali_name');
             //是否开启注册验证码机制
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 1);
@@ -456,17 +456,17 @@ class User extends MobileBase
                 $this->ajaxReturn(['msg'=>'支付宝姓名不能为空！']);
             }
 
-            if(empty($aliNo)) {
-                $this->ajaxReturn(['msg'=>'支付宝账号不能为空！']);
-                
-            } else {
-                //是否存在
-                $account_occupy = M("users")->field("user_id")->where(array("ali_no"=>$aliNo))->find();
-                if ($account_occupy) $this->ajaxReturn(['msg'=>'支付宝账号已存在！']);
-            }
+//            if(empty($aliNo)) {
+//                $this->ajaxReturn(['msg'=>'支付宝账号不能为空！']);
+//
+//            } else {
+//                //是否存在
+//                $account_occupy = M("users")->field("user_id")->where(array("ali_no"=>$aliNo))->find();
+//                if ($account_occupy) $this->ajaxReturn(['msg'=>'支付宝账号已存在！']);
+//            }
 
-            $data['ali_no'] = $aliNo;
-            $data['ali_name'] = $aliName;
+//            $data['ali_no'] = $aliNo;
+//            $data['ali_name'] = $aliName;
             $data['paypwd'] = encrypt($paypwd);
 
             //创建时间
