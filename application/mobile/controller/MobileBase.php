@@ -3,6 +3,7 @@
 namespace app\mobile\controller;
 use app\common\logic\CartLogic;
 use app\common\logic\UsersLogic;
+use app\common\model\GoodsConsignment;
 use app\common\model\Users;
 use think\Controller;
 use think\Db;
@@ -142,14 +143,11 @@ class MobileBase extends Controller {
      */
 
     public function forzens($userid){
-
         if($userid){
-            $forzens = Db::name('forzen')->where(['user_id'=>$userid,'five_status'=>0,'shifang_time'=>['EGT',time()]])->select();
+            $forzens = Db::name('forzen')->where(['user_id'=>$userid,'five_status'=>0,'shifang_time'=>['ELT',time()]])->select();
             foreach ($forzens as $key=>$value){
-
-                if($value['shifang_time']>=time()){
-                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('frozen_dongjie')->find();
-
+                if($value['shifang_time'] <= time()){
+                    $userss = Db::name('users')->where(['user_id'=>$userid])->field('frozen_money')->find();
                     $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['frozen_money'=>$value['frozen_dongjie']+$userss['frozen_money']]);
 
                     $forzen_status =  Db::name('forzen')->where(['id'=>$value['id']])->update(['five_status'=>1]);
@@ -160,18 +158,17 @@ class MobileBase extends Controller {
     }
 
     public function forzenss($userid){
-
+        $system = tpCache('ylg_spstem_role');
         if($userid){
             $forzens = Db::name('goods_consignments')->where(['user_id'=>$userid,'five_status'=>0,'create_time'=>['ELT',time()]])->select();
             foreach ($forzens as $key=>$value){
 
                 if($value['create_time']<=time()){
                     $userss = Db::name('users')->where(['user_id'=>$userid])->field('user_money')->find();
-
-                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$value['goods_price']+$userss['user_money']]);
-
+                    $money = $value['goods_price']*$value['num']*(1-$system['handling_fee']);
+                    $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$money+$userss['user_money']]);
                     $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
-
+                    GoodsConsignment::destroy($value['gid']);
                 }
             }
         }

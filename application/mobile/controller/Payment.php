@@ -163,11 +163,7 @@ class Payment extends MobileBase {
                 }
             }elseif($order['type'] == 1){
                 //零售
-//                dump($order['goods_price']*$system['invite_integral']);exit;
-                $result = Db::name('users')->where('user_id',$user['user_id'])->dec('user_money',$order['order_amount'])->inc('frozen_money',$order['goods_price']*$system['invite_integral'])->update();
-
                 $result = Db::name('users')->where('user_id',$user['user_id'])->dec('user_money',$order['order_amount'])->update();
-
                 $dasss['user_id'] = $user['user_id'];
                 $dasss['reg_time'] = time();
                 $dasss['frozen_dongjie'] = $order['goods_price']*$system['invite_integral'];
@@ -212,11 +208,11 @@ class Payment extends MobileBase {
 //                        dump($money);
 //                        dump($goods_integral);exit;
                         //贼难找的寄售商品收入
-                        $res = Db::name('users')->where('user_id',$consignment[$i]['user_id'])->Inc('user_money',$money)->Inc('distribut_money',$goods_integral)->update();
+//                        $res = Db::name('users')->where('user_id',$consignment[$i]['user_id'])->Inc('user_money',$money)->Inc('distribut_money',$goods_integral)->update();
                         // $ress = Db::name('goods')->where('goods_id',$order_goods['goods_id'])->setDec('store_count',$order_goods['goods_num']);
-                        if(!$res){
-                            $this->error('支付失败,请联系技术人员');
-                        }
+//                        if(!$res){
+//                            $this->error('支付失败,请联系技术人员');
+//                        }
                         //代理订单表
                         $agentid = Db::name('agent_order')->insertGetId($agentdata);
                         $agents =  Db::name('users')->where("user_id = {$agentdata['agent_id']}")->find();
@@ -225,8 +221,8 @@ class Payment extends MobileBase {
                         Db::name('goods_consignment')->where("user_id = {$agentdata['agent_id']} AND id = {$consignment[$i]['id']}")->update($data);
 
                             //余额变动日志
-                            balancelog($agentid,$consignment[$i]['user_id'],$money,11,$agents['user_money'],$agents['user_money']+$money);
-                            $logs = shoppinglog($order_id,$consignment[$i]['user_id'],$goods_integral,9,$agents['distribut_money'],$agents['distribut_money']+$goods_integral);
+//                            balancelog($agentid,$consignment[$i]['user_id'],$money,11,$agents['user_money'],$agents['user_money']+$money);
+//                            $logs = shoppinglog($order_id,$consignment[$i]['user_id'],$goods_integral,9,$agents['distribut_money'],$agents['distribut_money']+$goods_integral);
                         //剩余数量
                         if($sum >= $order_goods['goods_num']){
                             break;

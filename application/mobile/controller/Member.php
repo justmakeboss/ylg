@@ -9,6 +9,7 @@ use app\common\logic\UsersLogic;
 use app\common\logic\OrderLogic;
 use app\common\logic\CouponLogic;
 use app\common\logic\JssdkLogic;
+use app\common\model\GoodsConsignment;
 use app\common\model\Order;
 use app\common\model\Users;
 use think\Page;
@@ -245,7 +246,8 @@ class Member extends MobileBase
                             'update_time' => date('Y-m-d H:i:s')
                         );
                         Db::startTrans();
-                        if (Db::name('goods_consignment')->insert($arr)) {
+                        $gcId = Db::name('goods_consignment')->insertGetId($arr);
+                        if ($gcId) {
 
                             $d = array(
                                 'user_id' => $this->user_id,
@@ -257,6 +259,7 @@ class Member extends MobileBase
                                 'goods_name' => $goodslist[$i]['goods_name'],
                                 'goods_price' => $goodslist[$i]['shop_price'],
                                 'create_time' => time() + (5*86400),
+                                'gid' => $gcId,
                             );
                             Db::name('goods_consignments')->insert($d);
 
@@ -639,7 +642,7 @@ $goodslist = Db::name('agent_order')->alias('a')
                         if($result){
                             //                        Db::commit();
                             Db::name('goods_consignment')->where("user_id = {$this->user_id} AND id = $id")->delete();
-                            Db::name('goods_consignments')->where("user_id = {$this->user_id} AND id = $id")->delete();
+                            Db::name('goods_consignments')->where("user_id = {$this->user_id} AND gid = $id")->delete();
                             $this->success('取消成功');
                         }else{
                             //                        Db::rollback();
