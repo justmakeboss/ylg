@@ -447,14 +447,14 @@ class User extends MobileBase
             }
 
             //支付宝
-            $preg_name='/^[\x{4e00}-\x{9fa5}]{2,10}$|^[a-zA-Z\s]*[a-zA-Z\s]{2,20}$/isu';
-            if(!preg_match($preg_name,$aliName)){
-                $this->ajaxReturn(['msg'=>'支付宝姓名填写有误！']);
-            }
-            if(empty($aliName)) {
-
-                $this->ajaxReturn(['msg'=>'支付宝姓名不能为空！']);
-            }
+//            $preg_name='/^[\x{4e00}-\x{9fa5}]{2,10}$|^[a-zA-Z\s]*[a-zA-Z\s]{2,20}$/isu';
+//            if(!preg_match($preg_name,$aliName)){
+//                $this->ajaxReturn(['msg'=>'支付宝姓名填写有误！']);
+//            }
+//            if(empty($aliName)) {
+//
+//                $this->ajaxReturn(['msg'=>'支付宝姓名不能为空！']);
+//            }
 
 //            if(empty($aliNo)) {
 //                $this->ajaxReturn(['msg'=>'支付宝账号不能为空！']);
@@ -854,8 +854,8 @@ class User extends MobileBase
             I('post.district') ? $post['district'] = I('post.district') : false;  //地区
             I('post.email') ? $post['email'] = I('post.email') : false; //邮箱
             I('post.mobile') ? $post['mobile'] = I('post.mobile') : false; //手机
-            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
-            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
+//            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
+//            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
 
             if ($post['sex']){
                 switch ($post['sex']) {
@@ -875,7 +875,7 @@ class User extends MobileBase
             }
             $email = I('post.email');
             $mobile = I('post.mobile');
-            $aliNo = I('post.ali_no');
+//            $aliNo = I('post.ali_no');
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 6);
             $wx_code=I('post.wx_codes');
@@ -901,10 +901,10 @@ class User extends MobileBase
                 }
             }
 
-            if(!empty($aliNo)) {
-                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
-                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
-            }
+//            if(!empty($aliNo)) {
+//                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
+//                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
+//            }
 
             if (!empty($mobile)) {
                 $c = M('users')->where(['mobile' => input('post.mobile'), 'user_id' => ['<>', $this->user_id]])->count();
