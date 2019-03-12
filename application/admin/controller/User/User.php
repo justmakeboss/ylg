@@ -713,20 +713,20 @@ class User extends Base {
             }
 
             //更新分销关系
-            if($user['first_leader'] != $data['first_leader']){
-                $result = $this->change_distribution($uid,$data['first_leader']);
-                if($result['status'] == 0){
-                    exit($this->error($result['status']));
-                }
-            }
+//            if($user['first_leader'] != $data['first_leader']){
+//                $result = $this->change_distribution($uid,$data['first_leader']);
+//                if($result['status'] == 0){
+//                    exit($this->error($result['status']));
+//                }
+//            }
 
             $row = $user_model->where(['user_id'=>$uid])->save($data);
             if($row)
                 exit($this->success('修改成功'));
 
-            if($result['status'] == 1){
-                exit($this->success('修改成功'));
-            }
+//            if($result['status'] == 1){
+//                exit($this->success('修改成功'));
+//            }
             exit($this->error('未作内容修改或修改失败'));
         }
         //下级信息
@@ -735,7 +735,7 @@ class User extends Base {
         $user['third_lower'] = $user_model->where("third_leader = {$user['user_id']}")->count();
         //上级信息
         $first_leader = $user_model->where(['user_id'=>$user['first_leader']])->find();
-        if($user['wx_code']){
+        if($user['wx_code']) {
             $this->assign('wx_code',unserialize($user['wx_code']));
         }
         $this->assign('user',$user);
