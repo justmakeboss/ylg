@@ -106,12 +106,14 @@
             url: "/index.php/Mobile/Index/rankingListOfWeek.html",
             success: function(data){
                 busy = false;
-                $('#zzjz').show();
-                $('#jzwc').hide();
-                if(data.length<15&&p==0){
-                    $('#zzjz').hide();
-                    $('#jzwc').show();
-                }
+                // $('#zzjz').show();
+                // $('#jzwc').hide();
+                // if(data.length<15&&p==0){
+                //     $('#zzjz').hide();
+                //     $('#jzwc').show();
+                // }
+
+                $('#jzwc').show();
                 var div1='',div2='',div3='',div4='',div5='',div6='',div7='';
                 if(p==0){
                     div1+='<div class="weui-cell__hd">会员 </div>';
@@ -142,7 +144,7 @@
         });
     }
     var loading = false;  //状态标记
-    $('.page-bd').infinite().on("infinite", function() {
+    /*$('.page-bd').infinite().on("infinite", function() {
 
         if(loading) return;
         loading = true;
@@ -151,7 +153,7 @@
 
             loading = false;
         }, 1500);   //模拟延迟
-    });
+    });*/
 </script>
 
 </body>

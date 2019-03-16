@@ -1798,29 +1798,44 @@ function confirm_order($id, $user_id = 0)
         try{
             Db::startTrans();
             $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['egt',2]])->find();
+//            dump($TIR_ID);
+//            dump('**********************');
             if($TIR_ID){
                 $money = $order['order_amount'] * $config['daozhang'];
                 Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$money);
                 balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'],$TIR_ID['user_money'] + $money);
-                if($user['second_leader']){
-                    $tjstr = explode(',',$user['second_leader']);
-                    $a = 1;
-                    foreach (array_reverse($tjstr) as $key=>$value){
-                        $pids = Db::name('users')->where(['user_id'=>$value,'level'=>['egt',3]])->find();
-                        if($pids && $a<3){
-                            if($a == 1){
-                              $bblili = 0.02;
-                            }elseif($a == 2){
-                              $bblili = 0.004;
+                if($TIR_ID['second_leader']){
+                    $tjstr = array_reverse(explode(',',$TIR_ID['second_leader']));
+//                    dump('$tjstr:');
+//                    dump($tjstr);
+                    $canGetBonus = [];
+                    foreach ($tjstr as $userId) {
+                        if(count($canGetBonus) >= 2) {
+                            break;
+                        }
+                        $user = Db::name('users')->where('user_id',$userId)->where('level', 3)->find();
+                        if($user) {
+                            array_push($canGetBonus, $user);
+                        }
+                    }
+//                    dump('$canGetBonus:');
+//                    dump($canGetBonus);
+                    if(count($canGetBonus) >= 0) {
+                        foreach ($canGetBonus as $key=>$user){
+                            if($key == 0){
+                                $bblili = 0.02;
+                            }else{
+                                $bblili = 0.004;
                             }
+//                            dump($user);
                             $money = $order['order_amount'] * $bblili;
-                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money', $money);
-                            balancelog($pids['user_id'], $pids['user_id'], $money, 6, $pids['user_money'],$pids['user_money'] + $money);
-                            $a ++;
+                            Db::name('users')->where('user_id',$user['user_id'])->setInc('user_money', $money);
+                            balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'],$user['user_money'] + $money);
                         }
                     }
                 }
             }
+//            die;
             // 提交事务
             Db::commit();
         } catch (\Exception $e) {
