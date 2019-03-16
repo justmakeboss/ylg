@@ -167,8 +167,7 @@ class MobileBase extends Controller {
                     $userss = Db::name('users')->where(['user_id'=>$userid])->field('user_money')->find();
                     $money = $value['goods_price']*$value['num']*(1-$system['handling_fee']);
                     $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$money+$userss['user_money']]);
-                    $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
-
+                    Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
                     if($users_status) {
                         balancelog($userid,$userid,$money,11,$userss['user_money'],$userss['user_money']+$money);
                     }

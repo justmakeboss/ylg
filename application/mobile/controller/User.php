@@ -2981,13 +2981,13 @@ class User extends MobileBase
                     $logs[$k]['type_str'] = "代理商补贴";
                     break;
                 case 6 :
-                    $logs[$k]['type_str'] = "直推代理商收入";
+                    $logs[$k]['type_str'] = "直推收入";
                     break;
                 case 7 :
                     $logs[$k]['type_str'] = "月销售额收入";
                     break;
                 case 11 :
-                    $logs[$k]['type_str'] = "寄售商品收入";
+                    $logs[$k]['type_str'] = "寄售收入";
                     break;
                 case 12 :
                     $logs[$k]['type_str'] = "合伙人补贴";

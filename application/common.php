@@ -415,20 +415,58 @@ function getShoppingTimesOfCurrentMonth($userId)
     //当月消费次数
     $orderModel = new Order();
     $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
-    $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
+    $currMonthLastDay = strtotime(getCurMonthLastDay());
     $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
     return $currMonthShoppingNum;
 }
 
-
 function getCurMonthFirstDay($date) {
+    $date = date('Y-m-d H:i:s');
     return date('Y-m-01', strtotime($date));
 }
 
-function getCurMonthLastDay($date) {
+function getCurMonthLastDay() {
+    $date = date('Y-m-d H:i:s');
     return date('Y-m-d', strtotime(date('Y-m-01', strtotime($date)) . ' +1 month -1 day'));
 }
 
+function getTheBeginOfTheMonth()
+{
+    $BeginDate=date('Y-m-01', strtotime(date("Y-m-d")));
+    return strtotime($BeginDate);
+}
+
+function getTheEndOfTheMonth()
+{
+    $BeginDate=date('Y-m-01', strtotime(date("Y-m-d")));
+    return strtotime("$BeginDate +1 month");
+}
+
+function getTheBeginOfTheWeek()
+{
+    //当前日期
+    $sdefaultDate = date("Y-m-d");
+    //$first =1 表示每周星期一为开始日期 0表示每周日为开始日期
+    $first=1;
+    //获取当前周的第几天 周日是 0 周一到周六是 1 - 6
+    $w=date('w',strtotime($sdefaultDate));
+    //获取本周开始日期，如果$w是0，则表示周日，减去 6 天
+    $week_start=date('Y-m-d',strtotime("$sdefaultDate -".($w ? $w - $first : 6).' days'));
+    return $week_start;
+}
+
+function getTheEndOfTheWeek()
+{
+    //当前日期
+    $sdefaultDate = date("Y-m-d");
+    //$first =1 表示每周星期一为开始日期 0表示每周日为开始日期
+    $first=1;
+    //获取当前周的第几天 周日是 0 周一到周六是 1 - 6
+    $w=date('w',strtotime($sdefaultDate));
+    //本周结束日期
+    $week_end=date('Y-m-d',strtotime("$week_start +6 days"));
+    return $week_end;
+}
 
 /**
  * 会员等级变更记录
@@ -478,7 +516,7 @@ function integrallog($reflectId, $userId, $num, $type, $before,$after)
  * @param $reflectId 各表id
  * @param $userId   用户id
  * @param $num  数量
- * @param $type 类型 1：充值；2：申请提现；3：提现失败返还 4：直推下级业绩返点 5：代理商补贴  6 : 直推代理商收入 7：月销售额收入；8：收益积分购买产品；9：转出；10：转入； 11：寄售商品收入 12：合伙人补贴；13：转让手续费 14 : 回收出售商品
+ * @param $type 类型 1：充值；2：申请提现；3：提现失败返还 4：直推下级业绩返点 5：代理商补贴  6 : 直推会员收入 7：月销售额收入；8：收益积分购买产品；9：转出；10：转入； 11：寄售商品收入 12：合伙人补贴；13：转让手续费 14 : 回收出售商品
  * @param $before  变更前
  * @return mixed
  */
@@ -1759,13 +1797,12 @@ function confirm_order($id, $user_id = 0)
         // 启动事务
         try{
             Db::startTrans();
-
             $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['egt',2]])->find();
             if($TIR_ID){
-                Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$order['order_amount'] * $config['daozhang']);
-
+                $money = $order['order_amount'] * $config['daozhang'];
+                Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$money);
+                balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'],$TIR_ID['user_money'] + $money);
                 if($user['second_leader']){
-
                     $tjstr = explode(',',$user['second_leader']);
                     $a = 1;
                     foreach (array_reverse($tjstr) as $key=>$value){
@@ -1776,17 +1813,14 @@ function confirm_order($id, $user_id = 0)
                             }elseif($a == 2){
                               $bblili = 0.004;
                             }
-                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money',$order['order_amount'] * $bblili);
+                            $money = $order['order_amount'] * $bblili;
+                            Db::name('users')->where('user_id',$pids['user_id'])->setInc('user_money', $money);
+                            balancelog($pids['user_id'], $pids['user_id'], $money, 6, $pids['user_money'],$pids['user_money'] + $money);
                             $a ++;
                         }
                     }
                 }
             }
-
-//                file_put_contents('b.txt', 'userId:'$user['id'].',order_amount:'. $order['amount']."\r\n", FILE_APPEND);
-
-//                balancelog($res,$order['user_id'], $order['order_amount'] * $config['daozhang'], 2, $user['user_money'],$user['user_money'] + $order['order_amount'] * $config['daozhang']);
-
             // 提交事务
             Db::commit();
         } catch (\Exception $e) {
