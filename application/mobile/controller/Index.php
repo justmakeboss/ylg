@@ -12,7 +12,7 @@ class Index extends MobileBase {
     {
         $page = (int)I('p') ? (int)I('p') : 0;
         $rowsOfPerPage = 15;
-        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile')->select();
+        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile,nickname,head_pic')->select();
         $d = [];
         foreach ($usersLevelGT1 as $item) {
             $count = Db::name('users')->where('first_leader', $item['user_id'])->where('reg_time', '>=', strtotime(getTheBeginOfTheWeek()))->where('reg_time', '<', strtotime(getTheEndOfTheWeek()))->where('level', '>=', 2)->count();
@@ -29,19 +29,19 @@ class Index extends MobileBase {
                 }
             }
         }
-
         $users = [];
+        $d = array_slice($d, 0 , 10);
         foreach ($d as $rank => $v) {
             $currentUserInfo = current(array_filter($usersLevelGT1, function($user) use($v) {
                 return $user['user_id'] == $v['user_id'];
             }));
             $currentUserInfo['count'] = $v['count'];
             $currentUserInfo['rank'] = ++$rank;
+            $currentUserInfo['zhitui'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 6, 'createTime' => ['>=', strtotime(getTheBeginOfTheWeek())], 'createTime' => ['<', strtotime(getTheEndOfTheWeek())]])->sum('num') ?: 0;
+            $currentUserInfo['jishou'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 11, 'createTime' => ['>=', strtotime(getTheBeginOfTheWeek())], 'createTime' => ['<', strtotime(getTheEndOfTheWeek())]])->sum('num') ?: 0;
             array_push($users, $currentUserInfo);
         }
-        if (IS_POST) {
-            $this->ajaxReturn($users);
-        }
+        $this->assign('users', $users);
         return $this->fetch();
     }
 
@@ -49,7 +49,7 @@ class Index extends MobileBase {
     {
         $page = (int)I('p') ? (int)I('p') : 0;
         $rowsOfPerPage = 15;
-        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile')->select();
+        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile,nickname,head_pic')->select();
         $d = [];
         foreach ($usersLevelGT1 as $item) {
             $count = Db::name('users')->where('first_leader', $item['user_id'])->where('reg_time', '>=', strtotime(getTheBeginOfTheMonth()))->where('reg_time', '<', strtotime(getTheEndOfTheMonth()))->where('level', '>=', 2)->count();
@@ -66,7 +66,7 @@ class Index extends MobileBase {
                 }
             }
         }
-
+        $d = array_slice($d, 0 , 10);
         $users = [];
         foreach ($d as $rank => $v) {
             $currentUserInfo = current(array_filter($usersLevelGT1, function($user) use($v) {
@@ -74,11 +74,11 @@ class Index extends MobileBase {
             }));
             $currentUserInfo['count'] = $v['count'];
             $currentUserInfo['rank'] = ++$rank;
+            $currentUserInfo['zhitui'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 6, 'createTime' => ['>=', strtotime(getTheBeginOfTheMonth())], 'createTime' => ['<', strtotime(getTheEndOfTheMonth())]])->sum('num') ?: 0;
+            $currentUserInfo['jishou'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 11, 'createTime' => ['>=', strtotime(getTheBeginOfTheMonth())], 'createTime' => ['<', strtotime(getTheEndOfTheMonth())]])->sum('num') ?: 0;
             array_push($users, $currentUserInfo);
         }
-        if (IS_POST) {
-            $this->ajaxReturn($users);
-        }
+        $this->assign('users', $users);
         return $this->fetch();
     }
 

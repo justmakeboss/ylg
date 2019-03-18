@@ -2981,7 +2981,7 @@ class User extends MobileBase
                     $logs[$k]['type_str'] = "代理商补贴";
                     break;
                 case 6 :
-                    $logs[$k]['type_str'] = "直推收入";
+                    $logs[$k]['type_str'] = "奖励";
                     break;
                 case 7 :
                     $logs[$k]['type_str'] = "月销售额收入";
