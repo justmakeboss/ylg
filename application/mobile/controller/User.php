@@ -1595,7 +1595,6 @@ class User extends MobileBase
             $paymentList = M('Plugin')->where("`type`='payment' and status = 1 and code='weixin'")->select();
         }
         $paymentList = convert_arr_key($paymentList, 'code');
-
         foreach ($paymentList as $key => $val) {
             $val['config_value'] = unserialize($val['config_value']);
             if ($val['config_value']['is_bank'] == 2) {
