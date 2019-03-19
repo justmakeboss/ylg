@@ -50,9 +50,42 @@ class User extends Base {
         $this->assign('count',$count);
         return $this->fetch($inc_type);
     }
+
+    public function myteam_shopping()
+    {
+        /*配置列表*/
+        $group_list = [
+            'shop_info' => '活动区',
+            'shop_proxy'  => '批发区',
+            'shop_integral' => '积分商城',
+        ];
+        $inc_type =  I('get.inc_type','shop_info');
+        $where['o.user_id']=I('user_id');
+        $where['o.pay_status']=1;
+        if($inc_type=='shop_integral'){
+            $where['o.type']=2;
+        }elseif($inc_type=='shop_proxy'){
+            $where['o.type']=0;
+        }else{
+            $where['o.type']=1;
+        }
+        $p = I('p')?:1;
+        $list = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->order('o.order_id asc')->page($p.',10')->field('o.*,g.*,count(g.goods_num) as num')->group('goods_name')->select();
+        $count = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->group('goods_name')->count();
+        $Page = new Page($count,10);
+        $show = $Page->show();
+        $this->assign('user_id',I('user_id'));
+        $this->assign('user',I('user'));
+        $this->assign('list',$list);
+        $this->assign('page',$show);
+        $this->assign('group_list',$group_list);
+        $this->assign('inc_type',$inc_type);
+        $this->assign('count',$count);
+        return $this->fetch($inc_type);
+    }
+
     //会员列表
     public function index(){
-        
         return $this->fetch();
     }
     //会员升级记录
@@ -2346,6 +2379,7 @@ exit("功能正在开发中。。。");
             ->where($map)
             ->count();
         $Page  = new Page($count,20);
+        file_put_contents(ROOT_PATH.'/public/debug.txt', var_export($Page, true), 8);
         $show = $Page->show();
         $this->assign('pager',$Page);
         $this->assign('page',$show);// 赋值分页输出

@@ -61,6 +61,9 @@
                         <a class="btn blue" href="{:U('Admin/User.User/account_log',array('id'=>$list['user_id']))}"><i class="fa fa-search"></i>资金调节</a>
                         <a class="btn blue" href="{:U('Admin/User.User/level_update',array('user_id'=>$list['user_id']))}"><i class="fa fa-search"></i>等级变更</a>
                         <a class="btn blue" href="{:U('Admin/User.User/shop_index',array('user_id'=>$list['user_id'],'user'=>$list['mobile']))}"><i class="fa fa-steam"></i>购买明细</a>
+
+                        <a class="btn blue" href="{:U('Admin/User.User/myteam_shopping',array('user_id'=>$list['user_id'],'user'=>$list['mobile']))}"><i class="fa fa-steam"></i>下级所有消费明细</a>
+
                         <!-- <a class="btn blue" href="{:U('Admin/User.User/address',array('id'=>$list['user_id']))}"><i class="fa fa-steam"></i>收货地址</a> -->
                         <!-- <a class="btn red"  href="javascript:void(0)" data-id="{$list['user_id']}"  data-url="{:U('Admin/User.User/ajax_delete')}" onClick="delfun(this)"><i class="fa fa-trash-o"></i>删除</a> -->
                         <if condition="$list.engineer_status eq 0">

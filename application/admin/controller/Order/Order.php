@@ -1610,7 +1610,8 @@ exit("功能正在开发中。。。");
      * 寄修 平台填写单号 物流信息
      */
     public function update_server_order_info(){
-        if (empty(I('order_id/d'))) $this->error('请选择订单');
+        $d = I('order_id/d');
+        if (empty($d)) $this->error('请选择订单');
         $order_id = I('order_id/d');
         $action = input('action');
         if ($action == 5) {

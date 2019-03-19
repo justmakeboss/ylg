@@ -598,7 +598,9 @@ class Order extends MobileBase
             $field = 'suppliers_name,suppliers_desc,suppliers_phone,address';
             $suppliers_info = Db::name('suppliers')->field($field)->where(['suppliers_id'=>$suppliers_id])->find();
             //  radio默认选中
-            !empty(input('get.type/d')) && $this->assign('type',input('get.type/d'));
+
+            $d = input('get.type/d');
+            !empty($d) && $this->assign('type',input('get.type/d'));
             $this->assign('suppliers_id', $suppliers_id);
             $this->assign('suppliers_info', $suppliers_info);
 //            dump($suppliers_info);exit;
