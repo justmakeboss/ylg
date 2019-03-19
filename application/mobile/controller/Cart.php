@@ -117,7 +117,8 @@ class Cart extends MobileBase {
    
         $goods_id = input("goods_id/d"); // 商品id
         $goods_num = input("goods_num/d");// 商品数量
-        $setmeal_id = empty(input("setmeal_id/d"))?0:input("setmeal_id/d");// 套餐ID
+        $inputSetmeal = input("setmeal_id/d");
+        $setmeal_id = empty($inputSetmeal)?0:$inputSetmeal;// 套餐ID
         $item_id = input("item_id/d"); // 商品规格id
         $action = input("action"); // 行为
         if ($this->user_id == 0){
@@ -229,7 +230,8 @@ class Cart extends MobileBase {
             $field = 'suppliers_name,suppliers_desc,suppliers_phone,address';
             $suppliers_info = Db::name('suppliers')->field($field)->where(['suppliers_id'=>$suppliers_id])->find();
             //  radio默认选中
-            !empty(input('get.action')) && $this->assign('action',input('get.action'));
+            $inputGetAction = input('get.action');
+            !empty($inputGetAction) && $this->assign('action',$inputGetAction);
             $this->assign('suppliers_id', $suppliers_id);
             $this->assign('suppliers_info', $suppliers_info);
 //            dump($suppliers_info);exit;
@@ -355,7 +357,8 @@ class Cart extends MobileBase {
         $paypwd =  I("paypwd",''); // 支付密码
         $suppliers_id =  I("suppliers_id/d"); // 预约安装门店Id
         $order_type =  I("order_type/d"); // 预约安装门店Id
-        $setmeal_id = empty(input("setmeal_id/d"))?0:input("setmeal_id/d");// 套餐ID
+        $inputSetmeal = input("setmeal_id/d");
+        $setmeal_id = empty($inputSetmeal)?0:$inputSetmeal;// 套餐ID
 
 
         $user_money = $user_money ? $user_money : 0;

@@ -350,7 +350,8 @@ class User extends MobileBase
         $reg_smtp_enable = tpCache('sms.regis_smtp_enable');
 
         if (IS_POST) {
-            if (!empty(session("reg")) && time() - session("reg") <= 5) {
+            $sessionReg = session("reg");
+            if (!empty($sessionReg) && time() - session("reg") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("reg", time());
@@ -1535,7 +1536,8 @@ class User extends MobileBase
     {
 
         if(IS_POST){
-            if (!empty(session("recharge")) && time() - session("recharge") <= 5) {
+            $sessionRecharge = session("recharge");
+            if (!empty($sessionRecharge) && time() - session("recharge") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("recharge", time());
@@ -1555,8 +1557,9 @@ class User extends MobileBase
             }
 
             }
+            $d = I('account');
 
-            if(I('account')<=0||empty(I('account'))){
+            if(I('account')<=0||empty($d)){
                 $this->ajaxReturn(['status'=>0,'msg'=>"充值金额要大于0"]);
             }
 
@@ -1774,7 +1777,8 @@ class User extends MobileBase
     {
         $commodity = tpCache('ylg_spstem_role.commodity');
         if (IS_POST) {
-            if (!empty(session("transfer")) && time() - session("transfer") <= 5) {
+            $t = session("transfer");
+            if (!empty($t) && time() - session("transfer") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("transfer", time());
