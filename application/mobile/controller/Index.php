@@ -12,24 +12,36 @@ class Index extends MobileBase {
     {
         $page = (int)I('p') ? (int)I('p') : 0;
         $rowsOfPerPage = 15;
-//        $res = M('user')->where('user_id', 'gt', 0)->order('my_num_week desc')->limit($page*$rowsOfPerPage, $rowsOfPerPage)->select();
-
-        $allUsers = M('users')->alias('a')
-                ->join('tp_users b', 'a.user_id = b.first_leader')
-                ->where('a.user_id', 'gt', 0)
-                ->field('a.user_id')->select();
-
-
-
-        $res = M('users')->where('user_id', 'gt', 0);
-
-
-
-
-
-        if (IS_POST) {
-            $this->ajaxReturn($res);
+        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile,nickname,head_pic')->select();
+        $d = [];
+        foreach ($usersLevelGT1 as $item) {
+            $count = Db::name('users')->where('first_leader', $item['user_id'])->where('reg_time', '>=', strtotime(getTheBeginOfTheWeek()))->where('reg_time', '<', strtotime(getTheEndOfTheWeek()))->where('level', '>=', 2)->count();
+            $d[] = ['user_id' => $item['user_id'], 'count' => $count];
         }
+        //冒泡排序
+        for($i=0;$i<count($d)-1;$i++) {
+            for ($j=0;$j< count($d)-1 - $i;$j++) {
+
+                if($d[$j]['count'] < $d[$j+1]['count']) {
+                    $temp = $d[$j];
+                    $d[$j] = $d[$j+1];
+                    $d[$j+1] = $temp;
+                }
+            }
+        }
+        $users = [];
+        $d = array_slice($d, 0 , 10);
+        foreach ($d as $rank => $v) {
+            $currentUserInfo = current(array_filter($usersLevelGT1, function($user) use($v) {
+                return $user['user_id'] == $v['user_id'];
+            }));
+            $currentUserInfo['count'] = $v['count'];
+            $currentUserInfo['rank'] = ++$rank;
+            $currentUserInfo['zhitui'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 6, 'createTime' => ['>=', strtotime(getTheBeginOfTheWeek())], 'createTime' => ['<', strtotime(getTheEndOfTheWeek())]])->sum('num') ?: 0;
+            $currentUserInfo['jishou'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 11, 'createTime' => ['>=', strtotime(getTheBeginOfTheWeek())], 'createTime' => ['<', strtotime(getTheEndOfTheWeek())]])->sum('num') ?: 0;
+            array_push($users, $currentUserInfo);
+        }
+        $this->assign('users', $users);
         return $this->fetch();
     }
 
@@ -37,10 +49,36 @@ class Index extends MobileBase {
     {
         $page = (int)I('p') ? (int)I('p') : 0;
         $rowsOfPerPage = 15;
-        $res = M('user')->where('user_id', 'gt', 0)->order('my_num_month desc')->limit($page*$rowsOfPerPage, $rowsOfPerPage)->select();
-        if (IS_POST) {
-            $this->ajaxReturn($res);
+        $usersLevelGT1 = Db::name('users')->where('level', '>', 0)->field('user_id,mobile,nickname,head_pic')->select();
+        $d = [];
+        foreach ($usersLevelGT1 as $item) {
+            $count = Db::name('users')->where('first_leader', $item['user_id'])->where('reg_time', '>=', strtotime(getTheBeginOfTheMonth()))->where('reg_time', '<', strtotime(getTheEndOfTheMonth()))->where('level', '>=', 2)->count();
+            $d[] = ['user_id' => $item['user_id'], 'count' => $count];
         }
+        //冒泡排序
+        for($i=0;$i<count($d)-1;$i++) {
+            for ($j=0;$j< count($d)-1 - $i;$j++) {
+
+                if($d[$j]['count'] < $d[$j+1]['count']) {
+                    $temp = $d[$j];
+                    $d[$j] = $d[$j+1];
+                    $d[$j+1] = $temp;
+                }
+            }
+        }
+        $d = array_slice($d, 0 , 10);
+        $users = [];
+        foreach ($d as $rank => $v) {
+            $currentUserInfo = current(array_filter($usersLevelGT1, function($user) use($v) {
+                return $user['user_id'] == $v['user_id'];
+            }));
+            $currentUserInfo['count'] = $v['count'];
+            $currentUserInfo['rank'] = ++$rank;
+            $currentUserInfo['zhitui'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 6, 'createTime' => ['>=', strtotime(getTheBeginOfTheMonth())], 'createTime' => ['<', strtotime(getTheEndOfTheMonth())]])->sum('num') ?: 0;
+            $currentUserInfo['jishou'] = Db::name('balancelog')->where(['userId' => $v['user_id'], 'type' => 11, 'createTime' => ['>=', strtotime(getTheBeginOfTheMonth())], 'createTime' => ['<', strtotime(getTheEndOfTheMonth())]])->sum('num') ?: 0;
+            array_push($users, $currentUserInfo);
+        }
+        $this->assign('users', $users);
         return $this->fetch();
     }
 

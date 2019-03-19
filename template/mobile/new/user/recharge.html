@@ -30,7 +30,8 @@
 </style>
 <form id="recharge_form" enctype="multipart/form-data" method="post">
 <div class="loginsingup-input mobil_topup">
-        <input type="hidden" id="pay_type" name="pay_name" value="微信支付">
+        <!--<input type="hidden" id="pay_type" name="pay_name" value="微信支付">-->
+        <input type="hidden" id="pay_type" name="pay_name" value="支付宝支付">
         <div class="lsu">
             <span>您的当前余额：<span class="red">{$user.user_money}</span></span>
             <!--<input type="text" name="account" id="add_money" value=""  placeholder="0.00">-->
@@ -44,13 +45,14 @@
                 <div class="fl">
                     <span>充值方式：</span>
                 </div>
-                <span id="codename" style="font-size:0.5rem; color:#89898A;">微信支付</span>
+                <!--<span id="codename" style="font-size:0.5rem; color:#89898A;">微信支付</span>-->
+                <span id="codename" style="font-size:0.5rem; color:#89898A;">支付宝支付</span>
                 <div class="fr" >
                     <i class="Mright"></i>
                 </div>
             </div>
         </a>
-            <div style="text-align:center" id="div1">
+            <div style="text-align:center;display: none;" id="div1">
                <img src="{$system.wxcode}" alt="" style="width: 80%;padding: 10px"> 
             </div>
             <div style="text-align:center" id="div2" hidden="">
@@ -61,9 +63,9 @@
                <p style="padding: 8px">银行账户：{$system.bank_num}</p>
                <p style="padding: 8px">开户银行：{$system.bank_name}</p>
             </div>
-        <div class="lsu lsu-recharge">上传打款凭证</div>
+        <div class="lsu lsu-recharge uploadPZ" style="display: none">上传打款凭证</div>
             <div>
-                    <div id="img2" style="padding:20px;">
+                    <div id="img2" style="padding:20px;display: none;">
                         <a href="javascript:;" class="file">选择文件<input type="file" name="img" onchange="fileReader(this)"></a>
                     </div>
                     <div style="display:none;padding:20px;text-align: center;" id="imgs"><img id="img" src="" style="width: 80%;"/></div>
@@ -80,12 +82,13 @@
             <i class="gb-close"></i>
         </div>
         <foreach name="paymentList" item="v"  key="k">
+            <if condition="$k neq 'weixin'">
         <div class="card">
                 <leable>
                 <div class="card-list">
                     <input type="radio" style="display: none;" value="{$v['code']}" <if condition="$k eq 'weixin'">checked</if> >
                     <div class="radio fl">
-                        <span name="{$v[name]}"  class="che  <if condition="$k eq 'weixin'">check_t</if>" >
+                        <span name="{$v[name]}"  class="che  <if condition="$k eq 'alipayMobile'">check_t</if>" >
                             <i></i>
                         </span>
                     </div>
@@ -93,7 +96,10 @@
                 </div>
                 </leable>
             </div>
+</form></if>
         </foreach>
+
+
         <p class="teuse"><span class="red"></span><span>确定</span></p>
     </div>
 </div>
@@ -116,11 +122,13 @@
             if($('.check_t').attr('name')=='银联在线支付'){
                 $('#codename').text('银行卡支付');
                 $('#pay_type').val('银行卡支付');
+                $('.uploadPZ, #img2').show();
                 changediv(3);
             }else if($('.check_t').attr('name')=='手机网站支付宝'){
                 $('#codename').text('支付宝支付');
                 $('#pay_type').val('支付宝支付');
                 changediv(2);
+                $('.uploadPZ, #img2,#div1,#div2, #div img').hide();
             }else{
                 $('#codename').text($('.check_t').attr('name'));
                 $('#pay_type').val('微信支付');

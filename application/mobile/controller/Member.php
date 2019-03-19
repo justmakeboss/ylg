@@ -658,12 +658,12 @@ $goodslist = Db::name('agent_order')->alias('a')
             }
             $p = $this->request->post('p');
             $num = 15;
-            $goodslist = Db::name('goods_consignment')->where("user_id = {$this->user_id} AND surplus_num > 0")->limit($num * $p, $num * $p + $num)->select();
+            $goodslist = Db::name('goods_consignment')->where("user_id = {$this->user_id} AND surplus_num > 0")->order('id', 'desc')->limit($num * $p, $num * $p + $num)->select();
             foreach ($goodslist as $k => $v) {
-
+                $d = Db::name('goods_consignments')->where('gid='.$v['id'])->find();;
+                $goodslist[$k]['status'] = $d['five_status'] == 0 ? '进行中' :'已完成';
                 $goodslist[$k]['create_time'] = date('Y-m-d',strtotime($v['create_time']));
                 $setmeal = Db::name('goods_setmeal')->where('goods_id', $v['goods_id'])->select();
-                
                 for ($i = 0; $i < 5; $i++) {
                     if ($setmeal[$i]['id'] == $v['setmeal_id']) {
                         $goodslist[$k]['name'] = '套餐' . ($i + 1);
@@ -671,10 +671,8 @@ $goodslist = Db::name('agent_order')->alias('a')
                     }
                 }
             }
-
             $data['data'] = $goodslist;
             $data['code'] = 1;
-
             return $data;
         }else{
             return $this->fetch();

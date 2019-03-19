@@ -83,17 +83,27 @@
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                 </div>
-                <div class="weui-celly" id="num">
-                    <div class="weui-cell__hd">未成交数量</div>
+                <!--<div class="weui-celly" id="num">-->
+                    <!--<div class="weui-cell__hd">未成交数量</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
                     <!--<div class="weui-cell__hd">2018-12-01</div>-->
-                </div>
-                <div class="weui-celly" id="div_cz">
-                    <div class="weui-cell__hd">操作</div>
+                <!--</div>-->
+                <!--<div class="weui-celly" id="div_cz">-->
+                    <!--<div class="weui-cell__hd">操作</div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer" href="/Mobile/Member/sell_edit/act/del/id/">取消委托</a> </div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer acter" href="###">取消委托</a></div>-->
+                    <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
+                <!--</div>-->
+
+                <div class="weui-celly" id="div_status">
+                    <div class="weui-cell__hd">状态</div>
                     <!--<div class="weui-cell__hd"><a class="yuer" href="/Mobile/Member/sell_edit/act/del/id/">取消委托</a> </div>-->
                     <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
                     <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
@@ -101,6 +111,7 @@
                     <!--<div class="weui-cell__hd"><a class="yuer acter" href="###">取消委托</a></div>-->
                     <!--<div class="weui-cell__hd"><a class="yuer" href="###">取消委托</a></div>-->
                 </div>
+
             </div>
         </div>
   
@@ -173,7 +184,7 @@
               data: {'p':p},
               success: function (data) {
                   if (data.code == 1) {
-                      var time = '', name = '', setmeal = '', type= '',sell_num = '', price = '', num= '', div_cz = '';
+                      var time = '', name = '', setmeal = '', type= '',sell_num = '', price = '', num= '', div_cz = '',status='';
                       if(data.data != '' && data.data != null){
                           if( p > 0) {
                               $.toast("正在加载");
@@ -197,8 +208,8 @@
                           num += '<div class="weui-cell__hd">' + element['surplus_num'] + '</div>';
                           // type += '<div class="weui-cell__hd">自提</div>';
                           setmeal += '<div class="weui-cell__hd">' + element['name'] + '</div>';
-
-                          div_cz += '<div class="weui-cell__hd"><a class="yuer"  onclick="ajax_del('+id+')">取消委托</a></div>';
+                            status += '<div class="weui-cell__hd">' + element['status'] + '</div>';
+                          // div_cz += '<div class="weui-cell__hd"><a class="yuer"  onclick="ajax_del('+id+')">取消委托</a></div>';
                           // console.log(div_name);
                           // console.log(div_name);
                           // 已完成
@@ -213,7 +224,8 @@
                       $('#num').append(num);
                       $('#type').append(type);
                       $('#setmeal').append(setmeal);
-                      $('#div_cz').append(div_cz);
+                      $('#div_status').append(status);
+                      // $('#div_cz').append(div_cz);
                       // console.log(data.url);return false;
                       // layer.open({content:data.msg,time:2,end:function(){
                       //         window.location.href='/Mobile/Order/order_list';

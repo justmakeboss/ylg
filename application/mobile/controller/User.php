@@ -362,8 +362,8 @@ class User extends MobileBase
             $username = I('post.username', '');
             $password = I('post.password', '');
             $password2 = I('post.password2', '');
-            $aliNo = I('post.ali_no');
-            $aliName = I('post.ali_name');
+//            $aliNo = I('post.ali_no');
+//            $aliName = I('post.ali_name');
             //是否开启注册验证码机制
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 1);
@@ -447,26 +447,26 @@ class User extends MobileBase
             }
 
             //支付宝
-            $preg_name='/^[\x{4e00}-\x{9fa5}]{2,10}$|^[a-zA-Z\s]*[a-zA-Z\s]{2,20}$/isu';
-            if(!preg_match($preg_name,$aliName)){
-                $this->ajaxReturn(['msg'=>'支付宝姓名填写有误！']);
-            }
-            if(empty($aliName)) {
+//            $preg_name='/^[\x{4e00}-\x{9fa5}]{2,10}$|^[a-zA-Z\s]*[a-zA-Z\s]{2,20}$/isu';
+//            if(!preg_match($preg_name,$aliName)){
+//                $this->ajaxReturn(['msg'=>'支付宝姓名填写有误！']);
+//            }
+//            if(empty($aliName)) {
+//
+//                $this->ajaxReturn(['msg'=>'支付宝姓名不能为空！']);
+//            }
 
-                $this->ajaxReturn(['msg'=>'支付宝姓名不能为空！']);
-            }
+//            if(empty($aliNo)) {
+//                $this->ajaxReturn(['msg'=>'支付宝账号不能为空！']);
+//
+//            } else {
+//                //是否存在
+//                $account_occupy = M("users")->field("user_id")->where(array("ali_no"=>$aliNo))->find();
+//                if ($account_occupy) $this->ajaxReturn(['msg'=>'支付宝账号已存在！']);
+//            }
 
-            if(empty($aliNo)) {
-                $this->ajaxReturn(['msg'=>'支付宝账号不能为空！']);
-                
-            } else {
-                //是否存在
-                $account_occupy = M("users")->field("user_id")->where(array("ali_no"=>$aliNo))->find();
-                if ($account_occupy) $this->ajaxReturn(['msg'=>'支付宝账号已存在！']);
-            }
-
-            $data['ali_no'] = $aliNo;
-            $data['ali_name'] = $aliName;
+//            $data['ali_no'] = $aliNo;
+//            $data['ali_name'] = $aliName;
             $data['paypwd'] = encrypt($paypwd);
 
             //创建时间
@@ -854,8 +854,8 @@ class User extends MobileBase
             I('post.district') ? $post['district'] = I('post.district') : false;  //地区
             I('post.email') ? $post['email'] = I('post.email') : false; //邮箱
             I('post.mobile') ? $post['mobile'] = I('post.mobile') : false; //手机
-            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
-            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
+//            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
+//            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
 
             if ($post['sex']){
                 switch ($post['sex']) {
@@ -875,7 +875,7 @@ class User extends MobileBase
             }
             $email = I('post.email');
             $mobile = I('post.mobile');
-            $aliNo = I('post.ali_no');
+//            $aliNo = I('post.ali_no');
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 6);
             $wx_code=I('post.wx_codes');
@@ -901,10 +901,10 @@ class User extends MobileBase
                 }
             }
 
-            if(!empty($aliNo)) {
-                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
-                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
-            }
+//            if(!empty($aliNo)) {
+//                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
+//                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
+//            }
 
             if (!empty($mobile)) {
                 $c = M('users')->where(['mobile' => input('post.mobile'), 'user_id' => ['<>', $this->user_id]])->count();
@@ -1595,7 +1595,6 @@ class User extends MobileBase
             $paymentList = M('Plugin')->where("`type`='payment' and status = 1 and code='weixin'")->select();
         }
         $paymentList = convert_arr_key($paymentList, 'code');
-
         foreach ($paymentList as $key => $val) {
             $val['config_value'] = unserialize($val['config_value']);
             if ($val['config_value']['is_bank'] == 2) {
@@ -2981,13 +2980,13 @@ class User extends MobileBase
                     $logs[$k]['type_str'] = "代理商补贴";
                     break;
                 case 6 :
-                    $logs[$k]['type_str'] = "直推代理商收入";
+                    $logs[$k]['type_str'] = "奖励";
                     break;
                 case 7 :
                     $logs[$k]['type_str'] = "月销售额收入";
                     break;
                 case 11 :
-                    $logs[$k]['type_str'] = "寄售商品收入";
+                    $logs[$k]['type_str'] = "寄售收入";
                     break;
                 case 12 :
                     $logs[$k]['type_str'] = "合伙人补贴";

@@ -167,13 +167,17 @@ class MobileBase extends Controller {
                     $userss = Db::name('users')->where(['user_id'=>$userid])->field('user_money')->find();
                     $money = $value['goods_price']*$value['num']*(1-$system['handling_fee']);
                     $users_status = Db::name('users')->where(['user_id'=>$value['user_id']])->update(['user_money'=>$money+$userss['user_money']]);
-                    $forzen_status =  Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
-                    GoodsConsignment::destroy($value['gid']);
+                    Db::name('goods_consignments')->where(['id'=>$value['id']])->update(['five_status'=>1]);
+                    if($users_status) {
+                        balancelog($userid,$userid,$money,11,$userss['user_money'],$userss['user_money']+$money);
+                    }
+                    //消费积分
+                    $goods_integral = $value['goods_price']*$value['num']*$system['goods_integral'];
+                    Db::name('users')->where('user_id',$userid)->Inc('distribut_money',$goods_integral)->update();
                 }
             }
         }
     }
-
 
     /**
      * 保存公告变量到 smarty中 比如 导航

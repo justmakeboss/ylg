@@ -57,21 +57,22 @@
         <if condition="$tpshop_config['basic_invite'] eq 1" >
         <div class="lsu">
             <span class="ico ico-referee"></span>
-            <input type="text" name="invite" id="invite" value="<?php echo  $mobile;?>" placeholder="推荐人手机号" class="c-form-txt-normal">
+            <input type="text" name="invite" id="invite" value="<?php echo  $mobile;?>" placeholder="推荐人手机号" class="c-form-txt-normal" <?php if(I('get.id')){echo "readonly=\"readonly\"";} ?>>
+
             <span id="invite_phone_notice"></span>
         </div>
 
-        <div class="lsu">
-            <span class="ico ico-referee"></span>
-            <input type="text" name="ali_name" id="invite" value="" placeholder="支付宝姓名"  class="c-form-txt-normal" >
-            <span id="invite_phone_notice"></span>
-        </div>
+        <!--<div class="lsu">-->
+            <!--<span class="ico ico-referee"></span>-->
+            <!--<input type="text" name="ali_name" id="invite" value="" placeholder="支付宝姓名"  class="c-form-txt-normal" >-->
+            <!--<span id="invite_phone_notice"></span>-->
+        <!--</div>-->
 
-        <div class="lsu">
-            <span class="ico ico-referee"></span>
-            <input type="text" name="ali_no" id="invite" value="" placeholder="支付宝号"  class="c-form-txt-normal" >
-            <span id="invite_phone_notice"></span>
-        </div>
+        <!--<div class="lsu">-->
+            <!--<span class="ico ico-referee"></span>-->
+            <!--<input type="text" name="ali_no" id="invite" value="" placeholder="支付宝号"  class="c-form-txt-normal" >-->
+            <!--<span id="invite_phone_notice"></span>-->
+        <!--</div>-->
 
         </if>
         <div class="lsu-submit">

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <link href="__PUBLIC__/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="__STATIC__/assets/dist/assets/css/zpui.css"/>
+    <link rel="stylesheet" href="__STATIC__/assets/dist/assets/css/all.css"/>
+    <script src="__STATIC__/assets/dist/assets/js/page.js"></script>
+    <title>排名</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12">
+            <div>
+                <h3 class="text-center">排名</h3>
+            </div>
+            <div>
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <td>会员</td>
+                        <td>奖金</td>
+                        <td>直推人数</td>
+                        <td>名次</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($users as $user):?>
+                    <tr>
+                        <td>
+                            <div style="margin:4px;"><?php echo $user['nickname'];?></div>
+                            <img class="avatar" src="<?php echo $user[head_pic] ?: '__STATIC__/images/user68.jpg';?>" style="width:40px;">
+
+                        </td>
+                        <td>
+                            <span>直推：<?php echo $user['zhitui'];?></span><br>
+                            <span>寄售：<?php echo $user['jishou'];?></span>
+                        </td>
+                        <td><?php echo $user['count'];?></td>
+                        <td><?php echo $user['rank'];?></td>
+                    </tr>
+                    <?php endforeach;?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/assets/dist/assets/js/lib/jquery-2.1.4.js"></script>
+<script src="__STATIC__/assets/dist/assets/js/jquery-weui.min.js"></script>
+<script src="__STATIC__/assets/dist/assets/js/lib/fastclick.js"></script>
+<script src="__STATIC__/assets/dist/assets/js/Swiper-4.0.7/swiper.min.js"></script>
+</body>
+</html>
