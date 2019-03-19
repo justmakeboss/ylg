@@ -8,10 +8,10 @@ $config = array (
 //        'merchant_private_key' =>   file_get_contents( ALIPAYSDK_PATH.'/cert/rsa_private_key.pem') ,
 		
 		//异步通知地址
-		'notify_url' => "http://ylg.heroflower.top/home/Notification",
+		'notify_url' => "http://www.coolpg.cn/home/Notification",
 		
 		//同步跳转
-		'return_url' => "http://ylg.heroflower.top/index.php/Mobile/User",
+		'return_url' => "http://www.coolpg.cn/index.php/Mobile/User",
 
 		//编码格式
 		'charset' => "UTF-8",

@@ -26,6 +26,12 @@ class Notification {
         if($lists){
 
 
+            $trade_status = $alipay_data['trade_status'];//交易状态trade_status
+            if ($trade_status != 'TRADE_FINISHED' && $trade_status != 'TRADE_SUCCESS')
+            {
+                exit('fail');
+
+            }
 
             if ($alipay_data['total_amount']!=$lists['account'])
             {
