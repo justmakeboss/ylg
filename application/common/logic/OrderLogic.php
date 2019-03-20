@@ -467,9 +467,13 @@ class OrderLogic
 		$order = new Order();
 		$order->data($data,true);
 		$orderSaveResult = $order->save();
+
 		if($orderSaveResult === false){
+            file_put_contents(ROOT_PATH.'/public/debug.txt', date('Y-m-d H:i:s'). '用户'. $user_id. '下单失败'."\n", 8);
 			return array('status'=>-8,'msg'=>'添加订单失败','result'=>NULL);
 		}
+        file_put_contents(ROOT_PATH.'/public/debug.txt', date('Y-m-d H:i:s'). '用户'. $user_id. '下单成功'. "\n", 8);
+
         //TODO 商品订单选择安装服务创建服务订单
         if($suppliers_id){
             $repair_order_sn = null;

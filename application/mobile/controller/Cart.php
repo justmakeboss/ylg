@@ -395,7 +395,6 @@ class Cart extends MobileBase
                 }
             }
         }
-//        dump($order_goods);exit;
         $address = M('UserAddress')->where("address_id", $address_id)->find();
         $result = calculate_price($this->user_id, $order_goods, $shipping_code, 0, $address['province'], $address['city'], $address['district'], $pay_points, $user_money, $coupon_id);
         if ($result['status'] < 0)

@@ -177,7 +177,7 @@ class Payment extends MobileBase
 
 
             case 1:
-                ////////////////////////零售//////////////////////////////////////////////////
+                ////////////////////////活动区//////////////////////////////////////////////////
                 $result = Db::name('users')
                     ->where('user_id', $user['user_id'])
                     ->dec('user_money', $order['order_amount'])
@@ -189,7 +189,7 @@ class Payment extends MobileBase
                 $d['frozen_status'] = 1;
                 $d['order_id'] = $order['order_id'];
                 Db::name('forzen')->insertGetId($d);
-                if ($result) {Db::rollback();}
+                if (!$result) {Db::rollback();}
                 $order_goods = Db::name('order_goods')->where('order_id', $order['order_id'])->field('goods_id,goods_num,goods_price')->find();
                 //获取代理商出售的商品
                 $consignment = Db::name('goods_consignment')->where("goods_id = {$order_goods['goods_id']} AND surplus_num>0")->order('create_time')->limit($order_goods['goods_num'])->select();
@@ -210,21 +210,12 @@ class Payment extends MobileBase
                     $agentdata['setmeal_id'] = $consignment[$i]['setmeal_id'];      // 订单ID
                     $agentdata['sell_num'] = $consignment[$i]['surplus_num'] - $data['surplus_num']; // 成交数量
                     $agentdata['create_time'] = date('Y-m-d H:i:s'); // 成交时间
-                    //代理商收入
-                    $money = $order_goods['goods_price'] * $agentdata['sell_num'] * (1 - $system['handling_fee']);
-                    //赠送代理商消费积分
-                    $goods_integral = $order_goods['goods_price'] * $agentdata['sell_num'] * $system['goods_integral'];
-                        $res = Db::name('users')->where('user_id',$consignment[$i]['user_id'])->inc('user_money',$money)->inc('distribut_money',$goods_integral)->update();
-                     $ress = Db::name('goods')->where('goods_id',$order_goods['goods_id'])->setDec('store_count',$order_goods['goods_num']);
-                        if(!$res){
-                            $this->error('支付失败,请联系技术人员');
-                        }
+                    Db::name('goods')->where('goods_id',$order_goods['goods_id'])->setDec('store_count',$order_goods['goods_num']);
                     //代理订单表
                     $agentid = Db::name('agent_order')->insertGetId($agentdata);
                     $agents = Db::name('users')->where("user_id = {$agentdata['agent_id']}")->find();
                     //代理寄售表
                     Db::name('goods_consignment')->where("user_id = {$agentdata['agent_id']} AND id = {$consignment[$i]['id']}")->update($data);
-
                     //剩余数量
                     if ($sum >= $order_goods['goods_num']) {
                         break;
