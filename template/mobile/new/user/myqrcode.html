@@ -38,26 +38,6 @@
             box-shadow: 1px rgba(255, 80, 0, 0.2);
         }
 
-        @media (max-height: 640px) {
-
-            .rwmbox .rwm_imgbox img {
-
-                position: fixed;
-                width: 130px;
-                bottom: 10%;
-                left: 35%;
-            }
-        }
-
-        @media (max-height: 812px) {
-            .rwmbox .rwm_imgbox img {
-
-                position: fixed;
-                width: 125px;
-                bottom: 12%;
-                left: 35%;
-            }
-        }
 
         p {
             display: block;
@@ -81,7 +61,7 @@
     </style>
 </head>
 
-    <div class="page-bd" style="background: url('{$backgroundImage}');background-position: 0% 0%;background-size: 111%;">
+    <div class="page-bd" style="background: url('{$qrcodeImg}');background-size: 95%;background-repeat: no-repeat;">
         <!-- 页面内容-->
         <!-- <div class="weui-flex" style="align-items: center; padding: 20px;">
             <div>
@@ -89,12 +69,12 @@
             </div>
             <div  class="weui-flex__item"><span class="fs28">~{$user.nickname}~</span></div>
         </div> -->
-        <div class="rwmbox">
-            <p class="fs26"><!-- 我在{$tpshop_config['shop_info_store_title']}，快来看看吧！ --></p>
-            <div class="rwm_imgbox">
-                <img src="{$qrcodeImg}" alt="">
-            </div>
-        </div>
+        <!--<div class="rwmbox">-->
+            <!--<p class="fs26">&lt;!&ndash; 我在{$tpshop_config['shop_info_store_title']}，快来看看吧！ &ndash;&gt;</p>-->
+            <!--<div class="rwm_imgbox">-->
+                <!--<img src="{$qrcodeImg}" alt="">-->
+            <!--</div>-->
+        <!--</div>-->
         <!-- <div class="fs26 mt20" style="padding:0 0.306667rem; color: #4c4c4c;">
             <p>1. 长按保存您的推广二维码或提供给您的代理扫描</p>
             <p>2. 复制您专属链接: “<span id="target">{$url}</span>”给您的代理</p>

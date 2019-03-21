@@ -6,75 +6,79 @@ use app\common\model\UserLevel;
 use app\common\model\Users;
 
 //根据ID获取团队
-function get_team($id,$type=1)
+function get_team($id, $type = 1)
 {
-    if($type==1){
+    if ($type == 1) {
         //获取所有
-        $res=get_superior($id);
-        if($res){
+        $res = get_superior($id);
+        if ($res) {
             foreach ($res as $key => $value) {
-                $res2[]=get_subordinate($value);
+                $res2[] = get_subordinate($value);
             }
             foreach ($res2 as $key2 => $value2) {
                 foreach ($value2 as $key3 => $value3) {
                     foreach ($value3 as $key4 => $value4) {
-                        $res3[]=$value4;
+                        $res3[] = $value4;
                     }
                 }
             }
-            $res4=array_merge($res,$res3);
+            $res4 = array_merge($res, $res3);
             return array_unique($res4);
-        }else{
-            $res3=get_subordinate($id);
+        } else {
+            $res3 = get_subordinate($id);
             foreach ($res3 as $key => $value) {
                 foreach ($value as $key2 => $value2) {
-                    $res4[]=$value2;
+                    $res4[] = $value2;
                 }
             }
-            $res4[]=$id;
+            $res4[] = $id;
             return array_unique($res4);
         }
-    }else{
+    } else {
         //获取下级
-        $res3=get_subordinate($id);
+        $res3 = get_subordinate($id);
         foreach ($res3 as $key => $value) {
             foreach ($value as $key2 => $value2) {
-                $res4[]=$value2;
+                $res4[] = $value2;
             }
         }
-        if(empty($res4)){
+        if (empty($res4)) {
             return [];
-        }else{
+        } else {
             return array_unique($res4);
         }
     }
 }
+
 //根据ID获取上级
-function get_superior($id,$arr=[]){
-    if($id){
-        $pid=Db::name('users')->where(['user_id'=>['in',$id],'level'=>['in','1,2']])->value('first_leader');
-        if($pid){
-            $arr[]=$pid;
-            return get_superior($pid,$arr);
-        }else{
+function get_superior($id, $arr = [])
+{
+    if ($id) {
+        $pid = Db::name('users')->where(['user_id' => ['in', $id], 'level' => ['in', '1,2']])->value('first_leader');
+        if ($pid) {
+            $arr[] = $pid;
+            return get_superior($pid, $arr);
+        } else {
             return $arr;
         }
-    }else{
+    } else {
         return $arr;
     }
 }
+
 //根据ID获取下级
-function get_subordinate($id,$arr=[]){
-    if($id){
-        $pid=Db::name('users')->where(['first_leader'=>['in',$id],'level'=>['in','1,2']])->column('user_id');
-        if($pid){
-            $arr[]=$pid;
-            $ids=implode(',',$pid);
-            return get_subordinate($ids,$arr);
-        }else{
+function get_subordinate($id, $arr = [])
+{
+    if ($id) {
+        $pid = Db::name('users')->where(['first_leader' => ['in', $id], 'level' => ['in', '1,2']])->column('user_id');
+        if ($pid) {
+            $arr[] = $pid;
+            $ids = implode(',', $pid);
+            return get_subordinate($ids, $arr);
+        } else {
             return $arr;
         }
-    }else{
+    } else {
         return $arr;
     }
 }
@@ -91,16 +95,16 @@ function get_subordinate($id,$arr=[]){
  */
 function user_upgrade($userId)
 {
-    $user=Db::name('users')->where(['user_id'=>$userId])->find();
+    $user = Db::name('users')->where(['user_id' => $userId])->find();
 
     $levels = Db::name('user_level')->where('level_id>0')->select();
-    if(count($levels) == 0) {
+    if (count($levels) == 0) {
         return false;
     }
 
-    $maxLevel = $levels[count($levels)-1];
+    $maxLevel = $levels[count($levels) - 1];
 
-    if($user['level'] == $maxLevel['level_id']) {
+    if ($user['level'] == $maxLevel['level_id']) {
         return false;
     }
 
@@ -111,167 +115,166 @@ function user_upgrade($userId)
 
 //        debug('$level'. var_export($level, true));
 //        debug('$user[\'level\']'. $user['level']);
-        if($user['level'] >= $level['level_id']) {
+        if ($user['level'] >= $level['level_id']) {
             continue;
         }
 
-        $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>2])->column('user_id');
+        $userids = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 2])->column('user_id');
         //直推会员多少個
 //        debug('pullNum:'. count($userids).',$level[\'discount\']:'.$level['discount']);
 
-        if(!empty($level['discount']) && count($userids) < $level['discount']){
+        if (!empty($level['discount']) && count($userids) < $level['discount']) {
             continue;
         }
 
-        if(!empty($level['is_promote'])) {
-            $ids=implode(',',$userids);
+        if (!empty($level['is_promote'])) {
+            $ids = implode(',', $userids);
             //其中一个直推的會員业绩需要大於多少
-            $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$level['is_promote']]])->select();
+            $userlist = Db::name('users')->where(['user_id' => ['in', $ids], 'monthly_performance' => ['>=', $level['is_promote']]])->select();
 //            debug('$userlist:'. var_export($userlist, true));
-            if(sizeof($userlist) <= 0) {
+            if (sizeof($userlist) <= 0) {
                 continue;
             }
         }
 
         //其他所有直推会员总业绩大於多少
-        $userid=$userlist['0']['user_id']?:$userlist['user_id'];
-        $monthly_performance=Db::name('users')->where(['user_id'=>['in',$ids],'user_id'=>['<>',$userid]])->sum('monthly_performance');
+        $userid = $userlist['0']['user_id'] ?: $userlist['user_id'];
+        $monthly_performance = Db::name('users')->where(['user_id' => ['in', $ids], 'user_id' => ['<>', $userid]])->sum('monthly_performance');
 //        debug('$monthly_performance:'. $monthly_performance. ',$level[\'is_region_agent\']:'. $level['is_region_agent']);
-        if(!empty($level['is_region_agent']) && $monthly_performance < $level['is_region_agent']){
+        if (!empty($level['is_region_agent']) && $monthly_performance < $level['is_region_agent']) {
             continue;
         }
 
         //直推服务中心多少个
-        $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>3])->count();
+        $count = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 3])->count();
         //直推服务中心
 //        debug('$count'. $count. ',$level[\'region_code\']:'. $level['region_code']);
-        if(!empty($level['region_code']) && $count < $level['region_code']){
+        if (!empty($level['region_code']) && $count < $level['region_code']) {
             continue;
         }
 
         //每月购买活动区多少次
         $f = upgrade($user, $level);
 //        debug('$f'. var_export($f, true));
-        if(!empty($level['times']) && $f == false) {
+        if (!empty($level['times']) && $f == false) {
             continue;
         }
 
         //获取团队下级
-        $myTeamIds=get_team($userId, 2);
-        $usersLevelGt2=Db::name('users')->where('level>=2')->column('user_id');
-        $myTeamIdsLevelGt2=array_intersect($myTeamIds, $usersLevelGt2);
-        $myTeamIdsLevelGt2Str=implode(',',$myTeamIdsLevelGt2);
-        $team_performance=Db::name('users')->where(['user_id'=>['in', $myTeamIdsLevelGt2Str]])->sum('monthly_performance');
+        $myTeamIds = get_team($userId, 2);
+        $usersLevelGt2 = Db::name('users')->where('level>=2')->column('user_id');
+        $myTeamIdsLevelGt2 = array_intersect($myTeamIds, $usersLevelGt2);
+        $myTeamIdsLevelGt2Str = implode(',', $myTeamIdsLevelGt2);
+        $team_performance = Db::name('users')->where(['user_id' => ['in', $myTeamIdsLevelGt2Str]])->sum('monthly_performance');
         //累计团队订单总金额
 //        debug('$team_performance:'. $team_performance. ',$level[\'amount\']:'. $level['amount']);
-        if(!empty($level['amount']) && $team_performance < $level['amount']){
+        if (!empty($level['amount']) && $team_performance < $level['amount']) {
             continue;
         }
 
         //团队总人数
 //        debug('sizeof($myTeamIdsLevelGt2):'. sizeof($myTeamIdsLevelGt2). ',$level[\'team_num\']:'. $level['team_num']);
-        if(!empty($level['team_num']) && sizeof($myTeamIdsLevelGt2) < $level['team_num']) {
+        if (!empty($level['team_num']) && sizeof($myTeamIdsLevelGt2) < $level['team_num']) {
             continue;
         }
         //更新等级
 //        debug('updateUserLevel:'. $level['level_id']);
-        Db::name('users')->update(['user_id'=>$user['user_id'], 'level' => $level['level_id']]);
+        Db::name('users')->update(['user_id' => $user['user_id'], 'level' => $level['level_id']]);
         //升级日志
-        vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'], $level['level_id'],2);
+        vpay_level_log($user['user_id'], $user['mobile'], '前台升级', $user['level'], $level['level_id'], 2);
     }
 }
 
 function user_upgrade_old($userId)
 {
-    $user=Db::name('users')->where(['user_id'=>$userId])->find();
+    $user = Db::name('users')->where(['user_id' => $userId])->find();
 
-    if($user['level']==1){
-        $user_level=Db::name('user_level')->where('level_id=2')->find();
-        $userids=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>1])->column('user_id');
+    if ($user['level'] == 1) {
+        $user_level = Db::name('user_level')->where('level_id=2')->find();
+        $userids = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 1])->column('user_id');
         //直推会员
-        if(count($userids)>=$user_level['discount']){
-            $ids=implode(',',$userids);
+        if (count($userids) >= $user_level['discount']) {
+            $ids = implode(',', $userids);
             //其中一个直推消费商业绩
-            $userlist=Db::name('users')->where(['user_id'=>['in',$ids],'monthly_performance'=>['>=',$user_level['is_promote']]])->select();
-            if($userlist['0']['user_id']||$userlist['user_id']){
-                $userid=$userlist['0']['user_id']?:$userlist['user_id'];
+            $userlist = Db::name('users')->where(['user_id' => ['in', $ids], 'monthly_performance' => ['>=', $user_level['is_promote']]])->select();
+            if ($userlist['0']['user_id'] || $userlist['user_id']) {
+                $userid = $userlist['0']['user_id'] ?: $userlist['user_id'];
                 //其他直推消费商总业绩
-                $monthly_performance=Db::name('users')->where(['user_id'=>['in',$ids],'user_id'=>['<>',$userid]])->sum('monthly_performance');
+                $monthly_performance = Db::name('users')->where(['user_id' => ['in', $ids], 'user_id' => ['<>', $userid]])->sum('monthly_performance');
 
-                if($monthly_performance>=$user_level['is_region_agent']){
+                if ($monthly_performance >= $user_level['is_region_agent']) {
                     //获取团队下级
-                     $userids2=get_team($userId,2);
+                    $userids2 = get_team($userId, 2);
 
-                     $users=Db::name('users')->where(['level'=>1])->column('user_id');
-                     $userids3=array_intersect($userids2,$users);
+                    $users = Db::name('users')->where(['level' => 1])->column('user_id');
+                    $userids3 = array_intersect($userids2, $users);
 
-                     $ids2=implode(',',$userids3);
-                     $team_performance=Db::name('users')->where(['user_id'=>['in',$ids2]])->sum('monthly_performance');
+                    $ids2 = implode(',', $userids3);
+                    $team_performance = Db::name('users')->where(['user_id' => ['in', $ids2]])->sum('monthly_performance');
 
                     //累计订单金额
-                     if($team_performance>=$user_level['amount']){
-                         if(sizeof($userids2) >= $user_level['team_num']) {
-                             $res=Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
-                         }
-                     }else{
-                         return 0;
-                     }
+                    if ($team_performance >= $user_level['amount']) {
+                        if (sizeof($userids2) >= $user_level['team_num']) {
+                            $res = Db::name('users')->where(['user_id' => $user['user_id']])->setInc('level');
+                        }
+                    } else {
+                        return 0;
+                    }
 
-                }else{
+                } else {
                     return 0;
                 }
-            }else{
+            } else {
                 return 0;
             }
-        }else{
+        } else {
             return 0;
         }
-        if($res){
-            vpay_level_log($user['user_id'],$user['mobile'],'前台升级',$user['level'],$user['level']+1,2);
-            $user2=Db::name('users')->where(['user_id'=>$user['first_leader']])->find();
+        if ($res) {
+            vpay_level_log($user['user_id'], $user['mobile'], '前台升级', $user['level'], $user['level'] + 1, 2);
+            $user2 = Db::name('users')->where(['user_id' => $user['first_leader']])->find();
             //代理商升级代理商合伙人
-            if($user2['level']==2){
+            if ($user2['level'] == 2) {
                 //自己是代理商
-                $user_level2=Db::name('user_level')->where('level_id=3')->find();
-                $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>'2'])->count();
+                $user_level2 = Db::name('user_level')->where('level_id=3')->find();
+                $count = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => '2'])->count();
                 //直推代理商
-                if($count>=$user_level2['region_code']){
+                if ($count >= $user_level2['region_code']) {
 
-                    Db::name('users')->where(['user_id'=>$user2['user_id']])->setInc('level');
-                    return vpay_level_log($user2['user_id'],$user2['mobile'],'前台升级',$user2['level'],$user2['level']+1,2);
-                }else{
+                    Db::name('users')->where(['user_id' => $user2['user_id']])->setInc('level');
+                    return vpay_level_log($user2['user_id'], $user2['mobile'], '前台升级', $user2['level'], $user2['level'] + 1, 2);
+                } else {
                     return $res;
                 }
-            }else{
+            } else {
                 return $res;
             }
-        }else{
+        } else {
             return 0;
         }
     }
 
 
-
-    if($user['level']==2){
+    if ($user['level'] == 2) {
         //代理商升级代理商合伙人
 
         //自己是代理商
-        $user_level2=Db::name('user_level')->where('level_id=3')->find();
-        $count=Db::name('users')->where(['first_leader'=>['in',$user['user_id']],'level'=>'2'])->count();
+        $user_level2 = Db::name('user_level')->where('level_id=3')->find();
+        $count = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => '2'])->count();
         //直推代理商
-        if($count>=$user_level2['region_code']){
+        if ($count >= $user_level2['region_code']) {
 
             //服务中心团队多少人
-            $userIds =get_team($userId,2);
+            $userIds = get_team($userId, 2);
             $usersLevelGt1 = Db::name('users')->where(['level>1'])->column('user_id');
             $userIdsMyTeam = array_intersect($userIds, $usersLevelGt1);
             $myTeamTotal = sizeof($userIdsMyTeam);
-            file_put_contents('3838.txt', '$myTeamTotal:'. $myTeamTotal. ',userId:'. $userId, 8);
-            if($myTeamTotal >= 200) {
-                Db::name('users')->where(['user_id'=>$user['user_id']])->setInc('level');
-                return vpay_level_log($user['user_id'],$user['mobile'],'直推'. $user_level2['region_code'] .'人，且团队人数超过200人,前台升级',$user['level'],$user['level']+1,2);
+            file_put_contents('3838.txt', '$myTeamTotal:' . $myTeamTotal . ',userId:' . $userId, 8);
+            if ($myTeamTotal >= 200) {
+                Db::name('users')->where(['user_id' => $user['user_id']])->setInc('level');
+                return vpay_level_log($user['user_id'], $user['mobile'], '直推' . $user_level2['region_code'] . '人，且团队人数超过200人,前台升级', $user['level'], $user['level'] + 1, 2);
             }
-        }else{
+        } else {
             return 0;
         }
     }
@@ -283,29 +286,29 @@ function user_upgrade_old($userId)
 function checkExpiredAt($user)
 {
     $orderModel = new Order();
-    if($user['expired_at'] > 0 && $user['expired_at'] <= time()) {
-        $shoppingTimes = Db::name('order')->where(['user_id' => $user['user_id'],'pay_status' => 1,'pay_time' => ['>=', $user['check_point']], 'pay_time' => ['<', $user['expired_at']], 'type' => 1])->count();
+    if ($user['expired_at'] > 0 && $user['expired_at'] <= time()) {
+        $shoppingTimes = Db::name('order')->where(['user_id' => $user['user_id'], 'pay_status' => 1, 'pay_time' => ['>=', $user['check_point']], 'pay_time' => ['<', $user['expired_at']], 'type' => 1])->count();
         $levelInfo = UserLevel::get($user['level']);
-        if($shoppingTimes < $levelInfo['times']) {
+        if ($shoppingTimes < $levelInfo['times']) {
             Db::name('users')->where(['user_id' => $user['user_id']])->update([
-                'level' => $user['level'] -1,
+                'level' => $user['level'] - 1,
                 'check_point' => 0,
                 'expired_at' => 0,
             ]);
-            vpay_level_log($user['user_id'],$user['mobile'], '超过有效期降级',$user['level'],$user['level']--, 2);
+            vpay_level_log($user['user_id'], $user['mobile'], '超过有效期降级', $user['level'], $user['level']--, 2);
         } else {
             Users::update(['check_point' => time(), 'expired_at' => strtotime('+1month')], ['user_id' => $user['user_id']]);
-            vpay_level_log($user['user_id'],$user['mobile'], '等級继续保持',$user['level'],$user['level'], 2);
+            vpay_level_log($user['user_id'], $user['mobile'], '等級继续保持', $user['level'], $user['level'], 2);
         }
     }
 }
 
 function debug($d)
 {
-    if(is_string($d)) {
-        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".$d."\r\n", FILE_APPEND);
+    if (is_string($d)) {
+        file_put_contents(date('Ymd') . '.txt', date('Y-m-d H:i:s') . ": " . $d . "\r\n", FILE_APPEND);
     } else {
-        file_put_contents(date('Ymd').'.txt', date('Y-m-d H:i:s'). ": ".var_export($d, true)."\r\n", FILE_APPEND);
+        file_put_contents(date('Ymd') . '.txt', date('Y-m-d H:i:s') . ": " . var_export($d, true) . "\r\n", FILE_APPEND);
     }
 }
 
@@ -314,19 +317,19 @@ function upgrade($user, $level)
 {
     $currMonthShoppingNum = getShoppingTimesOfCurrentMonth($user['user_id']);
 //    debug('$currMonthShoppingNum:'. $currMonthShoppingNum.',$level[\'times\']:'.$level['times']);
-    if($currMonthShoppingNum < $level['times']){
-        return false;     
+    if ($currMonthShoppingNum < $level['times']) {
+        return false;
     }
 
     //从来没有升级过的
     $neverUpgrade = empty($user['check_point']) && empty($user['expired_at']);
     //过期的
     $expired = time() >= $user['expired_at'];
-    if($neverUpgrade || $expired) {
-         Db::name('users')->where(['user_id'=>$user['user_id']])->update([
-                'expired_at' => strtotime('+1 month'),
-                'check_point' => time(),
-            ]);  
+    if ($neverUpgrade || $expired) {
+        Db::name('users')->where(['user_id' => $user['user_id']])->update([
+            'expired_at' => strtotime('+1 month'),
+            'check_point' => time(),
+        ]);
     }
     return true;
 }
@@ -343,38 +346,38 @@ function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
         // to calculate the corresponding numeric ID
 
 
-        for ($n = 0; $n<strlen($index); $n++) {
-            $i[] = substr( $index,$n ,1);
+        for ($n = 0; $n < strlen($index); $n++) {
+            $i[] = substr($index, $n, 1);
         }
 
 
-        $passhash = hash('sha256',$passKey);
+        $passhash = hash('sha256', $passKey);
         $passhash = (strlen($passhash) < strlen($index))
-            ? hash('sha512',$passKey)
+            ? hash('sha512', $passKey)
             : $passhash;
 
 
-        for ($n=0; $n < strlen($index); $n++) {
-            $p[] =  substr($passhash, $n ,1);
+        for ($n = 0; $n < strlen($index); $n++) {
+            $p[] = substr($passhash, $n, 1);
         }
 
 
-        array_multisort($p,  SORT_DESC, $i);
+        array_multisort($p, SORT_DESC, $i);
         $index = implode($i);
     }
 
 
-    $base  = strlen($index);
+    $base = strlen($index);
 
 
     if ($to_num) {
         // Digital number  <<--  alphabet letter code
-        $in  = strrev($in);
+        $in = strrev($in);
         $out = 0;
         $len = strlen($in) - 1;
         for ($t = 0; $t <= $len; $t++) {
             $bcpow = bcpow($base, $len - $t);
-            $out   = $out + strpos($index, substr($in, $t, 1)) * $bcpow;
+            $out = $out + strpos($index, substr($in, $t, 1)) * $bcpow;
         }
 
 
@@ -399,9 +402,9 @@ function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
         $out = "";
         for ($t = floor(log($in, $base)); $t >= 0; $t--) {
             $bcp = bcpow($base, $t);
-            $a   = floor($in / $bcp) % $base;
+            $a = floor($in / $bcp) % $base;
             $out = $out . substr($index, $a, 1);
-            $in  = $in - ($a * $bcp);
+            $in = $in - ($a * $bcp);
         }
         $out = strrev($out); // reverse
     }
@@ -416,29 +419,31 @@ function getShoppingTimesOfCurrentMonth($userId)
     $orderModel = new Order();
     $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
     $currMonthLastDay = strtotime(getCurMonthLastDay());
-    $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
+    $currMonthShoppingNum = Db::name('order')->where(['user_id' => $userId, 'pay_status' => 1, 'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
     return $currMonthShoppingNum;
 }
 
-function getCurMonthFirstDay($date) {
+function getCurMonthFirstDay($date)
+{
     $date = date('Y-m-d H:i:s');
     return date('Y-m-01', strtotime($date));
 }
 
-function getCurMonthLastDay() {
+function getCurMonthLastDay()
+{
     $date = date('Y-m-d H:i:s');
     return date('Y-m-d', strtotime(date('Y-m-01', strtotime($date)) . ' +1 month -1 day'));
 }
 
 function getTheBeginOfTheMonth()
 {
-    $BeginDate=date('Y-m-01', strtotime(date("Y-m-d")));
+    $BeginDate = date('Y-m-01', strtotime(date("Y-m-d")));
     return strtotime($BeginDate);
 }
 
 function getTheEndOfTheMonth()
 {
-    $BeginDate=date('Y-m-01', strtotime(date("Y-m-d")));
+    $BeginDate = date('Y-m-01', strtotime(date("Y-m-d")));
     return strtotime("$BeginDate +1 month");
 }
 
@@ -447,11 +452,11 @@ function getTheBeginOfTheWeek()
     //当前日期
     $sdefaultDate = date("Y-m-d");
     //$first =1 表示每周星期一为开始日期 0表示每周日为开始日期
-    $first=1;
+    $first = 1;
     //获取当前周的第几天 周日是 0 周一到周六是 1 - 6
-    $w=date('w',strtotime($sdefaultDate));
+    $w = date('w', strtotime($sdefaultDate));
     //获取本周开始日期，如果$w是0，则表示周日，减去 6 天
-    $week_start=date('Y-m-d',strtotime("$sdefaultDate -".($w ? $w - $first : 6).' days'));
+    $week_start = date('Y-m-d', strtotime("$sdefaultDate -" . ($w ? $w - $first : 6) . ' days'));
     return $week_start;
 }
 
@@ -460,11 +465,11 @@ function getTheEndOfTheWeek()
     //当前日期
     $sdefaultDate = date("Y-m-d");
     //$first =1 表示每周星期一为开始日期 0表示每周日为开始日期
-    $first=1;
+    $first = 1;
     //获取当前周的第几天 周日是 0 周一到周六是 1 - 6
-    $w=date('w',strtotime($sdefaultDate));
+    $w = date('w', strtotime($sdefaultDate));
     //本周结束日期
-    $week_end=date('Y-m-d',strtotime("$week_start +6 days"));
+    $week_end = date('Y-m-d', strtotime("$week_start +6 days"));
     return $week_end;
 }
 
@@ -473,7 +478,7 @@ function getTheEndOfTheWeek()
  * @param
  * @return bool
  */
-function vpay_level_log($user_id,$account,$desc,$before_level,$after_level,$type)
+function vpay_level_log($user_id, $account, $desc, $before_level, $after_level, $type)
 {
     $data = array(
         'user_id' => $user_id,
@@ -486,6 +491,7 @@ function vpay_level_log($user_id,$account,$desc,$before_level,$after_level,$type
     );
     return Db::name('vpay_level_log')->insert($data);
 }
+
 /**
  *  配额log
  * @param $reflectId 各表id
@@ -496,7 +502,7 @@ function vpay_level_log($user_id,$account,$desc,$before_level,$after_level,$type
  * @return mixed
  */
 
-function integrallog($reflectId, $userId, $num, $type, $before,$after)
+function integrallog($reflectId, $userId, $num, $type, $before, $after)
 {
     $data = array(
         'reflectId' => $reflectId,
@@ -521,7 +527,7 @@ function integrallog($reflectId, $userId, $num, $type, $before,$after)
  * @return mixed
  */
 
-function balancelog($reflectId, $userId, $num, $type, $before,$after)
+function balancelog($reflectId, $userId, $num, $type, $before, $after)
 {
     $data = array(
         'reflectId' => $reflectId,
@@ -533,35 +539,33 @@ function balancelog($reflectId, $userId, $num, $type, $before,$after)
         'createTime' => date('Y-m-d H:i:s'),
         'updateTime' => date('Y-m-d H:i:s'),
     );
-    $user=M('users')->where(array("user_id"=>$userId))->find();
-    $arr=[8,15];
-    if($num < 0&&in_array($type,$arr)){
-        if($type==15){
-             //累积收益积分购买
-            M('users')->where(array("user_id"=>$userId))->inc('total_amount',abs($num))->inc('total_jackpot',abs($num))->inc('monthly_performance',abs($num))->update();
-            if($user['second_leader']){
+    $user = M('users')->where(array("user_id" => $userId))->find();
+    $arr = [8, 15];
+    if ($num < 0 && in_array($type, $arr)) {
+        if ($type == 15) {
+            //累积收益积分购买
+            M('users')->where(array("user_id" => $userId))->inc('total_amount', abs($num))->inc('total_jackpot', abs($num))->inc('monthly_performance', abs($num))->update();
+            if ($user['second_leader']) {
                 //累计所有下级业绩给上级
-                M('users')->where("user_id in ({$user['second_leader']})")->inc('performance',abs($num))->update();
+                M('users')->where("user_id in ({$user['second_leader']})")->inc('performance', abs($num))->update();
             }
-            if($user['level']==1||$user['level']==2){
-                if($user['second_leader']){
-                    $list=explode(',',$user['second_leader'].','.$userId);
-                }else{
-                    $list=explode(',',$userId);
+            if ($user['level'] == 1 || $user['level'] == 2) {
+                if ($user['second_leader']) {
+                    $list = explode(',', $user['second_leader'] . ',' . $userId);
+                } else {
+                    $list = explode(',', $userId);
                 }
                 krsort($list);
                 foreach ($list as $key => $value) {
                     //升级
-                    //debug(__FILE__);
                     user_upgrade($value);
                 }
             }
-        }else{
-             //累积收益积分购买
-            M('users')->where(array("user_id"=>$userId))->inc('total_amount',abs($num))->inc('total_jackpot',abs($num))->update();
+        } else {
+            //累积收益积分购买
+            M('users')->where(array("user_id" => $userId))->inc('total_amount', abs($num))->inc('total_jackpot', abs($num))->update();
         }
-       
-        
+
 
         /*//获取团队所有人
         $list=get_team($userId,1);
@@ -573,6 +577,7 @@ function balancelog($reflectId, $userId, $num, $type, $before,$after)
     }
     return M('balancelog')->add($data);
 }
+
 /**
  *  消费积分log
  * @param $reflectId 各表id
@@ -583,7 +588,7 @@ function balancelog($reflectId, $userId, $num, $type, $before,$after)
  * @return mixed
  */
 
-function shoppinglog($reflectId, $userId, $num, $type, $before,$after)
+function shoppinglog($reflectId, $userId, $num, $type, $before, $after)
 {
     $data = array(
         'reflectId' => $reflectId,
@@ -597,6 +602,59 @@ function shoppinglog($reflectId, $userId, $num, $type, $before,$after)
     );
     return M('shoppinglog')->add($data);
 }
+
+/**
+ * 批发票
+ * @param $userId
+ * @throws \think\Exception
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function forzens($userId)
+{
+    if ($userId) {
+        $forzens = Db::name('forzen')->where(['user_id' => $userId, 'five_status' => 0, 'shifang_time' => ['ELT', time()]])->select();
+        foreach ($forzens as $key => $value) {
+            if ($value['shifang_time'] <= time()) {
+                $user = Db::name('users')->where(['user_id' => $userId])->field('frozen_money')->find();
+                Db::name('users')->where(['user_id' => $value['user_id']])->setInc('frozen_money', $value['frozen_dongjie']);
+                Db::name('forzen')->where(['id' => $value['id']])->setField('five_status', 1);
+            }
+        }
+    }
+}
+
+/**
+ * 寄售收益
+ * @param $userId
+ * @throws \think\Exception
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ */
+function forzenss($userId)
+{
+    $system = tpCache('ylg_spstem_role');
+    if ($userId) {
+        $forzens = Db::name('goods_consignments')->where(['user_id' => $userId, 'five_status' => 0, 'create_time' => ['ELT', time()]])->select();
+        foreach ($forzens as $key => $gc) {
+
+            if ($gc['create_time'] <= time()) {
+                $user = Db::name('users')->where(['user_id' => $userId])->field('user_money,distribut_money')->find();
+                $money = $gc['goods_price'] * $gc['num'] * (1 - $system['handling_fee']);
+                Db::name('users')->where(['user_id' => $gc['user_id']])->setInc('user_money', $money);
+                Db::name('goods_consignments')->where(['id' => $gc['id']])->setField('five_status', 1);
+                //消费积分
+                $d = $gc['goods_price'] * $gc['num'] * $system['goods_integral'];
+                Db::name('users')->where('user_id', $userId)
+                    ->setInc('distribut_money', $d);
+                shoppinglog($gc['order_id'], $gc['user_id'], $d, 9, $user['distribut_money'], $user['distribut_money'] + $d);
+            }
+        }
+    }
+}
+
 /**
  * shop检验登陆
  * @param
@@ -1248,6 +1306,7 @@ function tpCache($config_key, $data = array())
         return F($param[0], $newData, TEMP_PATH);
     }
 }
+
 /**
  * 获取分销配置
  * @param string $config_key 缓存文件名称
@@ -1256,25 +1315,25 @@ function tpCache($config_key, $data = array())
  * @param array $other 补充的配置参数 格式为：'键名1'=>'值1','键名2'=>'值2'
  * @return array or string or bool
  */
-function distributCache($config_key, $data = array(),$state = 0,$other = array())
+function distributCache($config_key, $data = array(), $state = 0, $other = array())
 {
-    $param = strpos($config_key,'-') ? explode('-', $config_key) : explode('.', $config_key);
-    $level = strpos($config_key,'-') ? explode('-', $config_key) : '0';
+    $param = strpos($config_key, '-') ? explode('-', $config_key) : explode('.', $config_key);
+    $level = strpos($config_key, '-') ? explode('-', $config_key) : '0';
     //兼容没有switch字段的配置
-    if(!isset($other['switch'])){
+    if (!isset($other['switch'])) {
         $other['switch'] = 0;
     }
     //缓存名称
     $cache_name = $param[0];
-    if($state != 0){
+    if ($state != 0) {
         //需要区分每个角色的条件
-        $cache_name = $param[0].'-'.$level[1].'-'.$state;
+        $cache_name = $param[0] . '-' . $level[1] . '-' . $state;
     }
     if (empty($data)) {
         $config = Cache($cache_name);//直接获取分销配置
         if (empty($config)) {
             //缓存文件不存在就读取数据库
-            $res = db('distribut_system')->where(array("inc_type"=> $param[0],"level_id"=>$level[1],"state"=>$state))->select();
+            $res = db('distribut_system')->where(array("inc_type" => $param[0], "level_id" => $level[1], "state" => $state))->select();
             if ($res) {
                 foreach ($res as $k => $val) {
                     $config[$val['name']] = $val['value'];
@@ -1289,28 +1348,28 @@ function distributCache($config_key, $data = array(),$state = 0,$other = array()
         }
     } else {
         //更新缓存
-        $result = db('distribut_system')->where(['inc_type'=>$param[0],'level_id'=>$level[1],'state'=>$state])->select();
+        $result = db('distribut_system')->where(['inc_type' => $param[0], 'level_id' => $level[1], 'state' => $state])->select();
         if ($result) {
             foreach ($result as $val) {
                 //需要匹配name
                 $temp2[$val['name']] = $val['value'];
             }
             foreach ($data as $k => $v) {
-                $newArr = array('name' => $k, 'value' => trim($v), 'inc_type' => $param[0],'level_id' => $level[1],'state' => $state,'switch' => $other['switch']);
+                $newArr = array('name' => $k, 'value' => trim($v), 'inc_type' => $param[0], 'level_id' => $level[1], 'state' => $state, 'switch' => $other['switch']);
                 if (!isset($temp2[$k])) {
                     db('distribut_system')->insert($newArr);//新key数据插入数据库
                 } else {
-                    db('distribut_system')->where(['name'=>$k,'level_id'=>$level[1],'state'=>$state])->update($newArr);
+                    db('distribut_system')->where(['name' => $k, 'level_id' => $level[1], 'state' => $state])->update($newArr);
                 }
             }
             //更新后的数据库记录
-            $newRes = db('distribut_system')->where(['inc_type'=>$param[0],'level_id'=>$level[1],'state'=>$state])->select();
+            $newRes = db('distribut_system')->where(['inc_type' => $param[0], 'level_id' => $level[1], 'state' => $state])->select();
             foreach ($newRes as $rs) {
                 $newData[$rs['name']] = $rs['value'];
             }
         } else {
             foreach ($data as $k => $v) {
-                $newArr[] = array('name' => $k, 'value' => trim($v), 'inc_type' => $param[0],'level_id' => $level[1],'state' => $state,'switch' => $other['switch']);
+                $newArr[] = array('name' => $k, 'value' => trim($v), 'inc_type' => $param[0], 'level_id' => $level[1], 'state' => $state, 'switch' => $other['switch']);
             }
             db('distribut_system')->insertAll($newArr);
             $newData = $data;
@@ -1318,6 +1377,7 @@ function distributCache($config_key, $data = array(),$state = 0,$other = array()
         return Cache($cache_name, $newData);
     }
 }
+
 /**
  * 删除分销配置
  * @param string $level_id 角色id
@@ -1326,22 +1386,24 @@ function distributCache($config_key, $data = array(),$state = 0,$other = array()
  * @author Faramita
  * @return array or string or bool
  */
-function delDistributCache($level_id,$data,$state){
+function delDistributCache($level_id, $data, $state)
+{
     //删除数据库中配置
     foreach ($data as $k => $v) {
-        $result = db('distribut_system')->where(['name'=>$k,'inc_type'=>$v,'level_id'=>$level_id,'state'=>$state])->delete();
-        if($result == false){
+        $result = db('distribut_system')->where(['name' => $k, 'inc_type' => $v, 'level_id' => $level_id, 'state' => $state])->delete();
+        if ($result == false) {
             return false;
         }
         //删除缓存
-        if($state != 0){
-            Cache($v.'-'.$level_id.'-'.$state,NULL);
-        }else{
-            Cache($v,NULL);
+        if ($state != 0) {
+            Cache($v . '-' . $level_id . '-' . $state, NULL);
+        } else {
+            Cache($v, NULL);
         }
     }
     return true;
 }
+
 /**
  * 记录帐户变动
  * @param   int $user_id 用户id
@@ -1353,7 +1415,7 @@ function delDistributCache($level_id,$data,$state){
  * @param string $order_sn 订单sn
  * @return  bool
  */
-function accountLog($user_id, $user_money = 0, $pay_points = 0, $desc = '', $distribut_money = 0, $order_id = 0, $order_sn = '',$type = 0)
+function accountLog($user_id, $user_money = 0, $pay_points = 0, $desc = '', $distribut_money = 0, $order_id = 0, $order_sn = '', $type = 0)
 {
     /* 插入帐户变动记录 */
     $account_log = array(
@@ -1375,7 +1437,7 @@ function accountLog($user_id, $user_money = 0, $pay_points = 0, $desc = '', $dis
         'pay_points' => ['exp', 'pay_points+' . $pay_points],
         'distribut_money' => ['exp', 'distribut_money+' . $distribut_money],
     );
-    if (($user_money + $pay_points + $distribut_money) == 0){
+    if (($user_money + $pay_points + $distribut_money) == 0) {
         return false;
     }
     $update = Db::name('users')->where('user_id', $user_id)->update($update_data);
@@ -1420,25 +1482,25 @@ function logOrder($order_id, $action_note, $status_desc, $user_id = 0)
 /**
  * 服务订单操作日志 cp  上面logOrder
  * 参数示例
- * @param type $order_id  订单id
+ * @param type $order_id 订单id
  * @param type $action_note 操作备注
  * @param type $status_desc 操作状态  提交订单, 付款成功, 取消, 等待收货, 完成
- * @param type $user_id  用户id 默认为管理员
+ * @param type $user_id 用户id 默认为管理员
  * @return boolean
  */
-function logServerOrder($order_id,$action_note,$status_desc,$user_id = 0)
+function logServerOrder($order_id, $action_note, $status_desc, $user_id = 0)
 {
 
     $order = M('repair_order')->master()->where("order_id", $order_id)->find();
     $action_info = array(
-        'order_id'        =>$order_id,
-        'action_user'     => 1,
-        'order_status'    =>$order['order_status'],
-        'shipping_status' =>$order['order_type'],   //  发货状态  改成   订单类型
-        'pay_status'      =>$order['pay_status'],
-        'action_note'     => $action_note,
-        'status_desc'     => $status_desc, //  状态描述
-        'log_time'        =>time(),
+        'order_id' => $order_id,
+        'action_user' => 1,
+        'order_status' => $order['order_status'],
+        'shipping_status' => $order['order_type'],   //  发货状态  改成   订单类型
+        'pay_status' => $order['pay_status'],
+        'action_note' => $action_note,
+        'status_desc' => $status_desc, //  状态描述
+        'log_time' => time(),
     );
     return M('repair_action')->add($action_info);
 }
@@ -1454,9 +1516,11 @@ function get_region_list()
 /*
  * 获取地区列表
  */
-function get_region($id){
-    return M('region')->field('name')->where(array('id'=>$id))->find();
+function get_region($id)
+{
+    return M('region')->field('name')->where(array('id' => $id))->find();
 }
+
 /*
  * 获取用户地址列表
  */
@@ -1637,13 +1701,13 @@ function update_pay_status($order_sn, $ext = array())
         // 找出对应的订单
         $order = M('order')->master()->where("order_sn", $order_sn)->find();
         //TODO 更新维修服务订单
-        if($order['suppliers_id']){
+        if ($order['suppliers_id']) {
             // 修改支付状态  已支付
-            $repair_order_data = array('pay_status' => 1, 'pay_time' => time(), 'last_time' => time(),'pay_code' => $order['pay_code'],'pay_name' => $order['pay_name']);
+            $repair_order_data = array('pay_status' => 1, 'pay_time' => time(), 'last_time' => time(), 'pay_code' => $order['pay_code'], 'pay_name' => $order['pay_name']);
             if (isset($ext['transaction_id'])) $repair_order_data['transaction_id'] = $ext['transaction_id'];
             M('repair_order')->where("order_buy_id", $order['order_id'])->save($repair_order_data);
             $server_order = Db::name('repair_order')->where(['order_buy_id' => $order['order_id']])->find();
-            logServerOrder($server_order['order_id'], $server_order['order_sn'].'预约安装订单付款成功', '付款成功', $order['user_id']);//记录日志
+            logServerOrder($server_order['order_id'], $server_order['order_sn'] . '预约安装订单付款成功', '付款成功', $order['user_id']);//记录日志
         }
         //预售订单
         if ($order['order_prom_type'] == 4) {
@@ -1697,7 +1761,7 @@ function update_pay_status($order_sn, $ext = array())
         //分销设置
         $maid_time = distributCache('settlement.maid_time');
         $rebate_status = $maid_time == 0 ? 2 : 1;//$rebate_status = 1 按确认收货规则，2 按订单支付分佣规则分佣
-        M('rebate_log')->where("order_id", $order['order_id'])->save(array('status' => $rebate_status,'pay_time'=>time()));
+        M('rebate_log')->where("order_id", $order['order_id'])->save(array('status' => $rebate_status, 'pay_time' => time()));
 
         // 成为分销商条件
         $distribut_condition = distributCache('levels.condition');
@@ -1727,17 +1791,17 @@ function update_pay_status($order_sn, $ext = array())
         // 查出当前门店的联系方式
         $sender = Db::name('suppliers')->where(['suppliers_id' => $order['suppliers_id']])->value('suppliers_phone');
         if (empty($sender)) return;
-        $params = array('status' => '订单待处理','remark'=>'请留意订单详细信息');
+        $params = array('status' => '订单待处理', 'remark' => '请留意订单详细信息');
         sendSms("8", $sender, $params);
 
         // 检测当前用户是否已经绑定身份
         $leader = Db::name('users')->field('perpetual,first_leader')->where(['user_id' => $order['user_id']])->find();
         $perpetual = $leader['perpetual'];
-        if(!$perpetual) { //  没有永久绑定上下级关系
+        if (!$perpetual) { //  没有永久绑定上下级关系
             $level_state = Db::name('distribut_system')->where(['inc_type' => 'levels', 'name' => 'level_state'])->value('value');
-            if ($level_state == 2){
+            if ($level_state == 2) {
                 // 首次下单 永久绑定上下级关系
-                Db::name('users')->where(['user_id' => $order['user_id']])->save(['perpetual'=>1]);
+                Db::name('users')->where(['user_id' => $order['user_id']])->save(['perpetual' => 1]);
                 $wechat->sendTemplateMsgBindLeader($leader['first_leader'], $order['user_id']);
             }
         }
@@ -1770,67 +1834,67 @@ function confirm_order($id, $user_id = 0)
         $data['pay_time'] = time();
     }
     $row = db('order')->where(array('order_id' => $id))->update($data);
-    if ($row){
+    if ($row) {
 
 
         //准备验证升级角色,此处是确认收货的地方----------标记<QualificationLogic>
 //        $qualificationLogic = new \app\common\logic\QualificationLogic();
 //        $qualificationLogic->prepare_update_level($user_id);
-    }else{
+    } else {
         return array('status' => -3, 'msg' => '操作失败');
     }
     order_give($order);// 调用送礼物方法, 给下单这个人赠送相应的礼物
     //分销设置
     $maid_time = distributCache('settlement.maid_time');
 
-    if($maid_time){
+    if ($maid_time) {
         db('rebate_log')->where("order_id", $id)->update(array('status' => 2, 'confirm' => time()));
-    }else{
+    } else {
         db('rebate_log')->where("order_id", $id)->update(array('confirm' => time()));
     }
     //0：批发 1：零售 2：自营
     //todo 活动区确认收货立即到账
     $user = Db::name('users')->where('user_id', $order['user_id'])->find();
-    $inc_type='ylg_spstem_role';
+    $inc_type = 'ylg_spstem_role';
     $config = tpCache($inc_type);
-    if($order['type'] == 1 ) {
+    if ($order['type'] == 1) {
         // 启动事务
-        try{
+        try {
             Db::startTrans();
-            $TIR_ID = Db::name('users')->where(['user_id'=>$user['first_leader'],'level'=>['egt',2]])->find();
+            $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
 //            dump($TIR_ID);
 //            dump('**********************');
-            if($TIR_ID){
+            if ($TIR_ID) {
                 $money = $order['order_amount'] * $config['daozhang'];
-                Db::name('users')->where('user_id',$TIR_ID['user_id'])->setInc('user_money',$money);
-                balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'],$TIR_ID['user_money'] + $money);
-                if($TIR_ID['second_leader']){
-                    $tjstr = array_reverse(explode(',',$TIR_ID['second_leader']));
+                Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
+                balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
+                if ($TIR_ID['second_leader']) {
+                    $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
 //                    dump('$tjstr:');
 //                    dump($tjstr);
                     $canGetBonus = [];
                     foreach ($tjstr as $userId) {
-                        if(count($canGetBonus) >= 2) {
+                        if (count($canGetBonus) >= 2) {
                             break;
                         }
-                        $user = Db::name('users')->where('user_id',$userId)->where('level', 3)->find();
-                        if($user) {
+                        $user = Db::name('users')->where('user_id', $userId)->where('level', 3)->find();
+                        if ($user) {
                             array_push($canGetBonus, $user);
                         }
                     }
 //                    dump('$canGetBonus:');
 //                    dump($canGetBonus);
-                    if(count($canGetBonus) >= 0) {
-                        foreach ($canGetBonus as $key=>$user){
-                            if($key == 0){
+                    if (count($canGetBonus) >= 0) {
+                        foreach ($canGetBonus as $key => $user) {
+                            if ($key == 0) {
                                 $bblili = 0.02;
-                            }else{
+                            } else {
                                 $bblili = 0.004;
                             }
 //                            dump($user);
                             $money = $order['order_amount'] * $bblili;
-                            Db::name('users')->where('user_id',$user['user_id'])->setInc('user_money', $money);
-                            balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'],$user['user_money'] + $money);
+                            Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                            balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                         }
                     }
                 }
@@ -1846,6 +1910,7 @@ function confirm_order($id, $user_id = 0)
 
     return array('status' => 1, 'msg' => '操作成功', 'url' => U('Order/order_detail', ['id' => $id]));
 }
+
 /**
  * 下单赠送活动：优惠券，积分
  * @param $order |订单数组
@@ -1993,7 +2058,7 @@ function calculate_price($user_id = 0, $order_goods, $shipping_code = '', $shipp
         return array('status' => -6, 'msg' => "你的账户可用余额为:" . $user['user_money'], 'result' => ''); // 返回结果状态
 
     $goods_id_arr = get_arr_column($order_goods, 'goods_id');
-    if($order_goods[0]['goods']['type_id'] == 6 && $order_goods[0]['goods']['status'] == 0){
+    if ($order_goods[0]['goods']['type_id'] == 6 && $order_goods[0]['goods']['status'] == 0) {
         $goods_arr = M('goods')->where("goods_id in(" . implode(',', $goods_id_arr) . ")")->cache(true, TPSHOP_CACHE_TIME)
             ->getField('goods_id,weight,market_price,is_free_shipping,exchange_integral,shop_price'); // 商品id 和重量对应的键值对
     }
@@ -2018,21 +2083,21 @@ function calculate_price($user_id = 0, $order_goods, $shipping_code = '', $shipp
             //没有就按照会员价与平台设置的比例来计算。
             $result['order_integral'] += ceil($order_goods[$key]['member_goods_price'] * $use_percent_point);
         }
-        if($val['goods']['prom_type'] == 1){
+        if ($val['goods']['prom_type'] == 1) {
             $flash_sale = Db::name('flash_sale')->where("goods_id = {$val['goods_id']}")->find();
             $order_goods[$key]['goods_fee'] = $val['goods_num'] * $flash_sale['price'];
             $order_goods[$key]['shop_integral'] = 0;    // 小计 消费积分
-        }else{
+        } else {
             $order_goods[$key]['goods_fee'] = $val['goods_num'] * $val['member_goods_price'];    // 小计 收益积分
             $order_goods[$key]['shop_integral'] = $val['goods_num'] * $val['goods']['cost_price'];    // 小计 消费积分
         }
-        if($order_goods[$key]['goods']['type_id'] == 6 && $order_goods[$key]['goods']['status'] == 0){
+        if ($order_goods[$key]['goods']['type_id'] == 6 && $order_goods[$key]['goods']['status'] == 0) {
             $order_goods[$key]['quota'] = $val['goods_num'] * $val['goods']['quota'];    // 小计 配额
 
-            $order_goods[$key]['store_count'] = Db::name('goods_setmeal')->alias('s')->join('goods g','g.goods_id = s.goods_id')
+            $order_goods[$key]['store_count'] = Db::name('goods_setmeal')->alias('s')->join('goods g', 'g.goods_id = s.goods_id')
                 ->where("s.id = {$val['goods_id']} and g.is_on_sale = 1")
                 ->value('s.stock');
-        }else{
+        } else {
             $order_goods[$key]['store_count'] = getGoodNum($val['goods_id'], $val['spec_key']); // 最多可购买的库存数量
         }
         if ($order_goods[$key]['store_count'] <= 0 || $order_goods[$key]['store_count'] < $order_goods[$key]['goods_num'])
@@ -2372,13 +2437,14 @@ function wxbankPay($enc_bank_no, $enc_true_name, $bank_code, $ordernumber, $mone
 
 /**
  * 检测是否有数据
- * @param  sting $table       表名
- * @param  sting $field       字段名
+ * @param  sting $table 表名
+ * @param  sting $field 字段名
  * @param  string $field_value 字段值
  * @return arr              结果集
  */
-function confirm_exist($table,$field,$field_value){
-    return Db::name($table)->where(["$field"=>"$field_value"])->find();
+function confirm_exist($table, $field, $field_value)
+{
+    return Db::name($table)->where(["$field" => "$field_value"])->find();
 }
 
 /**
@@ -2390,24 +2456,24 @@ function confirm_exist($table,$field,$field_value){
 function update_server_pay_status($order_sn, $ext)
 {
 
-        // 如果这笔订单已经处理过了
-        // 看看有没已经处理过这笔订单  支付宝返回不重复处理操作
-        $count = M('repair_order')->master()->where("order_sn = :order_sn and pay_status = 0")->bind(['order_sn' => $order_sn])->count();
-        if ($count == 0) return false;
-        // 找出对应的订单
-        $order = M('repair_order')->master()->where("order_sn", $order_sn)->find();
+    // 如果这笔订单已经处理过了
+    // 看看有没已经处理过这笔订单  支付宝返回不重复处理操作
+    $count = M('repair_order')->master()->where("order_sn = :order_sn and pay_status = 0")->bind(['order_sn' => $order_sn])->count();
+    if ($count == 0) return false;
+    // 找出对应的订单
+    $order = M('repair_order')->master()->where("order_sn", $order_sn)->find();
 
-        // 修改支付状态  已支付
-        $updata = array('pay_status' => 1, 'pay_time' => time());
-        if (isset($ext['transaction_id'])) $updata['transaction_id'] = $ext['transaction_id'];
-        M('repair_order')->where("order_sn", $order_sn)->save($updata);
+    // 修改支付状态  已支付
+    $updata = array('pay_status' => 1, 'pay_time' => time());
+    if (isset($ext['transaction_id'])) $updata['transaction_id'] = $ext['transaction_id'];
+    M('repair_order')->where("order_sn", $order_sn)->save($updata);
 
-        // 记录订单操作日志
-        logServerOrder($order['order_id'], $order['order_sn'].'订单付款'.$order['paid_price'].'元成功', '付款成功', $order['user_id']);
+    // 记录订单操作日志
+    logServerOrder($order['order_id'], $order['order_sn'] . '订单付款' . $order['paid_price'] . '元成功', '付款成功', $order['user_id']);
 
-        // 记录订单操作日志
+    // 记录订单操作日志
 //        if (array_key_exists('admin_id', $ext)) {
-            // 无后台操作
+    // 无后台操作
 //            logServerOrder($order['order_id'], $ext['note'], '付款'.$order['paid_price'].'元成功', $ext['admin_id']);
 //        } else {
 //            logServerOrder($order['order_id'], '订单付款'.$order['paid_price'].'元成功', '付款成功', $order['user_id']);
@@ -2416,55 +2482,54 @@ function update_server_pay_status($order_sn, $ext)
 //        //发票生成
 //        $Invoice = new \app\admin\logic\InvoiceLogic();
 //        $Invoice->create_Invoice($order);
-       // 发送微信消息模板提醒
-        $wechat = new \app\common\logic\WechatLogic;
-        $wechat->sendTemplateMsgServiceOrderPay($order);
+    // 发送微信消息模板提醒
+    $wechat = new \app\common\logic\WechatLogic;
+    $wechat->sendTemplateMsgServiceOrderPay($order);
 
 
-
-
-        //用户支付, 发送短信给商家  //下单
-        $res = checkEnableSendSms("4");
-        if (!$res || $res['status'] != 1) return;
-        $sender = tpCache("sms.order_pay_sms_enable");
-        if (empty($sender)) return;
-        // 查出当前门店的联系方式
-        $sender = Db::name('suppliers')->where(['suppliers_id' => $order['suppliers_id']])->value('suppliers_phone');
-        if (empty($sender)) return;
-        $params = array('status' => '订单待处理','remark'=>'请留意订单详细信息');
-        sendSms("8", $sender, $params);
+    //用户支付, 发送短信给商家  //下单
+    $res = checkEnableSendSms("4");
+    if (!$res || $res['status'] != 1) return;
+    $sender = tpCache("sms.order_pay_sms_enable");
+    if (empty($sender)) return;
+    // 查出当前门店的联系方式
+    $sender = Db::name('suppliers')->where(['suppliers_id' => $order['suppliers_id']])->value('suppliers_phone');
+    if (empty($sender)) return;
+    $params = array('status' => '订单待处理', 'remark' => '请留意订单详细信息');
+    sendSms("8", $sender, $params);
 }
 
 /**
- * 生成宣传海报
- * @param array  参数,包括图片和文字
- * @param string  $filename 生成海报文件名,不传此参数则不生成文件,直接输出图片
- * @return [type] [description]
- */
-function createPoster($config=array(),$filename=""){
+ *  * 生成宣传海报
+ *  * @param array  参数,包括图片和文字
+ *  * @param string  $filename 生成海报文件名,不传此参数则不生成文件,直接输出图片
+ *  * @return [type] [description]
+ *  */
+function createPoster($config = array(), $filename = "")
+{
     //如果要看报什么错，可以先注释调这个header
-    if(empty($filename)) header("content-type: image/png");
+    if (empty($filename)) header("content-type: image/png");
     $imageDefault = array(
-        'left'=>0,
-        'top'=>0,
-        'right'=>0,
-        'bottom'=>0,
-        'width'=>100,
-        'height'=>100,
-        'opacity'=>100
+        'left' => 0,
+        'top' => 0,
+        'right' => 0,
+        'bottom' => 0,
+        'width' => 100,
+        'height' => 100,
+        'opacity' => 100
     );
     $textDefault = array(
-        'text'=>'',
-        'left'=>0,
-        'top'=>0,
-        'fontSize'=>32,       //字号
-        'fontColor'=>'255,255,255', //字体颜色
-        'angle'=>0,
+        'text' => '',
+        'left' => 0,
+        'top' => 0,
+        'fontSize' => 32,       //字号
+        'fontColor' => '255,255,255', //字体颜色
+        'angle' => 0,
     );
     $background = $config['background'];//海报最底层得背景
     //背景方法
     $backgroundInfo = getimagesize($background);
-    $backgroundFun = 'imagecreatefrom'.image_type_to_extension($backgroundInfo[2], false);
+    $backgroundFun = 'imagecreatefrom' . image_type_to_extension($backgroundInfo[2], false);
     $background = $backgroundFun($background);
     $backgroundWidth = imagesx($background);  //背景宽度
     $backgroundHeight = imagesy($background);  //背景高度
@@ -2472,18 +2537,18 @@ function createPoster($config=array(),$filename=""){
 //    $backgroundWidth = 750;  //背景宽度
 //    $backgroundHeight = 1650;  //背景高度
 
-    $imageRes = imageCreatetruecolor($backgroundWidth,$backgroundHeight);
+    $imageRes = imageCreatetruecolor($backgroundWidth, $backgroundHeight);
     $color = imagecolorallocate($imageRes, 0, 0, 0);
     imagefill($imageRes, 0, 0, $color);
     // imageColorTransparent($imageRes, $color);  //颜色透明
-    imagecopyresampled($imageRes,$background,0,0,0,0,imagesx($background),imagesy($background),imagesx($background),imagesy($background));
+    imagecopyresampled($imageRes, $background, 0, 0, 0, 0, imagesx($background), imagesy($background), imagesx($background), imagesy($background));
     //处理了图片
-    if(!empty($config['image'])){
+    if (!empty($config['image'])) {
         foreach ($config['image'] as $key => $val) {
-            $val = array_merge($imageDefault,$val);
+            $val = array_merge($imageDefault, $val);
             $info = getimagesize($val['url']);
-            $function = 'imagecreatefrom'.image_type_to_extension($info[2], false);
-            if($val['stream']){   //如果传的是字符串图像流
+            $function = 'imagecreatefrom' . image_type_to_extension($info[2], false);
+            if ($val['stream']) {   //如果传的是字符串图像流
                 $info = getimagesizefromstring($val['url']);
                 $function = 'imagecreatefromstring';
             }
@@ -2491,37 +2556,37 @@ function createPoster($config=array(),$filename=""){
             $resWidth = $info[0];
             $resHeight = $info[1];
             //建立画板 ，缩放图片至指定尺寸
-            $canvas=imagecreatetruecolor($val['width'], $val['height']);
+            $canvas = imagecreatetruecolor($val['width'], $val['height']);
             imagefill($canvas, 0, 0, $color);
             //关键函数，参数（目标资源，源，目标资源的开始坐标x,y, 源资源的开始坐标x,y,目标资源的宽高w,h,源资源的宽高w,h）
-            imagecopyresampled($canvas, $res, 0, 0, 0, 0, $val['width'], $val['height'],$resWidth,$resHeight);
-            $val['left'] = $val['left']<0?$backgroundWidth- abs($val['left']) - $val['width']:$val['left'];
-            $val['top'] = $val['top']<0?$backgroundHeight- abs($val['top']) - $val['height']:$val['top'];
+            imagecopyresampled($canvas, $res, 0, 0, 0, 0, $val['width'], $val['height'], $resWidth, $resHeight);
+            $val['left'] = $val['left'] < 0 ? $backgroundWidth - abs($val['left']) - $val['width'] : $val['left'];
+            $val['top'] = $val['top'] < 0 ? $backgroundHeight - abs($val['top']) - $val['height'] : $val['top'];
             //放置图像
-            imagecopymerge($imageRes,$canvas, $val['left'],$val['top'],$val['right'],$val['bottom'],$val['width'],$val['height'],$val['opacity']);//左，上，右，下，宽度，高度，透明度
+            imagecopymerge($imageRes, $canvas, $val['left'], $val['top'], $val['right'], $val['bottom'], $val['width'], $val['height'], $val['opacity']);//左，上，右，下，宽度，高度，透明度
         }
     }
     //处理文字
-    if(!empty($config['text'])){
+    if (!empty($config['text'])) {
         foreach ($config['text'] as $key => $val) {
-            $val = array_merge($textDefault,$val);
-            list($R,$G,$B) = explode(',', $val['fontColor']);
+            $val = array_merge($textDefault, $val);
+            list($R, $G, $B) = explode(',', $val['fontColor']);
             $fontColor = imagecolorallocate($imageRes, $R, $G, $B);
 //                $val['left'] = $val['left']<0?$backgroundWidth- abs($val['left']):$val['left'];
 //                $val['top'] = $val['top']<0?$backgroundHeight- abs($val['top']):$val['top'];
 
-            draw_txt_to($imageRes,$val,$val['text']);
+            draw_txt_to($imageRes, $val, $val['text']);
 //                imagettftext($imageRes,$val['fontSize'],$val['angle'],$val['left'],$val['top'],$fontColor,$val['fontPath'],$val['text']);
         }
     }
     //生成图片
-    if(!empty($filename)){
-        $res = imagejpeg ($imageRes,$filename,90); //保存到本地
+    if (!empty($filename)) {
+        $res = imagejpeg($imageRes, $filename, 90); //保存到本地
         imagedestroy($imageRes);
-        if(!$res) return false;
+        if (!$res) return false;
         return $filename;
-    }else{
-        imagejpeg ($imageRes);     //在浏览器上显示
+    } else {
+        imagejpeg($imageRes);     //在浏览器上显示
         imagedestroy($imageRes);
     }
 
@@ -2529,7 +2594,7 @@ function createPoster($config=array(),$filename=""){
 
 
 //自动换行
-function draw_txt_to($card,$pos,$string)
+function draw_txt_to($card, $pos, $string)
 {
     $pos['color'] = explode(',', $pos['fontColor']);
     $font_color = imagecolorallocate($card, $pos['color'][0], $pos['color'][1], $pos['color'][2]);
@@ -2566,7 +2631,8 @@ function draw_txt_to($card,$pos,$string)
 /**
  * 检查上级信息是否包含指定用户
  */
- function check_leader($user_id, $leader,$model = ''){
+function check_leader($user_id, $leader, $model = '')
+{
     if (empty($model)) {
         $model = Db::name('member');
     }
@@ -2578,31 +2644,33 @@ function draw_txt_to($card,$pos,$string)
     $leader_info = $model->field('id,parentId')->where(['id' => $leader])->find();
 
     if ($leader_info['parentId']) {
-        return check_leader($user_id,$leader_info['parentId'], $model);
+        return check_leader($user_id, $leader_info['parentId'], $model);
     } else {
         return false;
     }
 }
 
- /**
+/**
  * [arraytoxml 将数组转换成xml格式（简单方法）:]
  * @param [type] $data [数组]
  * @return [type]  [array 转 xml]
  */
- function arraytoxml($data){
-  $str='<xml>';
-  foreach($data as $k=>$v) {
-   $str.='<'.$k.'>'.$v.'</'.$k.'>';
-  }
-  $str.='</xml>';
-  return $str;
- }
+function arraytoxml($data)
+{
+    $str = '<xml>';
+    foreach ($data as $k => $v) {
+        $str .= '<' . $k . '>' . $v . '</' . $k . '>';
+    }
+    $str .= '</xml>';
+    return $str;
+}
 
 /**
  * 检查上级信息是否包含指定用户
  * @return [type] [description]
  */
- function checkLeader($user_id, $leader,$model = ''){
+function checkLeader($user_id, $leader, $model = '')
+{
     if (empty($model)) {
         $model = Db::name('users');
     }
@@ -2614,7 +2682,7 @@ function draw_txt_to($card,$pos,$string)
     $leader_info = $model->field('user_id,first_leader')->where(['user_id' => $leader])->find();
 
     if ($leader_info['first_leader']) {
-        return checkLeader($user_id,$leader_info['first_leader'], $model);
+        return checkLeader($user_id, $leader_info['first_leader'], $model);
     } else {
         return false;
     }
@@ -2628,14 +2696,14 @@ function draw_txt_to($card,$pos,$string)
  * @param string $body 内容描述
  * @throws Exception
  */
-function alipay($out_trade_no,$subject,$total_amount,$body='')
+function alipay($out_trade_no, $subject, $total_amount, $body = '')
 {
-    require_once ALIPAYSDK_PATH .'/wappay/service/AlipayTradeService.php';
-    require_once   ALIPAYSDK_PATH .'/wappay/buildermodel/AlipayTradeWapPayContentBuilder.php';
-    require  ALIPAYSDK_PATH .'/config.php';
+    require_once ALIPAYSDK_PATH . '/wappay/service/AlipayTradeService.php';
+    require_once ALIPAYSDK_PATH . '/wappay/buildermodel/AlipayTradeWapPayContentBuilder.php';
+    require ALIPAYSDK_PATH . '/config.php';
 
     //超时时间
-    $timeout_express="1m";
+    $timeout_express = "1m";
 
     $payRequestBuilder = new AlipayTradeWapPayContentBuilder();
     $payRequestBuilder->setBody($body);
@@ -2646,17 +2714,18 @@ function alipay($out_trade_no,$subject,$total_amount,$body='')
 
     $payResponse = new AlipayTradeService($config);
 
-    $result=$payResponse->wapPay($payRequestBuilder,$config['return_url'],$config['notify_url']);
+    $result = $payResponse->wapPay($payRequestBuilder, $config['return_url'], $config['notify_url']);
 }
 
-function negotiation($order_sn,$payee_account,$amount,$payee_real_name='')
-{header("Content-Type: text/html;charset=utf-8");
+function negotiation($order_sn, $payee_account, $amount, $payee_real_name = '')
+{
+    header("Content-Type: text/html;charset=utf-8");
 
-    require  ALIPAYSDK_PATH .'/config.php';
+    require ALIPAYSDK_PATH . '/config.php';
 //    error_reporting(E_ALL);
-    include(ALIPAYSDK_PATH.'/aop/AopClient.php');
+    include(ALIPAYSDK_PATH . '/aop/AopClient.php');
 
-    include(ALIPAYSDK_PATH.'/aop/request/AlipayFundTransToaccountTransferRequest.php');
+    include(ALIPAYSDK_PATH . '/aop/request/AlipayFundTransToaccountTransferRequest.php');
 
 //    require_once ALIPAYSDK_PATH .'/AopSdk.php';
 
@@ -2668,17 +2737,16 @@ function negotiation($order_sn,$payee_account,$amount,$payee_real_name='')
     $aop->gatewayUrl = 'https://openapi.alipay.com/gateway.do';
     $aop->appId = $config['app_id'];
     $aop->rsaPrivateKey = $config['merchant_private_key'];
-    $aop->alipayrsaPublicKey=$config['alipay_public_key'];
+    $aop->alipayrsaPublicKey = $config['alipay_public_key'];
     $aop->apiVersion = '1.0';
     $aop->signType = 'RSA2';
-    $aop->postCharset='UTF-8';
-    $aop->format='json';
+    $aop->postCharset = 'UTF-8';
+    $aop->format = 'json';
 
 
     $request = new \AlipayFundTransToaccountTransferRequest();
 
 //    echo 12;die;
-
 
 
     $data = array();
@@ -2691,11 +2759,10 @@ function negotiation($order_sn,$payee_account,$amount,$payee_real_name='')
     $data['remark'] = '提现';
 
 
-
 //    print_r(json_encode($data));die;
     $request->setBizContent(json_encode($data));
 
-    $result = $aop->execute ( $request);
+    $result = $aop->execute($request);
 
     return $result;
 
@@ -2708,4 +2775,24 @@ function negotiation($order_sn,$payee_account,$amount,$payee_real_name='')
 //    } else {
 //        echo "失败";
 //    }
+}
+
+function h_image($path_1, $path_2, $after_path)
+{
+    $image_1 = imagecreatefrompng($path_1);
+    $image_2 = imagecreatefrompng($path_2);
+    // 创建真彩画布
+//    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
+    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
+    // 为真彩画布创建白色背景
+    $color = imagecolorallocate($image_3, 255, 255, 255);
+    imagefill($image_3, 0, 0, $color);
+    // 设置透明
+    // imageColorTransparent($image_3, $color);
+    // 复制图片一到真彩画布中（重新取样-获取透明图片）
+    imagecopyresampled($image_3, $image_1, 0, 0, 0, 0, imagesx($image_1), imagesy($image_1), imagesx($image_1), imagesy($image_1));
+    // 与图片二合成
+    imagecopymerge($image_3, $image_2, 736, 2256, 0, 0, 526, 526, 100);
+    // 输出合成图片
+    imagepng($image_3,$after_path);
 }

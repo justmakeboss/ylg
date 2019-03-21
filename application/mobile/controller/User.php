@@ -2431,11 +2431,10 @@ class User extends MobileBase
             //实例化
             $qr = new \QRcode();
             //1:url,3: 容错级别：L、M、Q、H,4:点的大小：1到10
-            $qr::png($url,'./'.$after_path, "M", 6,TRUE);
+            $qr::png($url,'./'.$after_path, "L", 15.2,TRUE);
+            h_image(request()->domain().'/public/images/saiou.png', request()->domain().'/'.$after_path, $after_path);
         }
         $this->assign('qrcodeImg',request()->domain().'/'.$after_path);
-        $this->assign('backgroundImage',request()->domain().'/public/images/erweima.jpg');
-
         $this->assign('user',$user);
         $this->assign('url',$url);
         return $this->fetch();
