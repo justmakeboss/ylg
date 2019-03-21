@@ -350,7 +350,8 @@ class User extends MobileBase
         $reg_smtp_enable = tpCache('sms.regis_smtp_enable');
 
         if (IS_POST) {
-            if (!empty(session("reg")) && time() - session("reg") <= 5) {
+            $d = session("reg");
+            if (!empty($d) && time() - session("reg") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("reg", time());
@@ -1535,7 +1536,8 @@ class User extends MobileBase
     {
 
         if(IS_POST){
-            if (!empty(session("recharge")) && time() - session("recharge") <= 5) {
+            $r = session("recharge");
+            if (!empty($r) && time() - session("recharge") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("recharge", time());
@@ -1555,8 +1557,8 @@ class User extends MobileBase
             }
 
             }
-
-            if(I('account')<=0||empty(I('account'))){
+            $a = I('account');
+            if(I('account')<=0||empty($a)){
                 $this->ajaxReturn(['status'=>0,'msg'=>"充值金额要大于0"]);
             }
 
@@ -1774,7 +1776,8 @@ class User extends MobileBase
     {
         $commodity = tpCache('ylg_spstem_role.commodity');
         if (IS_POST) {
-            if (!empty(session("transfer")) && time() - session("transfer") <= 5) {
+            $a = session("transfer");
+            if (!empty($a) && time() - session("transfer") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("transfer", time());
@@ -2431,6 +2434,8 @@ class User extends MobileBase
             $qr::png($url,'./'.$after_path, "M", 6,TRUE);
         }
         $this->assign('qrcodeImg',request()->domain().'/'.$after_path);
+        $this->assign('backgroundImage',request()->domain().'/public/images/erweima.jpg');
+
         $this->assign('user',$user);
         $this->assign('url',$url);
         return $this->fetch();
