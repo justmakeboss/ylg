@@ -351,9 +351,10 @@ class User extends MobileBase
         $reg_smtp_enable = tpCache('sms.regis_smtp_enable');
 
         if (IS_POST) {
-            $sessionReg = session("reg");
-            if (!empty($sessionReg) && time() - session("reg") <= 5) {
-                $this->ajaxReturn(['msg' => '系统繁忙']);
+
+            $d = session("reg");
+            if (!empty($d) && time() - session("reg") <= 5) {
+                $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("reg", time());
             $logic = new UsersLogic();
@@ -1540,10 +1541,11 @@ class User extends MobileBase
     public function recharge()
     {
 
-        if (IS_POST) {
-            $sessionRecharge = session("recharge");
-            if (!empty($sessionRecharge) && time() - session("recharge") <= 5) {
-                $this->ajaxReturn(['msg' => '系统繁忙']);
+
+        if(IS_POST){
+            $r = session("recharge");
+            if (!empty($r) && time() - session("recharge") <= 5) {
+                $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("recharge", time());
             $file = request()->file('img');
@@ -1561,10 +1563,10 @@ class User extends MobileBase
                 }
 
             }
-            $d = I('account');
 
-            if (I('account') <= 0 || empty($d)) {
-                $this->ajaxReturn(['status' => 0, 'msg' => "充值金额要大于0"]);
+            $a = I('account');
+            if(I('account')<=0||empty($a)){
+                $this->ajaxReturn(['status'=>0,'msg'=>"充值金额要大于0"]);
             }
 
             //生产订单号
@@ -1781,9 +1783,10 @@ class User extends MobileBase
     {
         $commodity = tpCache('ylg_spstem_role.commodity');
         if (IS_POST) {
-            $t = session("transfer");
-            if (!empty($t) && time() - session("transfer") <= 5) {
-                $this->ajaxReturn(['msg' => '系统繁忙']);
+
+            $a = session("transfer");
+            if (!empty($a) && time() - session("transfer") <= 5) {
+                $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
             session("transfer", time());
             $reserve_funds = $this->user['user_money'];
@@ -2448,7 +2451,9 @@ class User extends MobileBase
             //实例化
             $qr = new \QRcode();
             //1:url,3: 容错级别：L、M、Q、H,4:点的大小：1到10
-            $qr::png($url, './' . $after_path, "M", 6, TRUE);
+
+            $qr::png($url,'./'.$after_path, "L", 15.2,TRUE);
+            h_image(request()->domain().'/public/images/saiou.png', request()->domain().'/'.$after_path, $after_path);
         }
         $this->assign('qrcodeImg', request()->domain() . '/' . $after_path);
         $this->assign('user', $user);

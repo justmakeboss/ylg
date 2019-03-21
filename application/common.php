@@ -2776,3 +2776,23 @@ function negotiation($order_sn, $payee_account, $amount, $payee_real_name = '')
 //        echo "失败";
 //    }
 }
+
+function h_image($path_1, $path_2, $after_path)
+{
+    $image_1 = imagecreatefrompng($path_1);
+    $image_2 = imagecreatefrompng($path_2);
+    // 创建真彩画布
+//    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
+    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
+    // 为真彩画布创建白色背景
+    $color = imagecolorallocate($image_3, 255, 255, 255);
+    imagefill($image_3, 0, 0, $color);
+    // 设置透明
+    // imageColorTransparent($image_3, $color);
+    // 复制图片一到真彩画布中（重新取样-获取透明图片）
+    imagecopyresampled($image_3, $image_1, 0, 0, 0, 0, imagesx($image_1), imagesy($image_1), imagesx($image_1), imagesy($image_1));
+    // 与图片二合成
+    imagecopymerge($image_3, $image_2, 736, 2256, 0, 0, 526, 526, 100);
+    // 输出合成图片
+    imagepng($image_3,$after_path);
+}
