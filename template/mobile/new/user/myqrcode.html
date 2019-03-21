@@ -38,12 +38,27 @@
             box-shadow: 1px rgba(255, 80, 0, 0.2);
         }
 
-        .rwmbox .rwm_imgbox img {
-            position: fixed;
-            width: 120px;
-            bottom: 10%;
-            left: 35%;
+        @media (max-height: 640px) {
+
+            .rwmbox .rwm_imgbox img {
+
+                position: fixed;
+                width: 130px;
+                bottom: 10%;
+                left: 35%;
+            }
         }
+
+        @media (max-height: 812px) {
+            .rwmbox .rwm_imgbox img {
+
+                position: fixed;
+                width: 125px;
+                bottom: 12%;
+                left: 35%;
+            }
+        }
+
         p {
             display: block;
             -webkit-margin-before: 1em;
