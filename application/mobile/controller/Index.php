@@ -188,13 +188,9 @@ class Index extends MobileBase {
             ->group("g.goods_id")
             ->order('agentend_time')
             ->select();
-
-//        print_r(Db::table('contract')->getLastSql());exit;
         if(empty($list[0]['goods_id'])){
             $list =[];
         }
-       //dump($list);exit;
-//        $list = M('goods')->where($where)->field(['goods_id', 'goods_name', 'shop_price'])->page($p, $pagesize)->order($order)->select();
         $this->assign('list', $list);
         if (I('is_ajax')) {
             return $this->fetch('ajax_goods_list');//输出分页

@@ -1,0 +1,77 @@
+Think\Page::__set_state(array(
+   'firstRow' => 0,
+   'listRows' => 20,
+   'parameter' => 
+  array (
+    'm' => 'Admin',
+    'c' => 'User.User',
+    'a' => 'transfers',
+  ),
+   'totalRows' => 174,
+   'totalPages' => 9,
+   'rollPage' => 11,
+   'lastSuffix' => true,
+   'p' => 'p',
+   'url' => '',
+   'nowPage' => 1,
+   'config' => 
+  array (
+    'header' => '<span class="rows">共 %TOTAL_ROW% 条记录</span>',
+    'prev' => '上一页',
+    'next' => '下一页',
+    'first' => '首页',
+    'last' => '尾页',
+    'theme' => '%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END%',
+  ),
+))Think\Page::__set_state(array(
+   'firstRow' => 20,
+   'listRows' => 20,
+   'parameter' => 
+  array (
+    'm' => 'Admin',
+    'c' => 'User.User',
+    'a' => 'transfers',
+    'p' => '2',
+  ),
+   'totalRows' => 174,
+   'totalPages' => 9,
+   'rollPage' => 11,
+   'lastSuffix' => true,
+   'p' => 'p',
+   'url' => '',
+   'nowPage' => 2,
+   'config' => 
+  array (
+    'header' => '<span class="rows">共 %TOTAL_ROW% 条记录</span>',
+    'prev' => '上一页',
+    'next' => '下一页',
+    'first' => '首页',
+    'last' => '尾页',
+    'theme' => '%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END%',
+  ),
+))Think\Page::__set_state(array(
+   'firstRow' => 0,
+   'listRows' => 20,
+   'parameter' => 
+  array (
+    'm' => 'Admin',
+    'c' => 'User.User',
+    'a' => 'transfers',
+  ),
+   'totalRows' => 174,
+   'totalPages' => 9,
+   'rollPage' => 11,
+   'lastSuffix' => true,
+   'p' => 'p',
+   'url' => '',
+   'nowPage' => 1,
+   'config' => 
+  array (
+    'header' => '<span class="rows">共 %TOTAL_ROW% 条记录</span>',
+    'prev' => '上一页',
+    'next' => '下一页',
+    'first' => '首页',
+    'last' => '尾页',
+    'theme' => '%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END%',
+  ),
+))
