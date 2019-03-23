@@ -54,34 +54,64 @@ class User extends Base {
     public function myteam_shopping()
     {
         /*配置列表*/
-        $group_list = [
-            'shop_info' => '活动区',
-            'shop_proxy'  => '批发区',
-            'shop_integral' => '积分商城',
-        ];
-        $inc_type =  I('get.inc_type','shop_info');
-        $where['o.user_id']=I('user_id');
-        $where['o.pay_status']=1;
-        if($inc_type=='shop_integral'){
-            $where['o.type']=2;
-        }elseif($inc_type=='shop_proxy'){
-            $where['o.type']=0;
-        }else{
-            $where['o.type']=1;
+        // $group_list = [
+        //     'shop_info' => '活动区',
+        //     'shop_proxy'  => '批发区',
+        //     'shop_integral' => '积分商城',
+        // ];
+        // $inc_type =  I('get.inc_type','shop_info');
+
+        $userId = I('user_id');
+        $userIds = [];
+
+        if(I('key')) {
+            $userId = Db::name('users')->where('mobile', 'eq', I('key'))->getField('user_id');
+            $userIds[] = $userId;
+        } else {
+            if(I('id')) {
+                $userIds[] = I('id');
+            } else if(I('mobile')) {
+                $user = Db::name('users')->where('mobile='. I('mobile'))->find();;
+                $userIds[] = $user['user_id'];
+            } else {
+                $teamUserIds = Db::query('select user_id from tp_users where find_in_set(\''. $userId .'\', second_leader)');
+                foreach ($teamUserIds as $teamUserId) {
+                    $userIds[] = $teamUserId['user_id']; 
+                }
+            }
         }
+
+        $where['o.pay_status']=1;
+        // if($inc_type=='shop_integral'){
+        //     $where['o.type']=2;
+        // }elseif($inc_type=='shop_proxy'){
+        //     $where['o.type']=0;
+        // }else{
+        //     $where['o.type']=1;
+        // }
         $p = I('p')?:1;
-        $list = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->order('o.order_id asc')->page($p.',10')->field('o.*,g.*,count(g.goods_num) as num')->group('goods_name')->select();
-        $count = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->group('goods_name')->count();
-        $Page = new Page($count,10);
+        $d = 10;
+        $list = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->where('o.user_id', 'in', $userIds)->order('o.order_id asc')->page($p.','.$d)->field('o.*,g.*,count(g.goods_num) as num')->group('goods_name')->select();
+
+        foreach ($list as $key => &$value) {
+            
+            $value['nickname'] = Db::name('users')->where('user_id='.$value['user_id'])->field('nickname')->find()['nickname'];
+        }
+
+
+
+        $count = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->where('o.user_id', 'in', $userIds)->group('goods_name')->count();
+        $Page = new Page($count,$d);
         $show = $Page->show();
         $this->assign('user_id',I('user_id'));
         $this->assign('user',I('user'));
         $this->assign('list',$list);
+        $this->assign('kkk',I('key'));
         $this->assign('page',$show);
         $this->assign('group_list',$group_list);
         $this->assign('inc_type',$inc_type);
         $this->assign('count',$count);
-        return $this->fetch($inc_type);
+        return $this->fetch();
     }
 
     //会员列表

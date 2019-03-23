@@ -174,8 +174,9 @@ class Index extends MobileBase {
 //        //批发自转零售
 //        Db::name('goods')->where("status = 0 AND type_id = 6 AND UNIX_TIMESTAMP(agentend_time) <= UNIX_TIMESTAMP(NOW())")->update(['status'=>1]);
         $count = M('goods')->alias('g')->join('goods_setmeal s','g.goods_id = s.goods_id')->group('s.goods_id')->where($where)->count();// 查询满足要求的总记录数
-//        dump($count);exit;
-        $pagesize = C('PAGESIZE');  //每页显示数
+        // $pagesize = C('PAGESIZE');  //每页显示数
+        $pagesize = 30;  //每页显示数
+
         $p = I('p') ? I('p') : 1;
         $page = new Page($count, $pagesize); // 实例化分页类 传入总记录数和每页显示的记录数
         $show = $page->show();  // 分页显示输出
