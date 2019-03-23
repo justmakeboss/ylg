@@ -108,7 +108,7 @@ class User extends MobileBase
     public function sums($id, $level, $strid = '')
     {
 //        dump($strid);
-        $users = Db::name('users')->where("first_leader in($id) AND level <= $level")->column('user_id');
+        $users = Db::name('users')->where("first_leader in($id)")->column('user_id');
         $id = implode(',', $users);
         if (empty($strid)) {
             $strid = $id;
