@@ -93,6 +93,7 @@ class User extends MobileBase
         $frozen_money = Db::name('users')->where(['user_id' => $user_id])->value('frozen_money');
         $mobile = Db::name('users')->where(['user_id' => $user['result']['first_leader']])->value('mobile');
         $agentnum = $this->sums($user_id, $user['result']['level']);
+        $teamNum = $this->getTeamNum($user_id);
         $this->assign('mobile', $mobile);
         $this->assign('agentnum', $agentnum);
         $this->assign('frozen_money', $frozen_money);
@@ -100,8 +101,15 @@ class User extends MobileBase
         $this->assign('level_name', $level_name);
         $this->assign('comment_count', $comment_count);
         $this->assign('user', $user['result']);
+        $this->assign('teamNum', $teamNum);
         $this->assign('title', '个人中心');
         return $this->fetch();
+    }
+
+    public function getTeamNum($userId)
+    {
+        $myTeams = Db::name('users')->query("select * from tp_users where find_in_set('".$userId."',second_leader)");
+        return count($myTeams);
     }
 
     //统计比自身低级的业绩业绩
