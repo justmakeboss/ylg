@@ -102,9 +102,16 @@
                                 <div class="weui-celly" id="div2">
                                     <div class="weui-cell__hd">互转金额 </div>
                                 </div>
+
                                 <div class="weui-celly" id="div3">
                                     <div class="weui-cell__hd">备注</div>
                                 </div>
+                                <div class="weui-celly" id="div4">
+                                    <div class="weui-cell__hd">转给 </div>
+                                </div>
+                                <!-- <div class="weui-celly" id="div5">
+                                    <div class="weui-cell__hd">时间 </div>
+                                </div> -->
                             </div>
                             <p id="zzjz" style="text-align: center" hidden="">正在加载</p>
                             <p id="jzwc" style="text-align: center" hidden="">已经全部加载完了</p>
@@ -173,7 +180,9 @@ function gettab2(){
                      div1+='<div class="weui-cell__hd">互转时间 </div>';
                      div2+='<div class="weui-cell__hd">互转金额 </div>';
                      div3+='<div class="weui-cell__hd">备注</div>';
-                    $('#div1').html('');$('#div2').html('');$('#div3').html('');
+                     div4+='<div class="weui-cell__hd">转给</div>';
+                     // div5+='<div class="weui-cell__hd">时间</div>';
+                    $('#div1').html('');$('#div2').html('');$('#div3').html('');$('#div4').html('');
                 }
                 $.each(data,function(index,item){
                     if(data[index].userId==res.user_id){
@@ -183,9 +192,11 @@ function gettab2(){
                     }
                     div1+='<div class="weui-cell__hd">'+data[index].createTime+'</div>';
                     div2+='<div class="weui-cell__hd">'+data[index].money+'</div>';
+                    div4+='<div class="weui-cell__hd">'+data[index].toUser+'</div>';
+                    // div5+='<div class="weui-cell__hd">'+data[index].time+'</div>';
                     
                 })
-                $('#div1').append(div1);$('#div2').append(div2);$('#div3').append(div3);
+                $('#div1').append(div1);$('#div2').append(div2);$('#div3').append(div3);$('#div4').append(div4);
 
                 if(data.length==0){
                     $('#jzwc').show();

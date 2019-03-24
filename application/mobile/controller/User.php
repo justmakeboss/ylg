@@ -1880,6 +1880,7 @@ class User extends MobileBase
         $list = M('transfer')->where($withdrawals_where)->whereOr($where)->order("id desc")->limit($page * $list, $list)->select();
         foreach ($list as $key => $value) {
             $list[$key]['createTime'] = date('Y-m-d', strtotime($value['createTime']));
+            $list[$key]['toUser'] = Db::name('users')->where('user_id', $value['toUserId'])->value('nickname');
         }
         $this->ajaxReturn(['data' => $list, 'user_id' => $this->user_id]);
     }
@@ -3048,6 +3049,15 @@ class User extends MobileBase
     {
         $where['first_leader'] = $this->user_id;
         $logs = Db::name('users')->where($where)->order('user_id desc')->select();
+        foreach ($logs as &$log) {
+            $log['levelName'] = M('user_level')->where('level_id', 'eq', $log['level'])->value('level_name');
+            $myTeams = Db::name('users')->query("select * from tp_users where find_in_set('".$log['user_id']."',second_leader)");
+            $sum = 0;
+            foreach ($myTeams as $myTeam) {
+                $sum += $myTeam['monthly_performance'];
+            }
+            $log['teams_monthly_performance'] = $sum;
+        }
         $this->assign('list', $logs);
         $this->assign('count', count($logs));
         $this->assign('user_id', $this->user_id);
