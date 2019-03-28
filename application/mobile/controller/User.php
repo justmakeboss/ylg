@@ -15,6 +15,7 @@ use think\Page;
 use think\Request;
 use think\Verify;
 use think\db;
+use \think\Session;
 
 class User extends MobileBase
 {
@@ -347,6 +348,20 @@ class User extends MobileBase
         exit(json_encode($res));
     }
 
+    public function sendsms($mobile)
+    {       
+        $code = createnoncestr(4);
+        $content = '您的验证码是'.$code.',30秒内有效.若非本人操作请忽略此消息';
+        $b = smsbao($mobile, $content);
+        file_put_contents(ROOT_PATH.'public/debug.txt', date('Y-m-d H:i:s').':'. $b."\r\n", FILE_APPEND);
+        if($b == '短信发送成功') {
+            Session::set('verify_code', $code);
+            $this->ajaxReturn(['msg' => '短信发送成功']);
+        } else {
+            $this->ajaxReturn(['msg' => '短信发送失败，请联系管理员']);
+        }
+    }
+
     /**
      *  注册
      */
@@ -364,6 +379,7 @@ class User extends MobileBase
             if (!empty($d) && time() - session("reg") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
+
             session("reg", time());
             $logic = new UsersLogic();
             //验证码检验
@@ -389,16 +405,29 @@ class User extends MobileBase
             if ($password == $paypwd) {
                 $this->ajaxReturn(['msg' => '登录密码和安全密码不能相同']);
             }
+
+            //验证短信验证码
+            $verify_code = I('post.verify_code', '');
+            if($verify_code == '') {
+                $this->ajaxReturn(['msg'=>'请输入短信验证码']);
+            }
+
+            $sessionVerifyCode = session('verify_code');
+
+            if($sessionVerifyCode != $verify_code) {
+                $this->ajaxReturn(['msg'=>'短信验证码不正确']);
+            }
+
             //是否开启注册验证码机制
-            /*if(check_mobile($username)){
-                if($reg_sms_enable){
-                    //手机功能没关闭
-                    $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
-                    if($check_code['status'] != 1){
-                        $this->ajaxReturn($check_code);
-                    }
-                }
-            }*/
+            // if(check_mobile($username)){
+            //     if($reg_sms_enable){
+            //         //手机功能没关闭
+            //         $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
+            //         if($check_code['status'] != 1){
+            //             $this->ajaxReturn($check_code);
+            //         }
+            //     }
+            // }
             $count = Db::name("users")->where('mobile', $username)->count();
             //账号已存在
             if (!empty($count)) {
@@ -499,6 +528,10 @@ class User extends MobileBase
                 }
 
                 Db::commit();
+                $config = tpCache('ylg_spstem_role');
+                $b = smsbao($data['mobile'], $config['smsbao']);
+                file_put_contents(ROOT_PATH.'public/reg.txt', date('Y-m-d H:i:s').': '.$data['mobile']."$b:".$b."\r\n",8);
+
                 $this->ajaxReturn(['msg' => '注册成功！', 'status' => 1]);
             } else {
                 Db::rollback();
@@ -864,8 +897,8 @@ class User extends MobileBase
             I('post.district') ? $post['district'] = I('post.district') : false;  //地区
             I('post.email') ? $post['email'] = I('post.email') : false; //邮箱
             I('post.mobile') ? $post['mobile'] = I('post.mobile') : false; //手机
-//            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
-//            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
+           I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
+           I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
 
             if ($post['sex']) {
                 switch ($post['sex']) {
@@ -885,7 +918,7 @@ class User extends MobileBase
             }
             $email = I('post.email');
             $mobile = I('post.mobile');
-//            $aliNo = I('post.ali_no');
+            $aliNo = I('post.ali_no');
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 6);
             $wx_code = I('post.wx_codes');
@@ -911,10 +944,10 @@ class User extends MobileBase
                 }
             }
 
-//            if(!empty($aliNo)) {
-//                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
-//                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
-//            }
+           if(!empty($aliNo)) {
+               $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
+               $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
+           }
 
             if (!empty($mobile)) {
                 $c = M('users')->where(['mobile' => input('post.mobile'), 'user_id' => ['<>', $this->user_id]])->count();

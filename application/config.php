@@ -372,6 +372,10 @@ return [
         '4'=>array('身份升级上级消息','恭喜您的好友 $nickname 成为智慧术网红$level $rn时间：$add_time','update_level_leader_msg_enable'),
         '5'=>array('奖项消息','佣金提醒 $rn恭喜您获得智慧术网红分享金（$prize)，请您注意查收哦！加油啊棒棒哒！$rn佣金金额:$money $rn时间：$add_time','prize_msg_enable'),
     ),
+    'smsbao' => array(
+        'user' => '',
+        'pwd' =>'',
+    ),
 
     'APP_TOKEN_TIME' => 60 * 60 * 24 , //App保持token时间 , 此处为1天
 

@@ -15,9 +15,15 @@
                         
                     </div>
                     <div class="lsu" style="height:2.83467rem  "><span>账号类型：</span>
-                        <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;"  value="支付宝">支付宝
+                        <label>
+                            <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;"  value="支付宝">支付宝
+                        </label>
+                        
                         <!--<input type="radio" name="atype" style="width:.8rem;height:1rem;" value="微信">微信-->
-                        <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;" value="银行卡" checked>银行卡
+                        <label>
+                            <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;" value="银行卡" checked>银行卡
+                        </label>
+                        
                     </div>
                     
                     <div class="lsu lsu-recharge">
@@ -26,15 +32,15 @@
                     </div>
                     <div class="lsu lsu-recharge">
                         <span>银行名称：</span>
-                        <input type="text" name="bank_name" id="bank_name" value="{$wx_code.bank}" placeholder="如：工商银行">
+                        <input type="text" name="bank_name" id="bank_name" value="{$wx_code.bank}" placeholder="如：工商银行" readonly="readonly">
                     </div>
 					<div class="lsu lsu-recharge">
 						<span>收款账号：</span>
-						<input type="text" name="bank_card" id="bank_card" value="{$wx_code.bank_num}" placeholder="收款账号" onKeyUp="this.value=this.value.replace(/[^\d]/g,'')">
+						<input type="text" name="bank_card" id="bank_card" value="{$wx_code.bank_num}" placeholder="收款账号" onKeyUp="this.value=this.value.replace(/[^\d]/g,'')" readonly="readonly">
 					</div>
 					<div class="lsu lsu-recharge">
 						<span>开 户 名：</span>
-						<input type="text" name="realname" id="realname" value="{$wx_code.bank_name}" value=""  placeholder="持卡人姓名">
+						<input type="text" name="realname" id="realname" value="{$wx_code.bank_name}" value=""  placeholder="持卡人姓名" readonly="readonly">
 					</div>
                     <div class="lsu lsu-recharge">
                         <span>安全密码：</span>
@@ -76,7 +82,7 @@
             return false;
         }*/
         if(bank_name == '' || bank_card == '' || realname=='' || money === '' || paypwd === ''){
-            showErrorMsg("所有信息为必填")
+            showErrorMsg("所有信息为必填,请到个人信息填写银行卡信息，修改后不可更改！！")
             return false;
         }
         if(money > usermoney){

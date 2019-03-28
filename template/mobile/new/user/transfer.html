@@ -234,7 +234,7 @@ var loading = false;  //状态标记
         var paypwd= $.trim($('#paypwd').val());
 
         if(bank_name == '' ||  money == '' || paypwd == ''){
-            showErrorMsg("所有信息为必填")
+            showErrorMsg("所有信息为必填,请到个人信息填写银行卡信息，一旦更改信息不可修改！！")
             return false;
         }
         if(money > usermoney){
