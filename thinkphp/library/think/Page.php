@@ -92,6 +92,12 @@ class Page{
         /* 生成URL */
         $this->parameter[$this->p] = '[PAGE]';
         $this->url = U(ACTION_NAME, $this->parameter);
+        //大小写转换
+        $url2=explode('/', $this->url);
+        if($url2){
+            $url2[3]=ucfirst($url2[3]);
+            $this->url = implode('/',$url2);
+        }
         if(!empty($this->totalPages) && $this->nowPage > $this->totalPages) {
             $this->nowPage = $this->totalPages;
         }
