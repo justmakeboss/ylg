@@ -337,6 +337,7 @@ function upgrade($user, $level)
 
 function alphaID($in, $to_num = false, $pad_up = false, $passKey = null)
 {
+    return 1;
     $index = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     if ($passKey !== null) {
         // Although this function's purpose is to just make the

@@ -81,7 +81,7 @@
                             <div style="text-align: center; width: 100px;" class="">余额</div>
                         </th>
                         <th align="center" abbr="frozen_money" axis="col6" class="">
-                            <div style="text-align: center; width: 100px;" class="">配额</div>
+                            <div style="text-align: center; width: 100px;" class="">批发票</div>
                         </th>
                         <th align="center" abbr="distribut_money" axis="col6" class="">
                             <div style="text-align: center; width: 100px;" class="">消费积分</div>
@@ -265,7 +265,6 @@
         } else {
             // layer.alert('请选择搜索条件', {icon: 2});
         }
-        //console.log($('#'+tab).serialize());
         cur_page = page; //当前页面 保存为全局变量
         $.ajax({
             type : "POST",
