@@ -139,7 +139,7 @@
     {
         $.ajax({
             type:'POST',
-            url:"/index.php?m=Mobile&c=User&a=reg",
+            url:"?m=Mobile&c=User&a=reg",
             dataType:'JSON',
             data:$('#regFrom').serialize(),
             success:function(data){
@@ -270,31 +270,32 @@
     }
 
 
-    function sendcode(obj){
-        if(flag){
-            $.ajax({
-                url:'/index.php?m=Mobile&c=User&a=sendsms&t='+Math.random() ,
-                type:'post',
-                dataType:'json',
-                data:{type:$(obj).attr('rel'),send:$.trim($('#username').val()), scene:1},
-                success:function(res){
-                    if(res.status==1){
-                        //成功
-                        countdown(obj)
-                        showErrorMsg(res.msg);
-                    }else{
-                        //失败
-                        showErrorMsg(res.msg);
-                    }
-                }
-            })
-        }else{
-            showErrorMsg('请输入手机号！');
-        }
-    }
+    // function sendcode(obj){
+    //     if(flag){
+    //
+    //         $.ajax({
+    //             url:'?m=Mobile&c=User&a=sendsms&t='+Math.random() ,
+    //             type:'post',
+    //             dataType:'json',
+    //             data:{type:$(obj).attr('rel'),send:$.trim($('#username').val()), scene:1},
+    //             success:function(res){
+    //                 if(res.status==1){
+    //                     //成功
+    //                     countdown(obj)
+    //                     showErrorMsg(res.msg);
+    //                 }else{
+    //                     //失败
+    //                     showErrorMsg(res.msg);
+    //                 }
+    //             }
+    //         })
+    //     }else{
+    //         showErrorMsg('请输入手机号！');
+    //     }
+    // }
 
     //发送短信验证码
-    function sendcode44(obj){
+    function sendcode(obj){
         if(flag){
             $.ajax({
                 url:'/index.php?m=Home&c=Api&a=send_validate_code&t='+Math.random() ,

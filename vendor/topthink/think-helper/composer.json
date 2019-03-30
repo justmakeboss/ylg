@@ -11,9 +11,6 @@
     "autoload": {
         "psr-4": {
             "think\\helper\\": "src"
-        },
-        "files": [
-            "src/helper.php"
-        ]
+        }
     }
 }

@@ -15,7 +15,6 @@ use think\Page;
 use think\Request;
 use think\Verify;
 use think\db;
-use \think\Session;
 
 class User extends MobileBase
 {
@@ -348,20 +347,6 @@ class User extends MobileBase
         exit(json_encode($res));
     }
 
-    public function sendsms($mobile)
-    {       
-        $code = createnoncestr(4);
-        $content = '您的验证码是'.$code.',30秒内有效.若非本人操作请忽略此消息';
-        $b = smsbao($mobile, $content);
-        file_put_contents(ROOT_PATH.'public/debug.txt', date('Y-m-d H:i:s').':'. $b."\r\n", FILE_APPEND);
-        if($b == '短信发送成功') {
-            Session::set('verify_code', $code);
-            $this->ajaxReturn(['msg' => '短信发送成功']);
-        } else {
-            $this->ajaxReturn(['msg' => '短信发送失败，请联系管理员']);
-        }
-    }
-
     /**
      *  注册
      */
@@ -379,7 +364,6 @@ class User extends MobileBase
             if (!empty($d) && time() - session("reg") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
             }
-
             session("reg", time());
             $logic = new UsersLogic();
             //验证码检验
@@ -405,29 +389,16 @@ class User extends MobileBase
             if ($password == $paypwd) {
                 $this->ajaxReturn(['msg' => '登录密码和安全密码不能相同']);
             }
-
-            //验证短信验证码
-            $verify_code = I('post.verify_code', '');
-            if($verify_code == '') {
-                $this->ajaxReturn(['msg'=>'请输入短信验证码']);
-            }
-
-            $sessionVerifyCode = session('verify_code');
-
-            if($sessionVerifyCode != $verify_code) {
-                $this->ajaxReturn(['msg'=>'短信验证码不正确']);
-            }
-
             //是否开启注册验证码机制
-            // if(check_mobile($username)){
-            //     if($reg_sms_enable){
-            //         //手机功能没关闭
-            //         $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
-            //         if($check_code['status'] != 1){
-            //             $this->ajaxReturn($check_code);
-            //         }
-            //     }
-            // }
+            /*if(check_mobile($username)){
+                if($reg_sms_enable){
+                    //手机功能没关闭
+                    $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
+                    if($check_code['status'] != 1){
+                        $this->ajaxReturn($check_code);
+                    }
+                }
+            }*/
             $count = Db::name("users")->where('mobile', $username)->count();
             //账号已存在
             if (!empty($count)) {
@@ -528,10 +499,6 @@ class User extends MobileBase
                 }
 
                 Db::commit();
-                $config = tpCache('ylg_spstem_role');
-                $b = smsbao($data['mobile'], $config['smsbao']);
-                file_put_contents(ROOT_PATH.'public/reg.txt', date('Y-m-d H:i:s').': '.$data['mobile']."$b:".$b."\r\n",8);
-
                 $this->ajaxReturn(['msg' => '注册成功！', 'status' => 1]);
             } else {
                 Db::rollback();
@@ -1696,6 +1663,9 @@ class User extends MobileBase
                 $this->ajaxReturn(['status'=>0,'msg'=>'验证码错误']);
             };*/
 
+            if($this->user['is_lock'] == 1) {
+                $this->ajaxReturn(['status'=>0,'msg'=>'提现被管理员禁止，请联系管理员']);
+            }
 
             //生产订单号
             $time = date("YmdHis");
@@ -1792,6 +1762,12 @@ class User extends MobileBase
         return $this->fetch();
     }
 
+
+    public function sendsms()
+    {
+        dump(34);die;
+    }
+
     /**
      * 申请记录列表
      */
@@ -1859,6 +1835,30 @@ class User extends MobileBase
                 $this->ajaxReturn(['status' => 0, 'msg' => '不能转给自己']);
                 exit;
             }
+
+            if($user2['is_lock'] == 1) {
+                $this->ajaxReturn(['status' => 0, 'msg' => '对方资金被冻结']);
+                exit;
+            }
+
+            if($this->user['is_lock'] == 1) {
+                $this->ajaxReturn(['status' => 0, 'msg' => '您的资金被冻结，请联系管理员']);
+                exit;
+            }
+
+            //所有上級ID
+            $leaderIds = explode(',', $this->user['second_leader']);
+            $downUsers = Db::query("select user_id from tp_users where find_in_set('".$this->user_id."', second_leader)");
+            $downUserIds = [];
+            foreach ($downUsers as $downUser) {
+                array_push($downUserIds, (int)$downUser['user_id']);
+            }
+            $upAndDownUserIds = array_merge($leaderIds, $downUserIds);
+            if(!in_array($user2['user_id'], $upAndDownUserIds)) {
+                $this->ajaxReturn(['status' => 0, 'msg' => "非上下級关系"]);
+                exit;
+            }
+
             if (($data['money'] * (1 + $commodity)) > $this->user['user_money']) {
                 $this->ajaxReturn(['status' => 0, 'msg' => "余额不足,无法支付手续费"]);
                 exit;
@@ -1920,7 +1920,7 @@ class User extends MobileBase
         $where['toUserId'] = $this->user_id;
         $list = M('transfer')->where($withdrawals_where)->whereOr($where)->order("id desc")->limit($page * $list, $list)->select();
         foreach ($list as $key => $value) {
-            $list[$key]['createTime'] = date('Y-m-d', strtotime($value['createTime']));
+            $list[$key]['createTime'] = date('Y-m-d H:i:s', strtotime($value['createTime']));
             $list[$key]['toUser'] = Db::name('users')->where('user_id', $value['toUserId'])->value('nickname');
         }
         $this->ajaxReturn(['data' => $list, 'user_id' => $this->user_id]);

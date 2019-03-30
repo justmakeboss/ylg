@@ -19,10 +19,9 @@ class Time
      */
     public static function today()
     {
-        list($y, $m, $d) = explode('-', date('Y-m-d'));
         return [
-            mktime(0, 0, 0, $m, $d, $y),
-            mktime(23, 59, 59, $m, $d, $y)
+            mktime(0, 0, 0, date('m'), date('d'), date('Y')),
+            mktime(23, 59, 59, date('m'), date('d'), date('Y'))
         ];
     }
 
@@ -47,10 +46,10 @@ class Time
      */
     public static function week()
     {
-        list($y, $m, $d, $w) = explode('-', date('Y-m-d-w'));
-        if($w == 0) $w = 7; //修正周日的问题
+        $timestamp = time();
         return [
-            mktime(0, 0, 0, $m, $d - $w + 1, $y), mktime(23, 59, 59, $m, $d - $w + 7, $y)
+            strtotime(date('Y-m-d', strtotime("+0 week Monday", $timestamp))),
+            strtotime(date('Y-m-d', strtotime("+0 week Sunday", $timestamp))) + 24 * 3600 - 1
         ];
     }
 
@@ -75,10 +74,9 @@ class Time
      */
     public static function month($everyDay = false)
     {
-        list($y, $m, $t) = explode('-', date('Y-m-t'));
         return [
-            mktime(0, 0, 0, $m, 1, $y),
-            mktime(23, 59, 59, $m, $t, $y)
+            mktime(0, 0, 0, date('m'), 1, date('Y')),
+            mktime(23, 59, 59, date('m'), date('t'), date('Y'))
         ];
     }
 
@@ -89,10 +87,8 @@ class Time
      */
     public static function lastMonth()
     {
-        $y = date('Y');
-        $m = date('m');
-        $begin = mktime(0, 0, 0, $m - 1, 1, $y);
-        $end = mktime(23, 59, 59, $m - 1, date('t', $begin), $y);
+        $begin = mktime(0, 0, 0, date('m') - 1, 1, date('Y'));
+        $end = mktime(23, 59, 59, date('m') - 1, date('t', $begin), date('Y'));
 
         return [$begin, $end];
     }
@@ -104,10 +100,9 @@ class Time
      */
     public static function year()
     {
-        $y = date('Y');
         return [
-            mktime(0, 0, 0, 1, 1, $y),
-            mktime(23, 59, 59, 12, 31, $y)
+            mktime(0, 0, 0, 1, 1, date('Y')),
+            mktime(23, 59, 59, 12, 31, date('Y'))
         ];
     }
 

@@ -54,64 +54,39 @@ class User extends Base {
     public function myteam_shopping()
     {
         /*配置列表*/
-        // $group_list = [
-        //     'shop_info' => '活动区',
-        //     'shop_proxy'  => '批发区',
-        //     'shop_integral' => '积分商城',
-        // ];
-        // $inc_type =  I('get.inc_type','shop_info');
-
+        $group_list = [
+            'myteam_shop_info' => '活动区',
+            'myteam_shop_proxy'  => '批发区',
+            'myteam_shop_integral' => '积分商城',
+        ];
+        $inc_type =  I('get.inc_type','myteam_shop_integral');
         $userId = I('user_id');
-        $userIds = [];
-
-        if(I('key')) {
-            $userId = Db::name('users')->where('mobile', 'eq', I('key'))->getField('user_id');
-            $userIds[] = $userId;
-        } else {
-            if(I('id')) {
-                $userIds[] = I('id');
-            } else if(I('mobile')) {
-                $user = Db::name('users')->where('mobile='. I('mobile'))->find();;
-                $userIds[] = $user['user_id'];
-            } else {
-                $teamUserIds = Db::query('select user_id from tp_users where find_in_set(\''. $userId .'\', second_leader)');
-                foreach ($teamUserIds as $teamUserId) {
-                    $userIds[] = $teamUserId['user_id']; 
-                }
-            }
+        $downUsers = Db::query("select user_id from tp_users where find_in_set('{$userId}', second_leader)");
+        $downUserIds = [];
+        foreach ($downUsers as $downUser) {
+            $downUserIds[] = $downUser['user_id'];
         }
-
         $where['o.pay_status']=1;
-        // if($inc_type=='shop_integral'){
-        //     $where['o.type']=2;
-        // }elseif($inc_type=='shop_proxy'){
-        //     $where['o.type']=0;
-        // }else{
-        //     $where['o.type']=1;
-        // }
-        $p = I('p')?:1;
-        $d = 10;
-        $list = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->where('o.user_id', 'in', $userIds)->order('o.order_id asc')->page($p.','.$d)->field('o.*,g.*,count(g.goods_num) as num')->group('goods_name')->select();
-
-        foreach ($list as $key => &$value) {
-            
-            $value['nickname'] = Db::name('users')->where('user_id='.$value['user_id'])->field('nickname')->find()['nickname'];
+        if($inc_type=='myteam_shop_integral'){
+            $where['o.type']=2;
+        }elseif($inc_type=='myteam_shop_proxy'){
+            $where['o.type']=0;
+        }else{
+            $where['o.type']=1;
         }
-
-
-
-        $count = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->where('o.user_id', 'in', $userIds)->group('goods_name')->count();
-        $Page = new Page($count,$d);
+        $p = I('p')?:1;
+        $list = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->join('tp_users u', 'u.user_id=o.user_id', 'left')->where($where)->whereIn('o.user_id', $downUserIds)->order('o.order_id asc')->page($p.',10')->field('o.*,g.*,count(g.goods_num) as num,u.mobile,u.nickname')->group('goods_name')->select();
+        $count = Db::name('order')->alias('o')->join('tp_order_goods g','g.order_id=o.order_id','left')->where($where)->whereIn('o.user_id', $downUserIds)->group('goods_name')->count();
+        $Page = new Page($count,10);
         $show = $Page->show();
         $this->assign('user_id',I('user_id'));
         $this->assign('user',I('user'));
         $this->assign('list',$list);
-        $this->assign('kkk',I('key'));
         $this->assign('page',$show);
         $this->assign('group_list',$group_list);
         $this->assign('inc_type',$inc_type);
         $this->assign('count',$count);
-        return $this->fetch();
+        return $this->fetch($inc_type);
     }
 
     //会员列表
@@ -173,7 +148,6 @@ class User extends Base {
         $inc_type='ylg_spstem_role';
         if(IS_POST){
             $param = I('post.');
-//            dump($param);exit;
             if($param['push'] && $param['return_numbers']){
                 foreach($param['push'] as $key=>$val){
                     $result['pushs'][$key]['sales']  = $val;
@@ -210,11 +184,13 @@ class User extends Base {
         I('second_leader') && ($condition['second_leader'] = I('second_leader')); // 查看二级下线人有哪些
         I('third_leader') && ($condition['third_leader'] = I('third_leader')); // 查看三级下线人有哪些
         $sort_order = I('order_by').' '.I('sort');
+        if(trim($sort_order) == '') {
+            $sort_order = 'user_id desc';
+        }
 //        dump($condition);die;
         $model = M('users');
         $count = $model->where($condition)->count();
         $Page  = new AjaxPage($count,10);
-
         $userList = $model->where($condition)->order($sort_order)->limit($Page->firstRow.','.$Page->listRows)->select();
         //  搜索条件下 分页赋值
         foreach($condition as $key=>$val) {
@@ -264,7 +240,6 @@ class User extends Base {
         I('third_leader') && ($condition['third_leader'] = I('third_leader')); // 查看三级下线人有哪些
         $sort_order = I('order_by').' '.I('sort');
         $condition['level']=4;
-//        dump($condition);die;
         $model = M('users');
         $count = $model->where($condition)->count();
         $Page  = new AjaxPage($count,10);
@@ -782,7 +757,6 @@ class User extends Base {
 //                    exit($this->error($result['status']));
 //                }
 //            }
-
             $row = $user_model->where(['user_id'=>$uid])->save($data);
             if($row)
                 exit($this->success('修改成功'));
@@ -2282,8 +2256,6 @@ exit("功能正在开发中。。。");
             default:
                 break;
         }
-//        dump($where);
-//        dump($search_key);
         $ctime = urldecode(I('ctime'));
         if ($ctime) {
             $gap = explode(' - ', $ctime);

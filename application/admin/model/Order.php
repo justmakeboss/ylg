@@ -13,7 +13,7 @@ class Order extends Model {
     public function getUserCurMonthShoppingTimes($userId)
     {
         $currMonthFirstDay = strtotime(getCurMonthFirstDay(date('Y-m-d')));
-        $currMonthLastDay = strtotime(getCurMonthLastDay());
+        $currMonthLastDay = strtotime(getCurMonthLastDay(date('Y-m-d')));
         return M('order')->where(['user_id' => $userId,'pay_status' => 1,'pay_time' => ['>=', $currMonthFirstDay], 'pay_time' => ['<', $currMonthLastDay], 'type' => 1])->count();
     }
 

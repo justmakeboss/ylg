@@ -22,7 +22,7 @@ class Base extends Controller {
         $navigate_admin = navigate_admin();
         $this->assign('navigate_admin',$navigate_admin);
         tpversion();
-   }
+    }
 
     /*
      * 初始化操作
@@ -33,7 +33,7 @@ class Base extends Controller {
         if(in_array(ACTION_NAME,array('login','suppliers_login','logout','vertify'))){
         	//return;
         }else{
-        	if(session('admin_id') > 0 || session('suppliers_id') > 0){
+            if(session('admin_id') > 0 || session('suppliers_id') > 0){
         		$this->check_priv();//检查管理员菜单操作权限
         	}else{
         		$this->error('请先登录',U('Systems.Admin/login'),1);
@@ -65,7 +65,7 @@ class Base extends Controller {
 		$uneed_check = array('login','suppliers_login','logout','vertifyHandle','vertify','imageUp','upload','login_task');
     	if($ctl == 'Index' || $act_list == 'all'){
     		//后台首页控制器无需验证,超级管理员无需验证
-    		return true;
+            return true;
     	}elseif(request()->isAjax() || strpos($act,'ajax')!== false || in_array($act,$uneed_check)){
     		//所有ajax请求不需要验证权限
     		return true;
