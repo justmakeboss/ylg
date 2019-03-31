@@ -364,7 +364,7 @@ $goodslist = Db::name('agent_order')->alias('a')
                         break;
                     }
                 }
-                $goodslist[$k]['add_time'] = date('Y-m-d H:i:s',$v['add_time']);
+                $goodslist[$k]['add_time'] = date('m-d H:i:s',$v['add_time']);
             }
             $data['data'] = $goodslist;
             $data['code'] = 1;
@@ -662,7 +662,7 @@ $goodslist = Db::name('agent_order')->alias('a')
             foreach ($goodslist as $k => $v) {
                 $d = Db::name('goods_consignments')->where('gid='.$v['id'])->find();;
                 $goodslist[$k]['status'] = $d['five_status'] == 0 ? '进行中' :'已完成';
-                $goodslist[$k]['create_time'] = date('Y-m-d H:i:s',strtotime($v['create_time']));
+                $goodslist[$k]['create_time'] = date('m-d H:i:s',strtotime($v['create_time']));
                 $setmeal = Db::name('goods_setmeal')->where('goods_id', $v['goods_id'])->select();
                 for ($i = 0; $i < 5; $i++) {
                     if ($setmeal[$i]['id'] == $v['setmeal_id']) {

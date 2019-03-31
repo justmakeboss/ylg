@@ -390,7 +390,7 @@ class User extends MobileBase
                 $this->ajaxReturn(['msg' => '登录密码和安全密码不能相同']);
             }
             //是否开启注册验证码机制
-            /*if(check_mobile($username)){
+            if(check_mobile($username)){
                 if($reg_sms_enable){
                     //手机功能没关闭
                     $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
@@ -398,7 +398,7 @@ class User extends MobileBase
                         $this->ajaxReturn($check_code);
                     }
                 }
-            }*/
+            }
             $count = Db::name("users")->where('mobile', $username)->count();
             //账号已存在
             if (!empty($count)) {
@@ -1875,7 +1875,7 @@ class User extends MobileBase
                     "toUserId" => $user2['user_id'],
                     "money" => $num,
                     "toUserAccount" => $user2['mobile'],
-                    "createTime" => date('Y-m-d H:i:s')
+                    "createTime" => date('m-d H:i:s')
                 );
                 $res = M("transfer")->add($data2);//添加转让
                 //转出
