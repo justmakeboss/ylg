@@ -210,6 +210,7 @@ class Index extends MobileBase
 //        }
         $count = M('goods')->where($where)->count();// 查询满足要求的总记录数
         $pagesize = C('PAGESIZE');  //每页显示数
+        $pagesize = 10000000;  //每页显示数
         $p = I('p') ? I('p') : 1;
         $page = new Page($count, $pagesize); // 实例化分页类 传入总记录数和每页显示的记录数
         $show = $page->show();  // 分页显示输出
