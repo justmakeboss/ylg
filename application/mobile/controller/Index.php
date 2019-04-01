@@ -223,7 +223,7 @@ class Index extends MobileBase
             ->page($p, $pagesize)
             ->group('g.goods_id')
             ->select();
-//        dump($list);exit;
+
         $this->assign('list', $list);
 
         if (I('is_ajax')) {
