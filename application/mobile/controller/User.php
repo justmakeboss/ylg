@@ -390,7 +390,7 @@ class User extends MobileBase
                 $this->ajaxReturn(['msg' => '登录密码和安全密码不能相同']);
             }
             //是否开启注册验证码机制
-            /*if(check_mobile($username)){
+            if(check_mobile($username)){
                 if($reg_sms_enable){
                     //手机功能没关闭
                     $check_code = $logic->check_validate_code($code, $username, 'phone', $session_id, $scene);
@@ -398,7 +398,7 @@ class User extends MobileBase
                         $this->ajaxReturn($check_code);
                     }
                 }
-            }*/
+            }
             $count = Db::name("users")->where('mobile', $username)->count();
             //账号已存在
             if (!empty($count)) {
@@ -864,8 +864,8 @@ class User extends MobileBase
             I('post.district') ? $post['district'] = I('post.district') : false;  //地区
             I('post.email') ? $post['email'] = I('post.email') : false; //邮箱
             I('post.mobile') ? $post['mobile'] = I('post.mobile') : false; //手机
-//            I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
-//            I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
+           I('post.ali_no') ? $post['ali_no'] = I('post.ali_no') : false; //支付宝账号
+           I('post.ali_name') ? $post['ali_name'] = I('post.ali_name') : false; //支付宝姓名
 
             if ($post['sex']) {
                 switch ($post['sex']) {
@@ -885,7 +885,7 @@ class User extends MobileBase
             }
             $email = I('post.email');
             $mobile = I('post.mobile');
-//            $aliNo = I('post.ali_no');
+            $aliNo = I('post.ali_no');
             $code = I('post.mobile_code', '');
             $scene = I('post.scene', 6);
             $wx_code = I('post.wx_codes');
@@ -911,10 +911,10 @@ class User extends MobileBase
                 }
             }
 
-//            if(!empty($aliNo)) {
-//                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
-//                $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
-//            }
+           if(!empty($aliNo)) {
+               $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
+               $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
+           }
 
             if (!empty($mobile)) {
                 $c = M('users')->where(['mobile' => input('post.mobile'), 'user_id' => ['<>', $this->user_id]])->count();
@@ -1663,6 +1663,9 @@ class User extends MobileBase
                 $this->ajaxReturn(['status'=>0,'msg'=>'验证码错误']);
             };*/
 
+            if($this->user['is_lock'] == 1) {
+                $this->ajaxReturn(['status'=>0,'msg'=>'提现被管理员禁止，请联系管理员']);
+            }
 
             //生产订单号
             $time = date("YmdHis");
@@ -1759,6 +1762,12 @@ class User extends MobileBase
         return $this->fetch();
     }
 
+
+    public function sendsms()
+    {
+        dump(34);die;
+    }
+
     /**
      * 申请记录列表
      */
@@ -1826,6 +1835,30 @@ class User extends MobileBase
                 $this->ajaxReturn(['status' => 0, 'msg' => '不能转给自己']);
                 exit;
             }
+
+            if($user2['is_lock'] == 1) {
+                $this->ajaxReturn(['status' => 0, 'msg' => '对方资金被冻结']);
+                exit;
+            }
+
+            if($this->user['is_lock'] == 1) {
+                $this->ajaxReturn(['status' => 0, 'msg' => '您的资金被冻结，请联系管理员']);
+                exit;
+            }
+
+            //所有上級ID
+            $leaderIds = explode(',', $this->user['second_leader']);
+            $downUsers = Db::query("select user_id from tp_users where find_in_set('".$this->user_id."', second_leader)");
+            $downUserIds = [];
+            foreach ($downUsers as $downUser) {
+                array_push($downUserIds, (int)$downUser['user_id']);
+            }
+            $upAndDownUserIds = array_merge($leaderIds, $downUserIds);
+            if(!in_array($user2['user_id'], $upAndDownUserIds)) {
+                $this->ajaxReturn(['status' => 0, 'msg' => "非上下級关系"]);
+                exit;
+            }
+
             if (($data['money'] * (1 + $commodity)) > $this->user['user_money']) {
                 $this->ajaxReturn(['status' => 0, 'msg' => "余额不足,无法支付手续费"]);
                 exit;
@@ -1842,7 +1875,7 @@ class User extends MobileBase
                     "toUserId" => $user2['user_id'],
                     "money" => $num,
                     "toUserAccount" => $user2['mobile'],
-                    "createTime" => date('Y-m-d H:i:s')
+                    "createTime" => date('m-d H:i:s')
                 );
                 $res = M("transfer")->add($data2);//添加转让
                 //转出
@@ -1887,7 +1920,7 @@ class User extends MobileBase
         $where['toUserId'] = $this->user_id;
         $list = M('transfer')->where($withdrawals_where)->whereOr($where)->order("id desc")->limit($page * $list, $list)->select();
         foreach ($list as $key => $value) {
-            $list[$key]['createTime'] = date('Y-m-d', strtotime($value['createTime']));
+            $list[$key]['createTime'] = date('Y-m-d H:i:s', strtotime($value['createTime']));
             $list[$key]['toUser'] = Db::name('users')->where('user_id', $value['toUserId'])->value('nickname');
         }
         $this->ajaxReturn(['data' => $list, 'user_id' => $this->user_id]);

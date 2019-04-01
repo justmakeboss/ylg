@@ -1,5 +1,4 @@
 <?php
-ini_set('date.timezone','Asia/Shanghai');
 
 // [ 应用入口文件 ]
 // 应用入口文件
@@ -7,6 +6,8 @@ if (extension_loaded('zlib')){
     ob_end_clean();
     ob_start('ob_gzhandler');
 }
+
+//error_reporting(E_ALL);
 // 检测PHP环境
 if(version_compare(PHP_VERSION,'5.4.0','<'))  die('require PHP > 5.4.0 !');
 //error_reporting(E_ALL ^ E_NOTICE);//显示除去 E_NOTICE 之外的所有错误信息

@@ -111,7 +111,6 @@ class Api extends Base {
         $mobile = !empty($mobile) ?  $mobile : $sender ;
         $session_id = I('unique_id' , session_id());
         session("scene" , $scene);
-
         //注册
         if($scene == 1 && !empty($verify_code)){
             $verify = new Verify();

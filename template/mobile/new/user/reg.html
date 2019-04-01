@@ -7,7 +7,22 @@
         height: 2.9rem;
         color: white;
         border-radius: .128rem;
+        display: block;
     }
+
+    .sd-btn {
+        width: 27%;
+        font-size: 0.64rem;
+        margin: -8px;
+        position: absolute;
+        left: 20px;
+    }
+    .sd-input {
+        position: absolute;
+        left:40%;
+        display: inline-block;
+    }
+
 </style>
 <div class="logo-wrap-bg">
     <a class="login-logo-wrap" href="#">
@@ -23,13 +38,13 @@
             <input type="text" name="username" id="username" value="" placeholder="请输入手机号"  class="c-form-txt-normal" onBlur="checkMobilePhone(this.value);">
             <span id="mobile_phone_notice"></span>
         </div>
-        <!-- <if condition="$regis_sms_enable eq 1">
+        <if condition="$regis_sms_enable eq 1">
             <div class="lsu">
                 <span class="ico ico-v-code"></span>
                 <input class="v-code-input" type="text" id="mobile_code" value="" name="mobile_code" placeholder="请输入验证码" >
                 <a class="btn-text-message" rel="mobile" onClick="sendcode(this)">获取验证码</a>
             </div>
-        </if> -->
+        </if>
         <div class="lsu">
             <span class="ico ico-password"></span>
             <input type="password" name="password" id="password" value="" placeholder="请设置登录密码" class="c-form-txt-normal" onBlur="check_password(this.value);">
@@ -75,6 +90,16 @@
         <!--</div>-->
 
         </if>
+      <!--   <div class="lsu" style="display: inline-flex;;">
+            <div>
+                <span  class="sd-btn" onclick="sendsms()">发送短信</span>
+            </div>
+            <div>
+            <input type="text" class="sd-input" name="verify_code" placeholder="输入验证码">
+            </div>
+        </div> -->
+
+
         <div class="lsu-submit">
             <input type="button" name="" id="" onclick="checkSubmit()" value="注 册"/>
         </div>
@@ -86,12 +111,35 @@
 
 <!--注册表单-s-->
 <script type="text/javascript">
+
+    function sendsms() {
+        $.ajax({
+            url:"{:Url('mobile/user/sendsms')}",
+            type:'POST',
+            dataType:'JSON',
+            data:{},
+            success:function (d) {
+
+                if(d.code == 200) {
+                    console.log(d);
+
+                } else {
+                    console.log(d);
+                }
+            }
+            ,error:function (e) {
+                console.log(JSON.stringify(e));
+            }
+        })
+    }
+
+
     //提交表单
     function checkSubmit()
     {
         $.ajax({
             type:'POST',
-            url:"/index.php?m=Mobile&c=User&a=reg",
+            url:"?m=Mobile&c=User&a=reg",
             dataType:'JSON',
             data:$('#regFrom').serialize(),
             success:function(data){

@@ -3,7 +3,8 @@ composer.lock
 *.log
 runtime
 tpl
+thinkphp
 application/database.php
 public/upload/*
 /public/cert
-/public/qrcode
+.user.ini

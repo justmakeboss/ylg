@@ -126,15 +126,8 @@ class Distribut extends Base
     {
         //$where = 'is_distribut = 1';
         $where = 'first_leader = 0';
-        if ($this->request->param('user_id')) {
-            $where = "user_id = '{$this->request->param('user_id')}'";
-            $where2 = "mobile = '{$this->request->param('user_id')}'";
-            // $list = M('users')->where($where)->orWhere($where2)->select();
-            $list = Db::query("select * from  tp_users where " . $where . ' or '. $where2);
-
-        } else {
-            $list = M('users')->where($where)->select();
-        }
+        if ($this->request->param('user_id')) $where = "user_id = '{$this->request->param('user_id')}'";
+        $list = M('users')->where($where)->select();
         $this->assign('list', $list);
         return $this->fetch();
     }

@@ -317,7 +317,10 @@ class App
         $request = Request::instance();
         if ($config['app_multi_module']) {
             // 多模块部署
+//            dump($config['default_module']);die;
             $module    = strip_tags(strtolower($result[0] ?: $config['default_module']));
+//            if($module == 'index.php') {$module='admin';}
+//            dump($module);die;
             $bind      = Route::getBind('module');
             $available = false;
             if ($bind) {
@@ -332,7 +335,8 @@ class App
             } elseif (!in_array($module, $config['deny_module_list']) && is_dir(APP_PATH . $module)) {
                 $available = true;
             }
-
+//            dump($module);
+//            dump($available);die;
             // 模块初始化
             if ($module && $available) {
                 // 初始化模块

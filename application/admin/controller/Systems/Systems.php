@@ -15,7 +15,7 @@ class Systems extends Base
 		/*配置列表*/
 		$group_list = [
             'shop_info' => '网站信息',
-            /*'basic'     => '基本设置',
+            'basic'     => '基本设置',
             'sms'       => '短信设置',
             'shopping'  => '购物流程设置',
             'distribut' => '分销设置',
@@ -24,7 +24,7 @@ class Systems extends Base
             'oss'       => '对象存储',
             'express'	=> '物流设置',
             'water'     => '水印设置',
-            'smtp'      => '邮件设置',*/
+            'smtp'      => '邮件设置',
         ];
 		$this->assign('group_list',$group_list);
 		$inc_type =  I('get.inc_type','shop_info');

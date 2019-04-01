@@ -13,7 +13,8 @@ namespace think\testing\command;
 
 
 use PHPUnit_TextUI_Command;
-use think\console\command\Command;
+use PHPUnit_Util_Blacklist;
+use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 use think\Loader;
@@ -28,16 +29,19 @@ class Test extends Command
 
     public function execute(Input $input, Output $output)
     {
-        Loader::addClassMap('TestCase', ROOT_PATH . 'tests/TestCase.php');
-        Loader::addClassMap('think\App', CORE_PATH . 'App' . EXT);
+        //注册命名空间
+        Loader::addNamespace('tests', ROOT_PATH . 'tests');
 
         Session::init();
         $argv = $_SERVER['argv'];
         array_shift($argv);
         array_shift($argv);
-        array_unshift($argv,'phpunit');
+        array_unshift($argv, 'phpunit');
+        PHPUnit_Util_Blacklist::$blacklistedClassNames = [];
 
-        (new PHPUnit_TextUI_Command())->run($argv);
+        $code = (new PHPUnit_TextUI_Command())->run($argv, false);
+
+        return $code;
     }
 
 }

@@ -72,9 +72,13 @@ class Image
             'type'   => image_type_to_extension($info[2], false),
             'mime'   => $info['mime'],
         ];
-
+        
         //打开图像
         if ('gif' == $this->info['type']) {
+        	//vendor('topthink.think-image.src.Image');
+//         	vendor('topthink.think-image.src.image.gif.Encoder');
+//         	vendor('topthink.think-image.src.image.gif.Decoder');
+//         	vendor('topthink.think-image.src.image.gif.Gif');
             $this->gif = new Gif($file->getPathname());
             $this->im  = @imagecreatefromstring($this->gif->image());
         } else {

@@ -1,7 +1,7 @@
 <include file="public/header" title="修改支付宝" body=""/>
 <include file="public/header_nav" title="修改支付宝"  href="{:U('Mobile/User/userinfo')}"/>
     <div class="loginsingup-input ma-to-20">
-        <form action="{:U('Mobile/User/userinfo')}" method="post">
+        <form action="{:U('Mobile/User/userinfo')}" method="post" id="just">
             
             <div class="lsu lsu-recharge">
                 <span style="width:4rem;">支付宝姓名: </span>
@@ -11,12 +11,35 @@
                 <span style="width:4rem;">支付宝账号: </span>
                 <input type="text" name="ali_no" value="{$user.ali_no}" placeholder="请输入支付宝账号" onBlur="checkAliNo(this.value);"/>
             </div>
-            <!-- <div class="lsu-submit">
-                <input type="submit" name="" id="" value="确认修改" />
-            </div> -->
+            <?php if(empty($user['ali_name'])):?>
+            <div class="lsu-submit">
+                <input type="submit" name="" id="checkToModify" value="确认修改" />
+            </div>
+            <?php endif;?>
         </form>
     </div>
 <script>
+
+    $(function () {
+
+
+        $('#checkToModify').on('click', function () {
+
+            if($('input[name="ali_name"]').val() == '') {
+                alert('请输入支付宝姓名');;return false;
+            }
+
+            if($('input[name="ali_no"]').val() == '') {
+                alert('请输入支付宝账号');;return false;
+            }
+
+            var f = confirm('一旦确定不可更改');
+            if(f) {
+                $('#just').submit();
+            }
+        })
+    })
+
 </script>
 </body>
 </html>
