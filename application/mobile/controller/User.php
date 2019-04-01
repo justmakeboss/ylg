@@ -1687,8 +1687,21 @@ class User extends MobileBase
 
             $data['taxfee'] = $data['money'] * $taxfee; //手续费
 
-            if (encrypt($data['paypwd']) != $this->user['paypwd']) {
-                $this->ajaxReturn(['status' => 0, 'msg' => '支付密码错误']);
+//            if (encrypt($data['paypwd']) != $this->user['paypwd']) {
+//                $this->ajaxReturn(['status' => 0, 'msg' => '支付密码错误']);
+//            }
+
+            $withdrawal_sms_enable = tpCache('sms.withdrawl_sms_enable');
+
+            if(true || $withdrawal_sms_enable) {
+                $code = I('post.mobile_code', '');
+                $session_id = session_id();
+                $scene = I('post.scene');
+                $logic = new UsersLogic();
+                $check_code = $logic->check_validate_code($code, $this->user['mobile'], 'phone', $session_id, $scene);
+                if($check_code['status'] != 1){
+                    $this->ajaxReturn($check_code);
+                }
             }
 
             if ($data['money'] > $this->user['user_money'] - $ylg_spstem_role['reserve_funds']) {
@@ -1710,7 +1723,6 @@ class User extends MobileBase
             // }
 
             $num = $data['money'];
-
             // 启动事务
             Db::startTrans();
             try {
@@ -1722,6 +1734,7 @@ class User extends MobileBase
                 Db::commit();
             } catch (\Exception $e) {
                 // 回滚事务
+                dump($e->getTraceAsString().$e->getLine().$e->getMessage());die;
                 Db::rollback();
             }
             if ($res) {
@@ -1758,6 +1771,7 @@ class User extends MobileBase
         }
         $this->assign('reserve_funds', $reserve_funds);//可提现金额
         $this->assign('user_money', $this->user['user_money']);    //用户余额
+        $this->assign('sender', $this->user['mobile']);    //用户余额
         $this->assign('handling_fee', $ylg_spstem_role['bill_charge'] * 100);    //手续费
         return $this->fetch();
     }

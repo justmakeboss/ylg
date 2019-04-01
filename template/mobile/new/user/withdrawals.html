@@ -3,6 +3,7 @@
 <input type="hidden" id="openid" value="{$user.openid}">
 <div class="loginsingup-input ma-to-20">
     <form method="post" id="returnform">
+        <input type="hidden" name="sender" id="sender" value="{$sender}">
         <div class="content30">
 
             <div class="lsu lsu-recharge">
@@ -49,15 +50,19 @@
                 <input type="text" name="realname" id="realname" value="{$wx_code.bank_name}" value=""
                        placeholder="持卡人姓名" readonly="readonly">
             </div>
-            <div class="lsu lsu-recharge">
-                <span>安全密码：</span>
-                <input type="password" name="paypwd" id="paypwd" placeholder="安全密码">
-            </div>
+<!--            <div class="lsu lsu-recharge">-->
+<!--                <span>安全密码：</span>-->
+<!--                <input type="password" name="paypwd" id="paypwd" placeholder="安全密码">-->
+<!--            </div>-->
             <!-- <div class="lsu lsu-v-code">
                 <span>验 证 码：</span>
                 <input type="text" name="verify_code" id="verify_code" value="" placeholder="请输入验证码">
                 <img  id="verify_code_img" src="{:U('User/verify',array('type'=>'withdrawals'))}" onClick="verify()" style=""/>
             </div> -->
+            <div class="lsu lsu-recharge">
+                <span onclick="sendcode(this)" style="width: 4.2rem;">获取验证码：</span>
+                <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="请输入验证码">
+            </div>
             <div class="lsu-submit">
                 <input type="hidden" name="__token__" value="{$Request.token}"/>
                 <input type="button" onclick="checkSubmit()" value="提交申请">
@@ -69,6 +74,49 @@
     // 验证码切换
     function verify() {
         $('#verify_code_img').attr('src', '/index.php?m=Mobile&c=User&a=verify&type=withdrawals&r=' + Math.random());
+    }
+
+    //发送短信验证码
+    function sendcode(obj){
+        $.ajax({
+            url:'/index.php?m=Home&c=Api&a=send_validate_code&t='+Math.random() ,
+            type:'post',
+            dataType:'json',
+            data:{type:$(obj).attr('rel'),send:$.trim($('#sender').val()), scene:10},
+            success:function(res){
+                if(res.status==1){
+                    //成功
+                    countdown(obj)
+                    showErrorMsg(res.msg);
+                }else{
+                    //失败
+                    showErrorMsg(res.msg);
+                }
+            }
+        })
+    }
+    function countdown(obj) {
+        var s = {$tpshop_config['sms_sms_time_out']};
+        //改变按钮状态
+        obj.disabled = true;
+        callback();
+        //循环定时器
+        var T = window.setInterval(callback,1000);
+        function callback()
+        {
+            if(s <= 0){
+                //移除定时器
+                window.clearInterval(T);
+                obj.disabled=false;
+                obj.innerHTML='获取验证码';
+            }else{
+                if(s<=10){
+                    obj.innerHTML = '0'+ --s + '秒后再获取';
+                }else{
+                    obj.innerHTML = --s+ '秒后再获取';
+                }
+            }
+        }
     }
 
     /**
@@ -87,7 +135,7 @@
             showErrorMsg('验证码不能空')
             return false;
         }*/
-        if (bank_name == '' || bank_card == '' || realname == '' || money === '' || paypwd === '') {
+        if (bank_name == '' || bank_card == '' || realname == '' || money === '') {
             showErrorMsg("所有信息为必填,请到个人信息填写银行卡信息，修改后不可更改！！")
             return false;
         }
