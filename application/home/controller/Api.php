@@ -102,7 +102,6 @@ class Api extends Base {
     public function send_validate_code(){
 
         $this->send_scene = C('SEND_SCENE');
-
         $type = I('type');
         $scene = I('scene');    //发送短信验证码使用场景
         $mobile = I('mobile');

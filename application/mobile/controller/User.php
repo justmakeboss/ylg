@@ -1800,7 +1800,7 @@ class User extends MobileBase
     {
         $commodity = tpCache('ylg_spstem_role.commodity');
         if (IS_POST) {
-
+            $transfer_sms_enable = tpCache('sms.transfer_sms_enable');
             $a = session("transfer");
             if (!empty($a) && time() - session("transfer") <= 5) {
                 $this->ajaxReturn(['msg'=>'系统繁忙']);
@@ -1812,10 +1812,10 @@ class User extends MobileBase
                 $this->ajaxReturn(['status' => 0, 'msg' => '转让金额要大于0']);
                 exit;
             }
-            if (encrypt($data['paypwd']) != $this->user['paypwd']) {
-                $this->ajaxReturn(['status' => 0, 'msg' => '安全密码错误']);
-                exit;
-            }
+//            if (encrypt($data['paypwd']) != $this->user['paypwd']) {
+//                $this->ajaxReturn(['status' => 0, 'msg' => '安全密码错误']);
+//                exit;
+//            }
 
             if ($data['money'] > $this->user['user_money']) {
                 $this->ajaxReturn(['status' => 0, 'msg' => "你最多可转让{$reserve_funds}"]);
@@ -1844,6 +1844,17 @@ class User extends MobileBase
             if($this->user['is_lock'] == 1) {
                 $this->ajaxReturn(['status' => 0, 'msg' => '您的资金被冻结，请联系管理员']);
                 exit;
+            }
+
+            if(true || $transfer_sms_enable) {
+                $code = I('post.mobile_code', '');
+                $session_id = session_id();
+                $scene = I('post.scene');
+                $logic = new UsersLogic();
+                $check_code = $logic->check_validate_code($code, $this->user['mobile'], 'phone', $session_id, $scene);
+                if($check_code['status'] != 1){
+                    $this->ajaxReturn($check_code);
+                }
             }
 
             //所有上級ID
@@ -1875,7 +1886,7 @@ class User extends MobileBase
                     "toUserId" => $user2['user_id'],
                     "money" => $num,
                     "toUserAccount" => $user2['mobile'],
-                    "createTime" => date('m-d H:i:s')
+                    "createTime" => date('Y-m-d H:i:s')
                 );
                 $res = M("transfer")->add($data2);//添加转让
                 //转出
@@ -1906,6 +1917,7 @@ class User extends MobileBase
         }
         $this->assign('user_money', $this->user['user_money']);    //用户余额
         $this->assign('handling_fee', $commodity * 100);    //手续费
+        $this->assign('sender', $this->user['mobile']);    //手续费
         return $this->fetch();
     }
 

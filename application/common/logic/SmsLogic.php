@@ -43,7 +43,10 @@ class SmsLogic
             5 => "{\"user_name\":\"$user_name\",\"consignee\":\"$consignee\"}",                                           //5. 商家发货
             6 => "{\"code\":\"$code\"}",                                                                                                           //6. 修改手机号码 (验证码类型短信只能有一个变量)
             7 => "{\"goods_name\":\"$goods_name\"}",   //购买虚拟商品通知  商品名
-            8 => "{\"status\":\"$status\",\"remark\":\"$remark\"}" //   通知门店  订单状态以及订单摘要
+            8 => "{\"status\":\"$status\",\"remark\":\"$remark\"}", //   通知门店  订单状态以及订单摘要
+            9 => "{\"code\":\"$code\"}",         //转账                                                                                                 //1. 用户注册 (验证码类型短信只能有一个变量)
+            10 => "{\"code\":\"$code\"}",             //提现                                                                                             //1. 用户注册 (验证码类型短信只能有一个变量)
+
         );
 
         $smsParam = $smsParams[$scene];

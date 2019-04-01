@@ -69,8 +69,6 @@ class SmsTemplate extends Base {
                 }
             }
         }
-
-
         $this->assign("send_scene" , $filterSendscene );
         return $this->fetch("_sms_template");
     }

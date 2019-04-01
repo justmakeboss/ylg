@@ -1075,6 +1075,10 @@ function send_email($to, $subject = '', $content = '')
 function checkEnableSendSms($scene)
 {
 
+    if($scene > 0) {
+        return array("status" => 1, "msg" => "可以发送短信");
+    }
+
     $scenes = C('SEND_SCENE');
     $sceneItem = $scenes[$scene];
     if (!$sceneItem) {

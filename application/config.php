@@ -361,7 +361,8 @@ return [
         '6'=>array('身份验证','尊敬的用户，您的验证码为${code}, 请勿告诉他人.','bind_mobile_sms_enable'),
         '7'=>array('购买虚拟商品通知','尊敬的用户，您购买的虚拟商品【${goods_name}】兑换码已生成,请注意查收.','virtual_goods_sms_enable'),
         '8'=>array('门店通知','尊敬的用户，您有新订单待处理,当前状态:${status},订单摘要:${remark},请及时处理.','to_door_order_sms_enable'),
-
+        '9'=>array('转账','您的验证码为：${code}，您正在转账，请勿泄露于他人.','withdraw_sms_enable'),
+        '10'=>array('提现','您的验证码为：${code}，您正在提现，请勿泄露于他人.','transfer_sms_enable'),
     ),
 
         //短信使用场景
