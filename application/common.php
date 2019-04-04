@@ -1075,7 +1075,7 @@ function send_email($to, $subject = '', $content = '')
 function checkEnableSendSms($scene)
 {
 
-    if($scene > 0) {
+    if ($scene > 0) {
         return array("status" => 1, "msg" => "可以发送短信");
     }
 
@@ -1857,63 +1857,62 @@ function confirm_order($id, $user_id = 0)
     } else {
         db('rebate_log')->where("order_id", $id)->update(array('confirm' => time()));
     }
+    //更新代码前付款的用户确认收货可以拿奖金
+    if ($order->pay_time <= 1554388357) {
+        get_bonus($order);
+    }
+    return array('status' => 1, 'msg' => '操作成功', 'url' => U('Order/order_detail', ['id' => $id]));
+}
+
+
+//奖金
+function get_bonus($order)
+{
+    if ($order->type != 1) {
+        return 0;
+    }
     //0：批发 1：零售 2：自营
     //todo 活动区确认收货立即到账
     $user = Db::name('users')->where('user_id', $order['user_id'])->find();
     $inc_type = 'ylg_spstem_role';
     $config = tpCache($inc_type);
-    if ($order['type'] == 1) {
-        // 启动事务
-        try {
-            Db::startTrans();
-            $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
-//            dump($TIR_ID);
-//            dump('**********************');
-            if ($TIR_ID) {
-                $money = $order['order_amount'] * $config['daozhang'];
-                Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
-                balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
-                if ($TIR_ID['second_leader']) {
-                    $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
-//                    dump('$tjstr:');
-//                    dump($tjstr);
-                    $canGetBonus = [];
-                    foreach ($tjstr as $userId) {
-                        if (count($canGetBonus) >= 2) {
-                            break;
-                        }
-                        $user = Db::name('users')->where('user_id', $userId)->where('level', 3)->find();
-                        if ($user) {
-                            array_push($canGetBonus, $user);
-                        }
+    try {
+        Db::startTrans();
+        $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
+        if ($TIR_ID) {
+            $money = $order['order_amount'] * $config['daozhang'];
+            Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
+            balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
+            if ($TIR_ID['second_leader']) {
+                $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
+                $canGetBonus = [];
+                foreach ($tjstr as $userId) {
+                    if (count($canGetBonus) >= 2) {
+                        break;
                     }
-//                    dump('$canGetBonus:');
-//                    dump($canGetBonus);
-                    if (count($canGetBonus) >= 0) {
-                        foreach ($canGetBonus as $key => $user) {
-                            if ($key == 0) {
-                                $bblili = 0.02;
-                            } else {
-                                $bblili = 0.004;
-                            }
-//                            dump($user);
-                            $money = $order['order_amount'] * $bblili;
-                            Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                            balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+                    $user = Db::name('users')->where('user_id', $userId)->where('level', 3)->find();
+                    if ($user) {
+                        array_push($canGetBonus, $user);
+                    }
+                }
+                if (count($canGetBonus) >= 0) {
+                    foreach ($canGetBonus as $key => $user) {
+                        if ($key == 0) {
+                            $bblili = 0.02;
+                        } else {
+                            $bblili = 0.004;
                         }
+                        $money = $order['order_amount'] * $bblili;
+                        Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                        balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                     }
                 }
             }
-//            die;
-            // 提交事务
-            Db::commit();
-        } catch (\Exception $e) {
-            // 回滚事务
-            Db::rollback();
         }
+        Db::commit();
+    } catch (\Exception $e) {
+        Db::rollback();
     }
-
-    return array('status' => 1, 'msg' => '操作成功', 'url' => U('Order/order_detail', ['id' => $id]));
 }
 
 /**
@@ -2788,7 +2787,7 @@ function h_image($path_1, $path_2, $after_path)
     $image_2 = imagecreatefrompng($path_2);
     // 创建真彩画布
 //    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
-    $image_3 = imageCreatetruecolor(imagesx($image_1),imagesy($image_1));
+    $image_3 = imageCreatetruecolor(imagesx($image_1), imagesy($image_1));
     // 为真彩画布创建白色背景
     $color = imagecolorallocate($image_3, 255, 255, 255);
     imagefill($image_3, 0, 0, $color);
@@ -2799,5 +2798,5 @@ function h_image($path_1, $path_2, $after_path)
     // 与图片二合成
     imagecopymerge($image_3, $image_2, 736, 2256, 0, 0, 526, 526, 100);
     // 输出合成图片
-    imagepng($image_3,$after_path);
+    imagepng($image_3, $after_path);
 }

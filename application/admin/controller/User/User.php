@@ -192,6 +192,20 @@ class User extends Base {
         $count = $model->where($condition)->count();
         $Page  = new AjaxPage($count,10);
         $userList = $model->where($condition)->order($sort_order)->limit($Page->firstRow.','.$Page->listRows)->select();
+
+
+        foreach ($userList as &$item) {
+            $allRecharges = Db::name('recharge')->where(['user_id' => $item['user_id'], 'pay_status' => 1])->sum('account');
+            $allWithdrawls =Db::name('withdrawals')->where(['user_id' => $item['user_id'], 'status' => 1])->sum('money');
+            $myTeamMemberIds = Db::query("select user_id from tp_users where find_in_set('".$item['user_id'] . "', second_leader)");
+            $memberIds = [];
+            foreach ($myTeamMemberIds as $myTeamMemberId) {
+                $memberIds[] = $myTeamMemberId['user_id'];
+            }
+            $myTeamAllRecharges = Db::name('recharge')->whereIn('user_id', implode(',', $memberIds))->where(['pay_status' => 1])->sum('account');
+            $myTeamWithdrawals = Db::name('withdrawals')->whereIn('user_id', implode(',', $memberIds))->sum('money');
+            $item['totalRechargeMinusWithdrawal'] = $allRecharges + $myTeamAllRecharges - $allWithdrawls - $myTeamWithdrawals;
+        }
         //  搜索条件下 分页赋值
         foreach($condition as $key=>$val) {
             if ($key == 'nickname'){

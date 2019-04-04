@@ -176,7 +176,7 @@ class Index extends MobileBase
             ->where($where)
             ->where('UNIX_TIMESTAMP(agentstart_time) <= UNIX_TIMESTAMP(NOW()) AND UNIX_TIMESTAMP(NOW()) <  UNIX_TIMESTAMP(agentend_time)')
             ->group("g.goods_id")
-            ->order('goods_id')
+            ->order('sort')
             ->select();
         if (empty($list[0]['goods_id'])) {
             $list = [];

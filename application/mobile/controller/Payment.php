@@ -139,7 +139,9 @@ class Payment extends MobileBase
                     ->dec('user_money', $order['order_amount'])
                     ->dec('frozen_money', $order['quota'])
                     ->update();
-                if(!$result) {Db::rollback();}
+                if (!$result) {
+                    Db::rollback();
+                }
                 if ($users['user_money'] < 0 || $users['frozen_money'] < 0) {
                     Db::rollback();
                     $this->error('系统繁忙');
@@ -189,7 +191,9 @@ class Payment extends MobileBase
                 $d['frozen_status'] = 1;
                 $d['order_id'] = $order['order_id'];
                 Db::name('forzen')->insertGetId($d);
-                if (!$result) {Db::rollback();}
+                if (!$result) {
+                    Db::rollback();
+                }
                 $order_goods = Db::name('order_goods')->where('order_id', $order['order_id'])->field('goods_id,goods_num,goods_price')->find();
                 //获取代理商出售的商品
                 $consignment = Db::name('goods_consignment')->where("goods_id = {$order_goods['goods_id']} AND surplus_num>0")->order('create_time')->limit($order_goods['goods_num'])->select();
@@ -210,7 +214,7 @@ class Payment extends MobileBase
                     $agentdata['setmeal_id'] = $consignment[$i]['setmeal_id'];      // 订单ID
                     $agentdata['sell_num'] = $consignment[$i]['surplus_num'] - $data['surplus_num']; // 成交数量
                     $agentdata['create_time'] = date('Y-m-d H:i:s'); // 成交时间
-                    Db::name('goods')->where('goods_id',$order_goods['goods_id'])->setDec('store_count',$order_goods['goods_num']);
+                    Db::name('goods')->where('goods_id', $order_goods['goods_id'])->setDec('store_count', $order_goods['goods_num']);
                     //代理订单表
                     $agentid = Db::name('agent_order')->insertGetId($agentdata);
                     $agents = Db::name('users')->where("user_id = {$agentdata['agent_id']}")->find();
@@ -238,12 +242,6 @@ class Payment extends MobileBase
 
         $results = Db::name('order')->where("order_id = {$order_id}")->save(['pay_status' => 1, 'pay_time' => time()]);
         if ($result && $results) {
-
-            if ($order['type'] == 1) {
-
-
-
-            }
             if ($order['type'] == 0) {
                 $logs = integrallog($order_id, $user['user_id'], -$order['quota'], 8, $user['frozen_money'], $user['frozen_money'] - $order['quota']);
                 $log = balancelog($order_id, $user['user_id'], -$order['order_amount'], 8, $user['user_money'], $user['user_money'] - $order['order_amount']);
@@ -259,6 +257,7 @@ class Payment extends MobileBase
 
             }
             if ($log && $logs) {
+                get_bonus($order);
                 Db::commit();
                 $this->success('支付成功!');
             } else {
