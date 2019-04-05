@@ -118,7 +118,6 @@ function openItem(param) {
     }
     $('div[id^="admincpNavTabs_"]').hide().find('dl').removeClass('active');
     $('li[data-param="' + data_str[1] + '"]').addClass('active');
-    //$('li[data-param="' + data_str[0] + '"]').addClass('active');
     $this.parent().addClass('active').parents('dl:first').addClass('active').parents('div:first').show();
     if(data_str[2] && data_str[2] != 'undefined'){
         var act = data_str[2]+'.'+data_str[1];

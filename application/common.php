@@ -146,7 +146,7 @@ function user_upgrade($userId)
         }
 
         //直推服务中心多少个
-        $count = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 3])->count();
+        $count = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 4])->count();
         //直推服务中心
 //        debug('$count'. $count. ',$level[\'region_code\']:'. $level['region_code']);
         if (!empty($level['region_code']) && $count < $level['region_code']) {
@@ -1881,7 +1881,6 @@ function get_bonus($order)
             $money = $order['order_amount'] * $config['daozhang'];
             Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
             balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
-
             if ($TIR_ID['second_leader']) {
                 $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
                 //区代理奖金

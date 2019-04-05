@@ -1,0 +1,63 @@
+<include file="public/layout" />
+<link href="__PUBLIC__/static2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .top {
+        margin-top:20px;
+    }
+</style>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title">
+            <div class="subject">
+                <h3>公告</h3>
+                <h5>公告</h5>
+            </div>
+        </div>
+    </div>
+    <div class="explanation" id="explanation">
+        <div class="title" id="checkZoom"><i class="fa fa-lightbulb-o"></i>
+            <h4 title="公告">操作提示</h4>
+            <span id="explanationZoom" title="公告"></span> </div>
+        <ul>
+            <li>公告</li>
+        </ul>
+    </div>
+
+    <div class="row top">
+        <div class="col-md-12">
+            <form method="post" action="{:U('Index.Index/update')}">
+                <input type="hidden" name="id" value="{$headline->id}">
+                <div class="form-group">
+                    <textarea class="form-control" rows="3" name="content">{$headline->content}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary edit">修改</button>
+                <button type="button" class="btn btn-default" onclick="history.back()">返回</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="goTop"> <a href="JavaScript:void(0);" id="btntop"><i class="fa fa-angle-up"></i></a><a href="JavaScript:void(0);" id="btnbottom"><i class="fa fa-angle-down"></i></a></div>
+</body>
+<script type="text/javascript">
+    $(document).on('click', '.edit', function () {
+        $.ajax({
+            url:$('form').eq(0).attr('action'),
+            type:'post',
+            data:$('form').eq(0).serialize(),
+            dataType:'json',
+            success:function (d) {
+                if(d.code == 200) {
+                    layer.msg(d.msg);
+                    location.href = "/index.php?m=Admin&c=index.index&a=ad";
+                } else {
+                    layer.msg(d.msg);
+                    location.reload();
+                }
+            },
+            error:function (e) {
+                console.log(e);
+            }
+        })
+    })
+</script>
+</html>

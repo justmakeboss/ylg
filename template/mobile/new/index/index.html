@@ -1,5 +1,23 @@
 <layout name="common/layout_nav" />
-
+<style type="text/css">
+    .notice {
+        width: 100%;/*单行显示，超出隐藏*/
+        height: 35px;/*固定公告栏显示区域的高度*/
+        padding: 0 10px;
+        overflow: hidden;
+        background: #fff;
+        text-align: center;
+    }
+    .notice ul li {
+        list-style: none;
+        line-height: 35px;
+        /*以下为了单行显示，超出隐藏*/
+        display: block;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+</style>
 <!-- <div class="page-hd">
     <div class="search-bar">
         <div class="weui-flex">
@@ -25,7 +43,23 @@
         <!-- Add Pagination -->
         <div class="swiper-pagination-wrap"><div class="swiper-pagination"></div></div>
     </div>
+    <?php if(sizeof($ads)) :?>
+
+    <div style="width: 100%;display: flex;">
+        <div class="notice">
+            <ul>
+                <?php foreach($ads as $ad):?>
+                <?php if($ad):?>
+                <li>{$ad['content']}</li>
+                <?php endif;?>
+                <?php endforeach;?>
+            </ul>
+        </div>
+    </div>
+
+    <?php else:?>
     <img src="__STATIC__/assets/images/index01.jpg" style="width: 100%;"/>
+    <?php endif;?>
     <div class="weui-panel">
         <div class="weui-panel__bd">
             <div class="weui-flex">
@@ -311,6 +345,28 @@
         pagination: '.swiper-pagination',
         paginationClickable: true
     });
+
+    $(function () {
+        // 调用 公告滚动函数
+        setInterval("noticeUp('.notice ul','-35px',500)", 2000);
+    });
+    /*
+    * 参数说明
+    * obj : 动画的节点，本例中是ul
+    * top : 动画的高度，本例中是-35px;注意向上滚动是负数
+    * time : 动画的速度，即完成动画所用时间，本例中是500毫秒，即marginTop从0到-35px耗时500毫秒
+    * function : 回调函数，每次动画完成，marginTop归零，并把此时第一条信息添加到列表最后;
+    *
+    */
+    function noticeUp(obj,top,time) {
+        $(obj).animate({
+            marginTop: top
+        }, time, function () {
+            $(this).css({marginTop:"0"}).find(":first").appendTo(this);
+        })
+    }
+
+
 function countTime() {
         //获取当前时间
         var date = new Date();

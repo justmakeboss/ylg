@@ -111,10 +111,11 @@
                             </td>
                             <td align="center" class="">
                                 <div style="text-align: center; width: 100px;">
-                                <if condition="$v['after_level'] eq 1">用户
-                                <elseif condition="$v['after_level'] eq 2">会员
-                                <elseif condition="$v['after_level'] eq 3">服务中心
-                                <elseif condition="$v['after_level'] eq 4">合伙人
+                                <if condition="$v['after_level'] eq 1">消费者
+                                <elseif condition="$v['after_level'] eq 2">消费商
+                                <elseif condition="$v['after_level'] eq 3">区代理
+                                    <elseif condition="$v['after_level'] eq 4">服务中心
+                                        <elseif condition="$v['after_level'] eq 5">总代理
                                 </if></div>
                             </td>
                             <td align="center" class="">

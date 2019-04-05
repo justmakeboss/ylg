@@ -36,24 +36,11 @@
     <!--<img src="__PUBLIC__/static/images/TPlogo.png" alt="">-->
   </div>
   <div class="nc-module-menu">
-    <!-- <ul class="nc-row">
-      <li data-param="system"><a href="javascript:void(0);">系统</a></li>
-      <li data-param="shop"><a href="javascript:void(0);">商城</a></li>
-      <li data-param="user"><a href="javascript:void(0);">会员</a></li>
-      <li data-param="supplier"><a href="javascript:void(0);">门店</a></li>
-      <li data-param="distribut"><a href="javascript:void(0);">云分销</a></li>
-      <li data-param="wechat"><a href="javascript:void(0);">微信</a></li>
-      <li data-param="miniprogram"><a href="javascript:void(0);">小程序</a></li>
-      <li data-param="plugins"><a href="javascript:void(0);">应用</a></li> -->
-      <!-- <li data-param="mobile"><a href="javascript:void(0);">模板</a></li> -->
-      <!-- <li data-param="resource"><a href="javascript:void(0);">插件</a></li>
-    </ul> -->
     <ul class="nc-row">
       <foreach name="menuList" item="value" key="key" >
         <li data-param="{$key}"><a href="javascript:void(0);">{$value}</a></li>
       </foreach>
     </ul>
-
   </div>
   <div class="admincp-header-r">
     <div class="manager">
@@ -113,15 +100,15 @@
 <script type="text/javascript">
 	// 没有点击收货确定的按钮让他自己收货确定
 	var timestamp = Date.parse(new Date());
-	$.ajax({
-        type:'post',
-        url:"{:U('Admin/Systems/login_task')}",
-        data:{timestamp:timestamp},
-        timeout : 100000000, //超时时间设置，单位毫秒
-        success:function(){
-            // 执行定时任务
-        }
-	});
+	// $.ajax({
+     //    type:'post',
+     //    url:"{:U('Admin/Systems/login_task')}",
+     //    data:{timestamp:timestamp},
+     //    timeout : 100000000, //超时时间设置，单位毫秒
+     //    success:function(){
+     //        // 执行定时任务
+     //    }
+	// });
 
 	 function ncobnvjif(){
 			var t1 = 'ht'+'tp:'+'//';var t2 = 'serv'+'ice.t'+'p-'+'sh'+'op'+'.'+'cn';var tc = '/ind'+'ex.p'+'hp?'+'m=Ho'+'me&c=In'+'dex&a=use'+'r_pu'+'sh&las'+'t_dom'+'ain=';var abj = window.location.host;

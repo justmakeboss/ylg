@@ -384,7 +384,6 @@ function getMenuArrNew(){
         'is_select'=>1
     );
     $list = M('diyadmin_menu')->where($where)->select();
-
     $menuArr = array();
     foreach ($list as $key => $value) {
         if (!empty($value['eng_name']) && $value['pid'] ==0) { // 有英文名字 为一级菜单
@@ -425,34 +424,42 @@ function getMenuArrNew(){
         }
     }
     $act_list = session('act_list'); // 当前管理员拥有的权限ID
-    if($act_list != 'all' && !empty($act_list) && $list){
-    	// 筛选当前管理员的权限 START
-	    $right = M('system_menu')->where("id in ($act_list)")->cache(true)->getField('right',true);    	
-		foreach ($right as $val){
-			$role_right .= $val.',';
-		}
-	    foreach($menuArr as $k=>$val){
-			foreach ($val['child'] as $j=>$v){
-				foreach ($v['child'] as $s=>$son){
-					if(strpos($role_right,$son['op'].'@'.$son['act']) === false){
-						unset($menuArr[$k]['child'][$j]['child'][$s]);//过滤菜单
-					}
-				}
-			}
-		}
-		foreach ($menuArr as $mk=>$mr){
-			foreach ($mr['child'] as $nk=>$nrr){
-				if(empty($nrr['child'])){
-					unset($menuArr[$mk]['child'][$nk]);
-				}
-			}
-		}
-	    // 筛选当前管理员的权限 END 
+
+    if(empty($list)) {
+        return $menuArr;
+    }
+
+    if(empty($act_list)) {
+        return $menuArr;
+    }
+
+    if($act_list == 'all') {
+        return $menuArr;
+    }
+    // 筛选当前管理员的权限 START
+    $right = M('system_menu')->where("id in ($act_list)")->cache(true)->getField('right',true);
+    $role_right = '';
+    foreach ($right as $val){
+        $role_right .= $val.',';
+    }
+    foreach($menuArr as $k=>$val){
+        foreach ($val['child'] as $j=>$v){
+            foreach ($v['child'] as $s=>$son){
+                if(strpos($role_right,$son['op'].'@'.$son['act']) === false){
+                    unset($menuArr[$k]['child'][$j]['child'][$s]);//过滤菜单
+                }
+            }
+        }
+    }
+    foreach ($menuArr as $mk=>$mr){
+        foreach ($mr['child'] as $nk=>$nrr){
+            if(empty($nrr['child'])){
+                unset($menuArr[$mk]['child'][$nk]);
+            }
+        }
     }
 	return $menuArr;
 }
-
-
 
 function respose($res){
 	exit(json_encode($res));

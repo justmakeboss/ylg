@@ -35,6 +35,8 @@ class Index extends Base {
         $this->assign('order_amount',$order_amount);
         $this->assign('admin_info',$admin_info);
         $this->assign('menu',getMenuArr());   //view2
+//        header('content-type:text/html;charset=utf-8;');
+//        dump(getMenuArrNew());die;
         $this->assign('menu',getMenuArrNew());   //view2
         return $this->fetch();
     }

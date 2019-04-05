@@ -1,0 +1,112 @@
+<include file="public/layout" />
+<link href="__PUBLIC__/static2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .top {
+        margin-top:20px;
+    }
+</style>
+<div class="page">
+    <div class="fixed-bar">
+        <div class="item-title">
+            <div class="subject">
+                <h3>公告</h3>
+                <h5>公告</h5>
+            </div>
+        </div>
+    </div>
+    <div class="row top">
+        <div class="col-md-12">
+            <form method="post" action="{:U('Index.Index/create')}">
+                <div class="form-group">
+                    <textarea class="form-control" rows="3" name="content" id="content"></textarea>
+                </div>
+                <button type="button" class="btn btn-default add">添加</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table">
+
+                <thead>
+                    <tr>
+                        <td>标题</td>
+                        <td>内容</td>
+                        <td>添加时间</td>
+                        <td>最后修改时间</td>
+                        <td>操作</td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach($headlines as $headline):?>
+                    <tr id="head_{$headline->id}">
+                        <td>{$headline['title']}</td>
+                        <td>{$headline['content']}</td>
+                        <td>{$headline['created_at']}</td>
+                        <td>{$headline['updated_at']}</td>
+                        <td>
+                            <a class="btn btn-primary btn-xs" href="{:U('Index.Index/edit', ['id' => $headline->id])}">修改</a>
+                            <a class="btn btn-danger btn-xs delete" href="javascript:;" data-url="{:U('Index.Index/delete', ['id' => $headline->id])}">删除</a>
+                        </td>
+                    </tr>
+                <?php endforeach;?>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+<div id="goTop"> <a href="JavaScript:void(0);" id="btntop"><i class="fa fa-angle-up"></i></a><a href="JavaScript:void(0);" id="btnbottom"><i class="fa fa-angle-down"></i></a></div>
+</body>
+<script type="text/javascript">
+    $(document).on('click', '.add', function () {
+
+        var a = $('#content').val();
+        if(a == '') {
+            layer.msg('請填寫內容');return;
+        }
+        $.ajax({
+            url:$('form').eq(0).attr('action'),
+            type:'post',
+            data:$('form').eq(0).serialize(),
+            dataType:'json',
+            success:function (d) {
+                if(d.code == 200) {
+                    layer.msg(d.msg);
+                    location.href = "/index.php?m=Admin&c=Index.Index&a=ad";
+                } else {
+                    layer.msg(d.msg);
+                    location.href = "/index.php?m=Admin&c=Index.Index&a=ad";
+                }
+            },
+            error:function (e) {
+                layer.msg(JSON.stringify(e));
+            }
+        })
+
+    }).on('click', '.delete', function () {
+
+
+        $.ajax({
+            url:$(this).data('url'),
+            type:'post',
+            dataType:'json',
+            success:function (d) {
+                if(d.code == 200) {
+                    layer.msg(d.msg);
+                    $('#head_'+d.data.id).remove();
+                } else {
+                    layer.msg(d.msg);
+                }
+            },
+            error:function (e) {
+                layer.msg(JSON.stringify(e));
+            }
+        })
+
+    })
+</script>
+</html>

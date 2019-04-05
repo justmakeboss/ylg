@@ -85,6 +85,7 @@ class CartLogic extends Model
      * @return array
      */
     public function buyNow(){
+
         if(empty($this->goods)){
             return ['status'=>0,'msg'=>'购买商品不存在','result'=>''];
         }

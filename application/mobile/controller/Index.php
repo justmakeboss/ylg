@@ -153,6 +153,10 @@ class Index extends MobileBase
         $this->assign('service_promise', $service_promise);
         $this->assign('title', "首页");
         $this->assign('favourite_goods', $favourite_goods);
+
+        //公告
+        $ads = M('headline')->where('id', '>', 0)->select();
+        $this->assign('ads', $ads);
         return $this->fetch();
     }
 
