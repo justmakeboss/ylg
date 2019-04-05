@@ -502,6 +502,7 @@
             data : $('#cart2_form').serialize(),
             dataType: "json",
             success: function(data){
+                console.log(data);
                 if(data.status == -3 || data.status == -4){
                     showErrorMsg(data.msg);
                     refresh_price(data);

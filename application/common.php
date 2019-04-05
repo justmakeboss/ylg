@@ -120,7 +120,7 @@ function user_upgrade($userId)
         }
 
         $userids = Db::name('users')->where(['first_leader' => ['in', $user['user_id']], 'level' => 2])->column('user_id');
-        //直推会员多少個
+        //直推消费商多少個
 //        debug('pullNum:'. count($userids).',$level[\'discount\']:'.$level['discount']);
 
         if (!empty($level['discount']) && count($userids) < $level['discount']) {
@@ -129,7 +129,7 @@ function user_upgrade($userId)
 
         if (!empty($level['is_promote'])) {
             $ids = implode(',', $userids);
-            //其中一个直推的會員业绩需要大於多少
+            //其中一个直推的消费商业绩需要大於多少
             $userlist = Db::name('users')->where(['user_id' => ['in', $ids], 'monthly_performance' => ['>=', $level['is_promote']]])->select();
 //            debug('$userlist:'. var_export($userlist, true));
             if (sizeof($userlist) <= 0) {
@@ -305,11 +305,7 @@ function checkExpiredAt($user)
 
 function debug($d)
 {
-    if (is_string($d)) {
-        file_put_contents(date('Ymd') . '.txt', date('Y-m-d H:i:s') . ": " . $d . "\r\n", FILE_APPEND);
-    } else {
-        file_put_contents(date('Ymd') . '.txt', date('Y-m-d H:i:s') . ": " . var_export($d, true) . "\r\n", FILE_APPEND);
-    }
+    file_put_contents('./debug.txt', date('Y-m-d H:i:s') . ": " . var_export($d, true) . "\r\n", FILE_APPEND);
 }
 
 //根据消费次数升级
@@ -1857,8 +1853,8 @@ function confirm_order($id, $user_id = 0)
     } else {
         db('rebate_log')->where("order_id", $id)->update(array('confirm' => time()));
     }
-    //更新代码前付款的用户确认收货可以拿奖金
-    if ($order->pay_time <= 1554388357) {
+    //更新代码前2019/4/5 1:49:20付款的用户确认收货可以拿奖金
+    if ($order['pay_time'] <= 1554388357) {
         get_bonus($order);
     }
     return array('status' => 1, 'msg' => '操作成功', 'url' => U('Order/order_detail', ['id' => $id]));
@@ -1868,44 +1864,85 @@ function confirm_order($id, $user_id = 0)
 //奖金
 function get_bonus($order)
 {
-    if ($order->type != 1) {
+    if ($order['type'] != 1) {
         return 0;
     }
     //0：批发 1：零售 2：自营
-    //todo 活动区确认收货立即到账
+    //todo 活动区支付立即到账
     $user = Db::name('users')->where('user_id', $order['user_id'])->find();
     $inc_type = 'ylg_spstem_role';
     $config = tpCache($inc_type);
     try {
         Db::startTrans();
+        //直推人（只要级别大于等于消费商）奖金
         $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
         if ($TIR_ID) {
+            //直推奖金
             $money = $order['order_amount'] * $config['daozhang'];
             Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
             balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
+
             if ($TIR_ID['second_leader']) {
                 $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
+                //区代理奖金
+                $myTeamHasMemberLevelEG3 = [];
+                $users = Db::name('users')->where('user_id', ['in', $tjstr])->select();
+                foreach ($tjstr as $userId) {
+
+                    $user = current(array_filter($users, function($i) use($userId) {
+                        return $i['user_id'] == $userId;
+                    }));
+                    if($user['level'] != 3) {
+                        continue;
+                    }
+                    if(sizeof($myTeamHasMemberLevelEG3) == 0) {
+                        $p = 0.01;
+                    } else {
+                        $p = 0.01 * 0.2;
+                    }
+                    $myTeamHasMemberLevelEG3[] = $userId;
+                    $money = $order['goods_price'] * $p;
+                    Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+                }
+                //服务中心奖金
                 $canGetBonus = [];
                 foreach ($tjstr as $userId) {
                     if (count($canGetBonus) >= 2) {
                         break;
                     }
-                    $user = Db::name('users')->where('user_id', $userId)->where('level', 3)->find();
-                    if ($user) {
-                        array_push($canGetBonus, $user);
+                    $user = current(array_filter($users, function($user) use($userId) {
+                        return $user['user_id'] == $userId && $user['level'] == 4;
+                    }));
+                    if(!$user) {
+                        continue;
                     }
+
+                    if (count($canGetBonus) == 0) {
+                        $bblili = 0.02;
+                    } else {
+                        $bblili = 0.004;
+                    }
+                    $canGetBonus[] = $userId;
+                    $money = $order['goods_price'] * $bblili;
+                    Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+
                 }
-                if (count($canGetBonus) >= 0) {
-                    foreach ($canGetBonus as $key => $user) {
-                        if ($key == 0) {
-                            $bblili = 0.02;
-                        } else {
-                            $bblili = 0.004;
-                        }
-                        $money = $order['order_amount'] * $bblili;
-                        Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                        balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+
+                //总代理奖金
+                foreach ($tjstr as $userId) {
+
+                    $user = current(array_filter($users, function($user) use($userId) {
+                        return $user['user_id'] == $userId;
+                    }));
+
+                    if($user['level'] != 5) {
+                        continue;
                     }
+                    $money = $order['goods_price'] * 0.03;
+                    Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                 }
             }
         }
@@ -2161,8 +2198,6 @@ function calculate_price($user_id = 0, $order_goods, $shipping_code = '', $shipp
         'order_prom_amount' => $order_prom['order_prom_amount'],
         'order_goods' => $order_goods, // 商品列表 多加几个字段原样返回
     );
-//    echo 1;
-//    dump($result);exit;
     return array('status' => 1, 'msg' => "计算价钱成功", 'result' => $result); // 返回结果状态
 }
 

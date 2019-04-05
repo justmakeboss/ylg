@@ -1365,18 +1365,22 @@ class User extends MobileBase
             $old_password = trim(I('post.old_password'));
             $password = trim(I('post.new_password'));
             $password2 = trim(I('post.confirm_password'));
+
             if (empty($password)) {
-                exit(['code' => -2, 'msg' => '新密码不能为空']);
+                exit(json_encode(['code' => -2, 'msg' => '新密码不能为空']));
             }
+
             if (empty($old_password)) {
-                exit(['code' => -2, 'msg' => '原密码不能为空']);
+                exit(json_encode(['code' => -2, 'msg' => '原密码不能为空']));
             }
             if ($password2 != $password) {
-                exit(['code' => -2, 'msg' => '两次密码不一致']);
+                exit(json_encode(['code' => -2, 'msg' => '两次密码不一致']));
             }
+
             $user = M('users')->where("user_id", $this->user_id)->find();
+
             if ($user['password'] != encrypt($old_password)) {
-                exit(['code' => -2, 'msg' => '原密码验证错误！']);
+                exit(json_encode(['code' => -2, 'msg' => '原密码验证错误！']));
             }
             M('users')->where("user_id", $user['user_id'])->save(array('password' => encrypt($password)));
             exit(json_encode(['code' => 1, 'msg' => '修改成功']));

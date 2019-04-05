@@ -76,7 +76,7 @@
                 <div class="fs12 mt5">{$user['nickname']}</div>
                 <!--<div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {:alphaID($user['user_id']).rand(0,100)} </div>-->
                 <div class="fs12 mt5">
-                    <if condition="$user['level'] eq 1">用户
+                    <if condition="$user['level'] eq 1">消费者
                     <elseif condition="$user['level'] eq 2">会员
                     <elseif condition="$user['level'] eq 3">服务中心
                     <elseif condition="$user['level'] eq 4">合伙人

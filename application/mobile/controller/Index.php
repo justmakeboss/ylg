@@ -222,8 +222,8 @@ class Index extends MobileBase
             ->where('UNIX_TIMESTAMP(agentend_time) <= UNIX_TIMESTAMP(NOW()) AND UNIX_TIMESTAMP(saleend_time) > UNIX_TIMESTAMP(NOW())')
             ->page($p, $pagesize)
             ->group('g.goods_id')
+            ->order('g.sort')
             ->select();
-
         $this->assign('list', $list);
 
         if (I('is_ajax')) {

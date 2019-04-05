@@ -121,7 +121,6 @@ class Cart extends MobileBase
      */
     public function cart2()
     {
-
         $goods_id = input("goods_id/d"); // 商品id
         $goods_num = input("goods_num/d");// 商品数量
         $inputSetmeal = input("setmeal_id/d");
@@ -243,9 +242,14 @@ class Cart extends MobileBase
         $this->assign('userCartCouponList', $userCartCouponList);  //优惠券，用able判断是否可用
         $this->assign('cartGoodsTotalNum', $cartGoodsTotalNum);
         $this->assign('suppliers', $suppliers);
-//        dump($cartList);exit;
         $this->assign('cartList', $cartList['cartList']); // 购物车的商品
         $this->assign('cartPriceInfo', $cartPriceInfo);//商品优惠总价
+        //#RPG
+        foreach ($shippingList as $kk =>$item) {
+            if($item['name'] != '申通物流') {
+                unset($shippingList[$kk]);
+            }
+        }
         $this->assign('shippingList', $shippingList); // 物流公司
         return $this->fetch();
     }
@@ -369,7 +373,6 @@ class Cart extends MobileBase
         $cartLogic = new CartLogic();
 
         $cartLogic->setUserId($this->user_id);
-
         if ($action == 'buy_now') {
 
             $cartLogic->setGoodsModel($goods_id, $setmeal_id);
@@ -395,7 +398,6 @@ class Cart extends MobileBase
                 }
             }
         }
-//        dump($order_goods);exit;
         $address = M('UserAddress')->where("address_id", $address_id)->find();
         $result = calculate_price($this->user_id, $order_goods, $shipping_code, 0, $address['province'], $address['city'], $address['district'], $pay_points, $user_money, $coupon_id);
         if ($result['status'] < 0)

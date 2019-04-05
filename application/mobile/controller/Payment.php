@@ -268,6 +268,7 @@ class Payment extends MobileBase
             Db::rollback();
             $this->error('支付失败!');
         }
+
         //订单支付提交
         $pay_radio = $_REQUEST['pay_radio'];
         $config_value = parse_url_param($pay_radio); // 类似于 pay_code=alipay&bank_code=CCB-DEBIT 参数
