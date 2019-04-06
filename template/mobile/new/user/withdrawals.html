@@ -1,5 +1,16 @@
 <include file="public/header" title="提现" body=""/>
 <include file="public/header_nav" title="提现" href="javascript:history.back(-1)"/>
+<link href="__PUBLIC__/bootstrap/css/bootstrap.css" rel="stylesheet" />
+<style>
+    .get-vericode {
+        height: 1rem;
+        margin-top:-0.1rem;
+        background-color: #e12c20;
+    }
+    .flex {
+        display: flex;
+    }
+</style>
 <input type="hidden" id="openid" value="{$user.openid}">
 <div class="loginsingup-input ma-to-20">
     <form method="post" id="returnform">
@@ -18,16 +29,9 @@
 
 
             </div>
-            <div class="lsu" style="height:2.83467rem  "><span>账号类型：</span>
-                <label>
-                    <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;" value="支付宝">支付宝
-                </label>
-
-                <!--<input type="radio" name="atype" style="width:.8rem;height:1rem;" value="微信">微信-->
-                <label>
-                    <input type="radio" name="atype" style="width:.8rem;;float: none;height:1rem;" value="银行卡" checked>银行卡
-                </label>
-
+            <div style="    border-bottom: 1px solid #dbdbdb;height: 2.133333rem;padding: .853333rem .64rem .426667rem;"><span>账号类型：</span>
+                <label class="radio-inline"><input type="radio" name="atype" value="支付宝"> 支付宝</label>
+                <label class="radio-inline"><input type="radio" name="atype"  value="银行卡"> 银行卡</label>
             </div>
 
             <div class="lsu lsu-recharge">
@@ -59,9 +63,9 @@
                 <input type="text" name="verify_code" id="verify_code" value="" placeholder="请输入验证码">
                 <img  id="verify_code_img" src="{:U('User/verify',array('type'=>'withdrawals'))}" onClick="verify()" style=""/>
             </div> -->
-            <div class="lsu lsu-recharge">
-                <span onclick="sendcode(this)" style="width: 4.2rem;">获取验证码：</span>
-                <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="请输入验证码">
+            <div class="lsu lsu-recharge flex">
+                <button type="button" class="btn btn-danger btn-xs get-vericode" onclick="sendcode(this)">获取验证码</button>
+                <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="&emsp;&nbsp;请输入验证码">
             </div>
             <div class="lsu-submit">
                 <input type="hidden" name="__token__" value="{$Request.token}"/>
