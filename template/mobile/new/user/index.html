@@ -77,9 +77,11 @@
                 <!--<div class="fs12 mt5" style="font-size: .5rem;">我的ID：  {:alphaID($user['user_id']).rand(0,100)} </div>-->
                 <div class="fs12 mt5">
                     <if condition="$user['level'] eq 1">消费者
-                    <elseif condition="$user['level'] eq 2">会员
-                    <elseif condition="$user['level'] eq 3">服务中心
-                    <elseif condition="$user['level'] eq 4">合伙人
+                    <elseif condition="$user['level'] eq 2">消费商
+                    <elseif condition="$user['level'] eq 3">区代理
+                    <elseif condition="$user['level'] eq 4">服务中心
+                        <elseif condition="$user['level'] eq 5">总代理
+
                     </if>
                 </div>
                 <!--<div class="fs12 mt5" style="font-size: .5rem;">上级：  {$mobile|default="无"} </div>-->

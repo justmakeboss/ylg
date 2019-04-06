@@ -1886,24 +1886,34 @@ function get_bonus($order)
                 //区代理奖金
                 $myTeamHasMemberLevelEG3 = [];
                 $users = Db::name('users')->where('user_id', ['in', $tjstr])->select();
-                foreach ($tjstr as $userId) {
+                if($TIR_ID['level'] != 4) {
+                    $usersLevelET4 = [];
+                    foreach ($tjstr as $userId) {
 
-                    $user = current(array_filter($users, function($i) use($userId) {
-                        return $i['user_id'] == $userId;
-                    }));
-                    if($user['level'] != 3) {
-                        continue;
+                        if(count($usersLevelET4) > 0) {
+                            break;
+                        }
+                        $user = current(array_filter($users, function($i) use($userId) {
+                            return $i['user_id'] == $userId;
+                        }));
+                        if(sizeof($myTeamHasMemberLevelEG3) == 0) {
+                            $p = 0.01;
+                        } else {
+                            $p = 0.01 * 0.2;
+                        }
+                        if($user['level'] == 4) {
+                            $usersLevelET4 = $userId;
+                        }
+                        if($user['level'] != 3) {
+                            continue;
+                        }
+                        $myTeamHasMemberLevelEG3[] = $userId;
+                        $money = $order['goods_price'] * $p;
+                        Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
+                        balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                     }
-                    if(sizeof($myTeamHasMemberLevelEG3) == 0) {
-                        $p = 0.01;
-                    } else {
-                        $p = 0.01 * 0.2;
-                    }
-                    $myTeamHasMemberLevelEG3[] = $userId;
-                    $money = $order['goods_price'] * $p;
-                    Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                 }
+
                 //服务中心奖金
                 $canGetBonus = [];
                 foreach ($tjstr as $userId) {

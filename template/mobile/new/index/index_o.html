@@ -1,48 +1,21 @@
 <layout name="common/layout_nav" />
-<link href="__PUBLIC__/static/css/font-awesome/bootstrap.min.css" rel="stylesheet"/>
-<link href="__PUBLIC__/static/css/font-awesome/font-awesome.min.css" rel="stylesheet"/>
 <style type="text/css">
-    * {
-        margin: 0;
-        padding: 0;
+    .notice {
+        width: 100%;/*单行显示，超出隐藏*/
+        height: 35px;/*固定公告栏显示区域的高度*/
+        padding: 0 10px;
+        overflow: hidden;
+        background: #fff;
+        text-align: center;
     }
-
-    .box {
-        width: 300px;
-        margin: 0 auto;
-        position: relative;
-        border: 1px solid #ff6700;
-    }
-
-    .animate {
-        padding-left: 20px;
-        font-size: 12px;
-        color: #000;
+    .notice ul li {
+        list-style: none;
+        line-height: 35px;
+        /*以下为了单行显示，超出隐藏*/
+        display: block;
         white-space: nowrap;
-        display: inline-block;
-        animation: 15s wordsLoop linear infinite normal;
-    }
-
-    @keyframes wordsLoop {
-        0% {
-            transform: translateX(0px);
-            -webkit-transform: translateX(0px);
-        }
-        100% {
-            transform: translateX(-60%);
-            -webkit-transform: translateX(-60%);
-        }
-    }
-
-    @-webkit-keyframes wordsLoop {
-        0% {
-            transform: translateX(0px);
-            -webkit-transform: translateX(0px);
-        }
-        100% {
-            transform: translateX(-60%);
-            -webkit-transform: translateX(-60%);
-        }
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 </style>
 <!-- <div class="page-hd">
@@ -71,20 +44,17 @@
         <div class="swiper-pagination-wrap"><div class="swiper-pagination"></div></div>
     </div>
     <?php if(sizeof($ads)) :?>
+
     <div style="width: 100%;display: flex;">
-        <!--<div style="width:200px;margin-left:6px;">-->
-            <!--<i class="icon-bell-alt" style="z-index:999;height: 100%;opacity: 1;"></i>-->
-        <!--</div>-->
-        <div>
-            <p class="animate">
+        <div class="notice">
+            <ul>
                 <?php foreach($ads as $ad):?>
                 <?php if($ad):?>
-                <span style="margin-right: 10px;">{$ad['content']}</span>
+                <li>{$ad['content']}</li>
                 <?php endif;?>
                 <?php endforeach;?>
-            </p>
+            </ul>
         </div>
-
     </div>
 
     <?php else:?>
