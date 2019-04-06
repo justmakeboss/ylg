@@ -1387,7 +1387,6 @@ class User extends MobileBase
         }
         if (session('pwdOutTime')) {
             $smsOutTime = session('pwdOutTime') - time();
-            echo $smsOutTime;
             if ($smsOutTime >= 0) {
                 $this->assign('smsOutTime', $smsOutTime);
             }
@@ -1423,7 +1422,6 @@ class User extends MobileBase
         }
         if (session('pwdOutTime')) {
             $smsOutTime = session('pwdOutTime') - time();
-            echo $smsOutTime;
             if ($smsOutTime >= 0) {
                 $this->assign('smsOutTime', $smsOutTime);
             }

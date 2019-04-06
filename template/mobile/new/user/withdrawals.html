@@ -10,6 +10,17 @@
     .flex {
         display: flex;
     }
+
+    /*.alipay {*/
+        /*margin-top:-0.6em;*/
+        /*display: inline-block;*/
+        /*overflow: hidden;*/
+    /*}*/
+    /*.bank {*/
+        /*display: inline-block;*/
+        /*overflow: hidden;*/
+        /*margin-top:-0.6em;*/
+    /*}*/
 </style>
 <input type="hidden" id="openid" value="{$user.openid}">
 <div class="loginsingup-input ma-to-20">
@@ -29,11 +40,51 @@
 
 
             </div>
-            <div style="    border-bottom: 1px solid #dbdbdb;height: 2.133333rem;padding: .853333rem .64rem .426667rem;"><span>账号类型：</span>
-                <label class="radio-inline"><input type="radio" name="atype" value="支付宝"> 支付宝</label>
-                <label class="radio-inline"><input type="radio" name="atype"  value="银行卡"> 银行卡</label>
-            </div>
+            <!--<div style="border-bottom: 1px solid #dbdbdb;height: 2.133333rem;padding: .853333rem .64rem .426667rem;">-->
+                <!--<span>账号类型：</span>-->
+                <!--<label class="radio-inline"><input type="radio" name="atype" value="支付宝"> 支付宝</label>-->
+                <!--<label class="radio-inline"><input type="radio" name="atype"  value="银行卡"> 银行卡</label>-->
+            <!--</div>-->
 
+            <div class="lsu">
+                <table>
+                    <tr>
+                        <td>
+                            <span>账号类型：</span>
+
+                        </td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="atype" style="width:.8rem;;float: none;" value="支付宝">
+
+                                    </td>
+                                    <td>
+                                        <span>支付宝</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <label for="sd-bank">
+                                            <input type="radio" name="atype" style="width:.8rem;;float: none;" value="银行卡" checked>
+
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <span id="sd-bank">银行卡</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <!--<input type="radio" name="atype" style="width:.8rem;height:1rem;" value="微信">微信-->
+            </div>
             <div class="lsu lsu-recharge">
                 <span>提现数量：</span>
                 <input type="text" name="money" id="money" value="" usermoney="{$user.user_money}"
@@ -63,9 +114,19 @@
                 <input type="text" name="verify_code" id="verify_code" value="" placeholder="请输入验证码">
                 <img  id="verify_code_img" src="{:U('User/verify',array('type'=>'withdrawals'))}" onClick="verify()" style=""/>
             </div> -->
-            <div class="lsu lsu-recharge flex">
-                <button type="button" class="btn btn-danger btn-xs get-vericode" onclick="sendcode(this)">获取验证码</button>
-                <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="&emsp;&nbsp;请输入验证码">
+            <div class="lsu lsu-recharge">
+                <table>
+                    <tr>
+                        <td>
+                            <button type="button" class="btn btn-danger" onclick="sendcode(this)" style="font-size: 0.6rem;background-color: #e12c20;display: inline-block;padding: 4px;">获取验证码</button>
+
+                        </td>
+                        <td>
+                            <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="&emsp;&nbsp;请输入验证码">
+
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div class="lsu-submit">
                 <input type="hidden" name="__token__" value="{$Request.token}"/>

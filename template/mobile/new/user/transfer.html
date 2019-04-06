@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="__STATIC__/assets/dist/assets/css/zpui.css"/>
     <link rel="stylesheet" href="__STATIC__/assets/dist/assets/css/all.css"/>
     <script src="__STATIC__/assets/dist/assets/js/page.js"></script>
+    <!--<link href="__PUBLIC__/bootstrap/css/bootstrap.css" rel="stylesheet" />-->
 
     <title> 余额互转</title>
     <style>
         .wigth-3 .weui-celly {
             width:25%;
+        }
+
+        #mobile_code {
+            display: block;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -97,10 +103,16 @@
 <!--                                    </div>-->
 <!--                                </div>-->
                                 <div class="weui-cell fs26">
-                                    <div class="weui-cell__hd"><label class="weui-label" onclick="sendcode(this)" rel="mobile">获取验证码</label></div>
-                                    <div class="weui-cell__bd">
-                                        <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="请输入验证码">
-                                    </div>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <button type="button" class="btn btn-danger" onclick="sendcode(this)" style="background-color: #f9454e;display: inline-block;padding: 1px;border-radius: 0.053333rem;color:#fff;">获取验证码</button>
+                                            </td>
+                                            <td>
+                                                <input class="weui-input" type="text" id="mobile_code" name="mobile_code" placeholder="请输入验证码">
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
                             </div>
                             <div class="weui-btn-area">
@@ -338,7 +350,7 @@
                 }
             })
         }else{
-            showErrorMsg('请输入手机号！');
+            showErrorMsg('请输入手机号或者转账数额');
         }
     }
 </script>
