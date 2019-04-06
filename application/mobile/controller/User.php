@@ -913,9 +913,10 @@ class User extends MobileBase
 
            if(!empty($aliNo)) {
                $c = M('users')->where(['ali_no' => input('post.ali_no'), 'user_id' => ['<>', $this->user_id]])->count();
-               $c && exit(json_encode(['code'=>-1,'msg'=>'支付宝账号被使用']));
+               if($c) {
+                   $this->error("支付宝账号被使用");
+               }
            }
-
             if (!empty($mobile)) {
                 $c = M('users')->where(['mobile' => input('post.mobile'), 'user_id' => ['<>', $this->user_id]])->count();
                 $c && exit(json_encode(['code' => -1, 'msg' => '手机已被使用']));
@@ -1774,6 +1775,7 @@ class User extends MobileBase
         $this->assign('reserve_funds', $reserve_funds);//可提现金额
         $this->assign('user_money', $this->user['user_money']);    //用户余额
         $this->assign('sender', $this->user['mobile']);    //用户余额
+        $this->assign('ali_no', $this->user['ali_no']);
         $this->assign('handling_fee', $ylg_spstem_role['bill_charge'] * 100);    //手续费
         return $this->fetch();
     }

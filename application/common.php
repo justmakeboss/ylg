@@ -1878,7 +1878,7 @@ function get_bonus($order)
         $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
         if ($TIR_ID) {
             //直推奖金
-            $money = $order['order_amount'] * $config['daozhang'];
+            $money = $order['goods_price'] * $config['daozhang'];
             Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
             balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
             if ($TIR_ID['second_leader']) {

@@ -61,7 +61,7 @@
 
                                     </td>
                                     <td>
-                                        <span>支付宝</span>
+                                        <span id="sd-ali">支付宝</span>
                                     </td>
                                 </tr>
                             </table>
@@ -93,12 +93,12 @@
             <div class="lsu lsu-recharge">
                 <span>银行名称：</span>
                 <input type="text" name="bank_name" id="bank_name" value="{$wx_code.bank}" placeholder="如：工商银行"
-                       readonly="readonly">
+                       readonly="readonly" data-v1="{$wx_code.bank}" data-v2="支付宝">
             </div>
             <div class="lsu lsu-recharge">
                 <span>收款账号：</span>
                 <input type="text" name="bank_card" id="bank_card" value="{$wx_code.bank_num}" placeholder="收款账号"
-                       onKeyUp="this.value=this.value.replace(/[^\d]/g,'')" readonly="readonly">
+                       onKeyUp="this.value=this.value.replace(/[^\d]/g,'')" readonly data-v1="{$wx_code.bank_num}" data-v2="{$ali_no}">
             </div>
             <div class="lsu lsu-recharge">
                 <span>开 户 名：</span>
@@ -140,7 +140,6 @@
     function verify() {
         $('#verify_code_img').attr('src', '/index.php?m=Mobile&c=User&a=verify&type=withdrawals&r=' + Math.random());
     }
-
     //发送短信验证码
     function sendcode(obj){
         $.ajax({
@@ -243,14 +242,14 @@
                 $('#bank_name').attr('readonly', 'readonly');
                 if (bankstr == '微信') {
                     $('#bank_card').val($('#openid').val());
-                    $('#bank_card').attr('readonly', 'readonly');
                 } else {
-                    $('#bank_card').val('');
-                    $('#bank_card').removeAttr('readonly');
+                    $('#bank_card').val($('#bank_card').data('v2'));
+                    $('#bank_name').val($('#bank_name').data('v2'));
                 }
             } else {
-                $('#bank_name').val('');
-                $('#bank_name').removeAttr('readonly');
+                $('#bank_name').val($('#bank_name').data('v1'));
+                $('#bank_card').val($('#bank_card').data('v2'));
+
             }
         })
     });
