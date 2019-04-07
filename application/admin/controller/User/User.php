@@ -1307,9 +1307,14 @@ class User extends Base {
     		$end = $gap[1];
     		$map['ctime'] = array('between',array(strtotime($begin),strtotime($end)));
     	}
-    	if($nickname){
-    		$map['nickname'] = array('like',"%$nickname%");
-    	}
+//    	if($nickname){
+//    		$map['nickname'] = array('like',"%$nickname%");
+//    	}
+
+        if($nickname){
+            $map['user_id'] = $nickname;
+        }
+
         if($pay_status){
             if($pay_status==3){
                 $map['pay_status'] = array('=',0);
