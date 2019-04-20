@@ -84,6 +84,60 @@ class Index extends MobileBase
         return $this->fetch();
     }
 
+    public function getWrong()
+    {
+        header('content-type:text/html;charset=utf-8');
+        $goodsConsignUsers = Db::name('goods_consignments')->group('user_id')->field('user_id')->select();
+        $goodsConsignUserIds = [];
+
+        foreach ($goodsConsignUsers as $goodsConsignUser) {
+            if(!in_array($goodsConsignUser['user_id'], $goodsConsignUserIds)) {
+                $goodsConsignUserIds[] = $goodsConsignUser['user_id'];
+            }
+        }
+        $users = Db::name('users')->whereIn('user_id', $goodsConsignUserIds)->field('user_id,user_money,mobile')->select();
+//        $users = Db::name('users')->field('user_id,user_money,mobile')->select();
+        $wrongUsers = [];
+        $rightUsers = [];
+        $lostTotal = 0;
+        $lostTotal2 = 0;
+        foreach ($users as $user) {
+
+
+            $sumBalanceLog = Db::name('balancelog')->where(['userId' => $user['user_id'], 'type' => ['neq', 11]])->sum('num');
+            $allGoodsConsign = Db::name('goods_consignments')->where(['user_id' => $user['user_id'], 'five_status' => 1])->field('num,goods_price')->select();
+            $sum = 0;
+            foreach ($allGoodsConsign as $item) {
+                $sum += $item['goods_price'] * $item['num'] * 0.8;
+            }
+            $userMoneyLeft = $sumBalanceLog + $sum;
+            if(bccomp((string)$userMoneyLeft, $user['user_money'], 4) === -1){
+                $wrongUsers[$user['user_id']] = [
+                    '手机号' => $user['mobile'],
+                    '计算出来的' => intval($userMoneyLeft),
+                    '现在的余额' => intval($user['user_money']),
+                    '差值' => intval($userMoneyLeft)- intval($user['user_money']),
+                ];
+                $lostTotal += intval($userMoneyLeft)- intval($user['user_money']);
+            } else {
+                $rightUsers[$user['user_id']] = [
+                    '手机号' => $user['mobile'],
+                    '计算出来的' => $userMoneyLeft,
+                    '现在的余额' => $user['user_money'],
+                ];
+            }
+        }
+        echo "账面亏损：" .$lostTotal ;
+        echo "<hr><br>";
+//        echo '扣余额后亏损：'. $lostTotal2;
+        echo "<hr><br>";
+
+        dump($wrongUsers);
+        echo "<b><hr><br></b>";
+//        dump($rightUsers);
+        die;
+    }
+
     public function index()
     {
         /*
