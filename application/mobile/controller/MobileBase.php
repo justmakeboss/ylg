@@ -178,10 +178,8 @@ class MobileBase extends Controller
             $userId = $users['user_id'];
             $uname = $users['nickname'];
         }
-        file_put_contents('./debug.txt', date('Y-m-d H:i:s'). ' Start here...'. "\r\n", FILE_APPEND);
         forzenss($userId);
         forzens($userId);
-        file_put_contents('./debug.txt', date('Y-m-d H:i:s'). ' End here...'. "\r\n", FILE_APPEND);
 
         $this->assign('user_id', $userId);
         $this->assign('uname', $uname);
