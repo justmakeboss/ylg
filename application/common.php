@@ -1862,6 +1862,21 @@ function confirm_order($id, $user_id = 0)
 }
 
 
+
+function limitShopping($orderType, $userId)
+{
+    if($orderType == 1) {
+        $record = Db::name('goods_consignments')->where(['user_id' => $userId, 'five_status' => 0])->select();
+        if($record) {
+            exit(json_encode(array('status' => -8, 'msg' => '寄售进行期间不允许再次购买', 'result' => null)));
+        }
+        $latestRecord = Db::name('order')->where(['user_id' => $userId, 'pay_status' => 1])->order('order_id', 'desc')->find();
+        if(time() - $latestRecord['pay_time'] <= 10 * 86400) {
+            exit(json_encode(array('status' => -8, 'msg' => '10天内不能再次购买活动区产品', 'result' => null)));
+        }
+    }
+}
+
 //奖金
 function get_bonus($order)
 {

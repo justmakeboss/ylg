@@ -308,9 +308,9 @@
                         </div>
                         <div class="weui-cell__ft">
                             <div class="number">
-                                <span class="number-sub" onclick="altergoodsnum(-1);initGoodsPrice();">-</span>
-                                <input type="tel" value="1" id="number" residuenum="{$goods.store_count}" name="goods_num" style="width: 30px;height: 30px;" class="number-input buyNum" min="1" max="{$goods.store_count}" onblur="altergoodsnum(0)">
-                                <span class="number-plus" onclick="altergoodsnum(1);initGoodsPrice();">+</span>
+                                <!--<span class="number-sub" onclick="altergoodsnum(-1);initGoodsPrice();">-</span>-->
+                                <input type="tel" value="1" id="number" residuenum="{$goods.store_count}" name="goods_num" style="width: 30px;height: 30px;" class="number-input buyNum" min="1" max="{$goods.store_count}" onblur="altergoodsnum(0)" readonly="readonly">
+                                <!--<span class="number-plus" onclick="altergoodsnum(1);initGoodsPrice();">+</span>-->
                             </div>
                         </div>
                     </div>

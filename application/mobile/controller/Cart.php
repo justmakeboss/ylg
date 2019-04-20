@@ -165,7 +165,8 @@ class Cart extends MobileBase
             }
             $goods = Db::name('goods')->where('goods_id', $goods_id)->find();
             if ($goods['type_id'] == 6 && $goods['status'] == 1) {
-                $frozen_status = Db::name('forzen')->where(['frozen_status' => 1,
+                $frozen_status = Db::name('forzen')
+                    ->where(['frozen_status' => 1,
                     'five_status' => 0, 'user_id' => $this->user_id])->find();
                 if ($frozen_status) {
                     $this->error('请批发完后再购买活动区产品');
@@ -440,6 +441,7 @@ class Cart extends MobileBase
                 }
                 $pay_name = $user_money ? '余额支付' : '积分兑换';
             }
+
             if (empty($coupon_id) && !empty($couponCode)) {
                 $coupon_id = M('CouponList')->where("code", $couponCode)->getField('id');
             }
@@ -464,6 +466,9 @@ class Cart extends MobileBase
 
                 }
             }
+
+            limitShopping($type, $this->user_id);
+
             $orderLogic = new OrderLogic();
             $orderLogic->setAction($action);
             $orderLogic->setCartList($order_goods);
