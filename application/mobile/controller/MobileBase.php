@@ -178,10 +178,8 @@ class MobileBase extends Controller
             $userId = $users['user_id'];
             $uname = $users['nickname'];
         }
-        Db::transaction(function () use ($userId) {
-            forzenss($userId);
-            forzens($userId);
-        });
+        forzenss($userId);
+        forzens($userId);
         $this->assign('user_id', $userId);
         $this->assign('uname', $uname);
 

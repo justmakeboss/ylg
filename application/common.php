@@ -642,6 +642,7 @@ function forzenss($userId)
                 $money = $gc['goods_price'] * $gc['num'] * (1 - $system['handling_fee']);
                 Db::name('users')->where(['user_id' => $gc['user_id']])->setInc('user_money', $money);
                 Db::name('goods_consignments')->where(['id' => $gc['id']])->setField('five_status', 1);
+                balancelog($gc['id'], $userId, $money, 11, $user['user_money'], $user['user_money'] + $money);
                 //消费积分
                 $d = $gc['goods_price'] * $gc['num'] * $system['goods_integral'];
                 Db::name('users')->where('user_id', $userId)
