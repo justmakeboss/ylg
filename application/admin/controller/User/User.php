@@ -203,7 +203,7 @@ class User extends Base {
                 $memberIds[] = $myTeamMemberId['user_id'];
             }
             $myTeamAllRecharges = Db::name('recharge')->whereIn('user_id', implode(',', $memberIds))->where(['pay_status' => 1])->sum('account');
-            $myTeamWithdrawals = Db::name('withdrawals')->whereIn('user_id', implode(',', $memberIds))->sum('money');
+            $myTeamWithdrawals = Db::name('withdrawals')->whereIn('user_id', implode(',', $memberIds))->where(['status' => 1])->sum('money');
             $item['totalRechargeMinusWithdrawal'] = $allRecharges + $myTeamAllRecharges - $allWithdrawls - $myTeamWithdrawals;
         }
         //  搜索条件下 分页赋值
@@ -1307,9 +1307,14 @@ class User extends Base {
     		$end = $gap[1];
     		$map['ctime'] = array('between',array(strtotime($begin),strtotime($end)));
     	}
-    	if($nickname){
-    		$map['nickname'] = array('like',"%$nickname%");
-    	}
+//    	if($nickname){
+//    		$map['nickname'] = array('like',"%$nickname%");
+//    	}
+
+        if($nickname){
+            $map['user_id'] = $nickname;
+        }
+
         if($pay_status){
             if($pay_status==3){
                 $map['pay_status'] = array('=',0);
