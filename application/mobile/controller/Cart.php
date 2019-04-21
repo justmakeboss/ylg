@@ -166,10 +166,17 @@ class Cart extends MobileBase
 
             $goods = Db::name('goods')->where('goods_id', $goods_id)->find();
 
-            $lastTimeOrderAmount = Db::name('order')->where(['user_id' => $this->user_id, 'pay_status' => 1, 'type' => 1])->order('pay_time', 'desc')->column('order_amount');
+            $lastTimeOrderAmount = Db::name('order')->where(['user_id' => $this->user_id, 'pay_status' => 1, 'type' => 1])->order('pay_time', 'desc')->find();
             if($lastTimeOrderAmount) {
-                if($goods['shop_price'] < $lastTimeOrderAmount) {
-                    $this->error('活动区下次购买金额要大于等于上一次购买的金额!');
+                $orderGoods = Db::name('order_goods')->where(['order_id' => $lastTimeOrderAmount['order_id']])->field('goods_price')->select();
+                $maxGoodsPrice = 0;
+                foreach ($orderGoods as $orderGood) {
+                    if($orderGood['goods_price'] > $maxGoodsPrice) {
+                        $maxGoodsPrice = $orderGood['goods_price'];
+                    }
+                }
+                if($goods['shop_price'] < $maxGoodsPrice) {
+                    $this->error('活动区下次购买金额要大于等于上一次购买的金额');
                 }
             }
             if ($goods['type_id'] == 6 && $goods['status'] == 1) {
