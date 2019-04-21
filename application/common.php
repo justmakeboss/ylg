@@ -1884,6 +1884,13 @@ function limitShopping($orderType, $userId)
     }
 }
 
+function getMy15DayShopPrice($userId)
+{
+    $result = Db::name('order')->where(['user_id' => $userId, 'type' => 1, 'pay_status' => 1, 'pay_time' =>['egt', time() - 15 * 86400]])->sum('goods_price');
+    file_put_contents(MY_LOG.date('Ymd').'.txt', date('Y-m-d H:i:s'). ' '.$userId.' 15天内的活动区消费总额是：' . $result. "\r\n", 8);
+    return $result > 0 ? $result : 0;
+}
+
 //奖金
 function get_bonus($order)
 {
@@ -1901,7 +1908,7 @@ function get_bonus($order)
         $TIR_ID = Db::name('users')->where(['user_id' => $user['first_leader'], 'level' => ['egt', 2]])->find();
         if ($TIR_ID) {
             //直推奖金
-            $money = $order['goods_price'] * $config['daozhang'];
+            $money = min($order['goods_price'], getMy15DayShopPrice($TIR_ID['user_id'])) * $config['daozhang'];
             Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
             balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
             if ($TIR_ID['second_leader']) {
@@ -1931,7 +1938,7 @@ function get_bonus($order)
                             continue;
                         }
                         $myTeamHasMemberLevelEG3[] = $userId;
-                        $money = $order['goods_price'] * $p;
+                        $money = min($order['goods_price'], getMy15DayShopPrice($user['user_id'])) * $p;
                         Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
                         balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                     }
@@ -1956,7 +1963,7 @@ function get_bonus($order)
                         $bblili = 0.004;
                     }
                     $canGetBonus[] = $userId;
-                    $money = $order['goods_price'] * $bblili;
+                    $money = min($order['goods_price'], getMy15DayShopPrice($user['user_id'])) * $bblili;
                     Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
                     balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
 

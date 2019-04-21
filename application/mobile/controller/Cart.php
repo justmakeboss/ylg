@@ -163,7 +163,15 @@ class Cart extends MobileBase
             if (empty($goods_num)) {
                 $this->error('购买商品数量不能为0');
             }
+
             $goods = Db::name('goods')->where('goods_id', $goods_id)->find();
+
+            $lastTimeOrderAmount = Db::name('order')->where(['user_id' => $this->user_id, 'pay_status' => 1, 'type' => 1])->order('pay_time', 'desc')->column('order_amount');
+            if($lastTimeOrderAmount) {
+                if($goods['shop_price'] < $lastTimeOrderAmount) {
+                    $this->error('活动区下次购买金额要大于等于上一次购买的金额!');
+                }
+            }
             if ($goods['type_id'] == 6 && $goods['status'] == 1) {
                 $frozen_status = Db::name('forzen')
                     ->where(['frozen_status' => 1,

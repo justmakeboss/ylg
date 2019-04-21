@@ -1712,6 +1712,11 @@ class User extends MobileBase
                 exit;
             }
 
+            if(ceil($data['money']/100) != $data['money'] /100) {
+                $this->ajaxReturn(['status' => 0, 'msg' => "提现金额必须是100的整数倍"]);
+                exit;
+            }
+
             if ($data['money'] > $this->user['user_money'] - $ylg_spstem_role['reserve_funds']) {
                 $this->ajaxReturn(['status' => 0, 'msg' => "你最多可提现{$reserve_funds}账户余额."]);
                 exit;

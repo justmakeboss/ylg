@@ -1,5 +1,1 @@
-2019-04-21 01:31:25 user id is 663, mobile is 15088131939 get bonus: 1024,gcId is : 345678
-2019-04-21 01:31:25 user id is 663, mobile is 15088131939 get bonus: 1024,gcId is : 345679
-2019-04-21 01:32:23 user id is 663, mobile is 15088131939 get bonus: 1024,gcId is : 345678
-2019-04-21 01:33:17 user id is 663, mobile is 15088131939 get bonus: 1024,gcId is : 345678
-2019-04-21 01:33:53 user id is 663, mobile is 15088131939 get bonus: 800,gcId is : 345678
+2019-04-21 23:57:16 21 15天内的活动区消费总额是：
