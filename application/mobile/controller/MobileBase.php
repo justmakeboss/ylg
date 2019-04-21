@@ -178,12 +178,8 @@ class MobileBase extends Controller
             $userId = $users['user_id'];
             $uname = $users['nickname'];
         }
-        forzenss($userId);
-        forzens($userId);
-
         $this->assign('user_id', $userId);
         $this->assign('uname', $uname);
-
     }
 
     // 网页授权登录获取 OpendId

@@ -14,25 +14,13 @@ class Test extends Command
     }
     protected function execute(Input $input, Output $output)
     {
-        file_put_contents('/home/ylg/1.txt', time(),8);
         // 输出到日志文件
         $output->writeln("TestCommand:");
-        // 定时器需要执行的内容
-
-        $goodsCron = Db::name('goods_crontab')->where(['status' => 0])->select();
-
-        foreach ($goodsCron as $item) {
-
-
-
-
-
+        $users = Db::name('users')->field('user_id')->select();
+        foreach ($users as $user) {
+            forzenss($user['user_id']);
+            forzens($user['user_id']);
         }
-
-
-
-
-
         $output->writeln("end....");
     }
 }

@@ -56,7 +56,7 @@
                 <div class="weui-cell__ft">
                    <div class="number">
                         <!--<span class="number-sub num-jian"  id="num-jian">-</span>-->
-                        <input type="text" value="1" name="num" class="number-input" id="input-num" readonly="readonly">
+                        <input type="text" value="1" name="num" class="number-input" id="input-num" readonly="readonly num_jia.onclick">
                         <!--<span class="number-plus"  id="num-jia">+</span>-->
                     </div>
                 </div>
@@ -154,21 +154,21 @@ var num_jia = document.getElementById("num-jia");
         var num_jian = document.getElementById("num-jian");
         var input_num = document.getElementById("input-num");
 
-        num_jia.onclick = function() {
+        // num_jia.onclick = function() {
+        //
+        //     input_num.value = parseInt(input_num.value) + 1;
+        // }
 
-            input_num.value = parseInt(input_num.value) + 1;
-        }
-
-        num_jian.onclick = function() {
-
-            if(input_num.value <= 1) {
-                input_num.value = 1;
-            } else {
-
-                input_num.value = parseInt(input_num.value) - 1;
-            }
-
-        }
+        // num_jian.onclick = function() {
+        //
+        //     if(input_num.value <= 1) {
+        //         input_num.value = 1;
+        //     } else {
+        //
+        //         input_num.value = parseInt(input_num.value) - 1;
+        //     }
+        //
+        // }
 function setmeal(obj,id)
     {
         var num = $(obj).attr('stock');

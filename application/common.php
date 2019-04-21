@@ -1874,10 +1874,13 @@ function limitShopping($orderType, $userId)
         if($record) {
             exit(json_encode(array('status' => -8, 'msg' => '寄售进行期间不允许再次购买', 'result' => null)));
         }
-        $latestRecord = Db::name('order')->where(['user_id' => $userId, 'pay_status' => 1])->order('order_id', 'desc')->find();
-        if(time() - $latestRecord['pay_time'] <= 10 * 86400) {
-            exit(json_encode(array('status' => -8, 'msg' => '10天内不能再次购买活动区产品', 'result' => null)));
+        $latestRecord = Db::name('order')->where(['user_id' => $userId, 'pay_status' => 1, 'type' => 1])->order('pay_time', 'desc')->find();
+        if(!empty($latestRecord)) {
+            if(time() - $latestRecord['pay_time'] <= 10 * 86400) {
+                exit(json_encode(array('status' => -8, 'msg' => '10天内不能再次购买活动区产品', 'result' => null)));
+            }
         }
+
     }
 }
 

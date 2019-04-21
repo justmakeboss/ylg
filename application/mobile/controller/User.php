@@ -1707,6 +1707,11 @@ class User extends MobileBase
                 }
             }
 
+            if($data['money'] < 100) {
+                $this->ajaxReturn(['status' => 0, 'msg' => "最低提现100"]);
+                exit;
+            }
+
             if ($data['money'] > $this->user['user_money'] - $ylg_spstem_role['reserve_funds']) {
                 $this->ajaxReturn(['status' => 0, 'msg' => "你最多可提现{$reserve_funds}账户余额."]);
                 exit;
