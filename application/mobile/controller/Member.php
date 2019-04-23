@@ -258,7 +258,7 @@ class Member extends MobileBase
                                 'surplus_num' => $data['num'],
                                 'goods_name' => $goodslist[$i]['goods_name'],
                                 'goods_price' => $goodslist[$i]['shop_price'],
-                                'create_time' => time() + (5*86400),
+                                'create_time' => time() + (7*86400),
                                 'gid' => $gcId,
                             );
                             Db::name('goods_consignments')->insert($d);

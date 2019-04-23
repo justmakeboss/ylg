@@ -241,6 +241,7 @@ class Cart extends MobileBase
         $this->assign('goods_num', input('get.goods_num'));
         $this->assign('action', input('get.action'));
         $this->assign('goods_id', input('get.goods_id'));
+        $this->assign('goods', $goods);
         $this->assign('item_id', input('get.item_id'));
         $this->assign('type', input('get.type'));
         // 选择完门店会有门店id返回
@@ -259,6 +260,9 @@ class Cart extends MobileBase
         $this->assign('cartGoodsTotalNum', $cartGoodsTotalNum);
         $this->assign('suppliers', $suppliers);
         $this->assign('cartList', $cartList['cartList']); // 购物车的商品
+
+        //重新计算
+        $cartPriceInfo['total_fee'] = $goods['shop_price'] + $goods['zip_price'];
         $this->assign('cartPriceInfo', $cartPriceInfo);//商品优惠总价
         //#RPG
         foreach ($shippingList as $kk =>$item) {

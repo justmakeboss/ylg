@@ -187,7 +187,7 @@ class Payment extends MobileBase
                 $d['user_id'] = $user['user_id'];
                 $d['reg_time'] = time();
                 $d['frozen_dongjie'] = $order['goods_price'] * $system['invite_integral'];
-                $d['shifang_time'] = time() + (5 * 86400);
+                $d['shifang_time'] = time() + (7 * 86400);
                 $d['frozen_status'] = 1;
                 $d['order_id'] = $order['order_id'];
                 Db::name('forzen')->insertGetId($d);

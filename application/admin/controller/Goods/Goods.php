@@ -326,7 +326,6 @@ class Goods extends Base {
             $return_url = $is_distribut > 0 ? U('admin/Distribut.Distribut/goods_list') : U('admin/Goods.Goods/goodsList');
             $data = input('post.');
 
-
             $errors = [];
             if(empty($data['type_id'])){
 
@@ -443,6 +442,7 @@ class Goods extends Base {
             } else {
                 $Goods->price_ladder = '';
             }
+
             if ($type == 2) {
                 if(!empty($data['name'])){
                     $goodsdate = [];
@@ -464,7 +464,6 @@ class Goods extends Base {
 //                    dump($goodsdate);exit;
 
                 }
-
                 $Goods->isUpdate(true)->save(); // 写入数据到数据库
                 // 修改商品后购物车的商品价格也修改一下
                 M('cart')->where("goods_id = $goods_id and spec_key = ''")->save(array(

@@ -96,14 +96,14 @@
         <div class="weui-panel__ft">
             <div class="weui-cell weui-cell_link fs11">
                 <div class="weui-cell__bd">订单运费</div>
-                <div class="weui-cell__ft"><span class="text-muted" id="postFee">0</span></div>
+                <div class="weui-cell__ft"><span class="text-muted" id="postFee">{$goods.zip_price}</span></div>
             </div>
-            <div class="weui-cell weui-cell_access weui-cell_link fs11 takeoutps">
-                <div class="weui-cell__bd">
-                    <div>支持配送</div>
-                </div>
-                <div class="weui-cell__ft"><span class="text-muted" id="postname">不选择，则按默认配送方式</span></div>
-            </div>
+            <!--<div class="weui-cell weui-cell_access weui-cell_link fs11 takeoutps">-->
+                <!--<div class="weui-cell__bd">-->
+                    <!--<div>支持配送</div>-->
+                <!--</div>-->
+                <!--<div class="weui-cell__ft"><span class="text-muted" id="postname">不选择，则按默认配送方式</span></div>-->
+            <!--</div>-->
             <!--<div class="information_dr">
                 <div class="maleri30">
                     <div class="invoice list7">
@@ -201,6 +201,7 @@
     <div class="fixed-bottom2 ">
         <div class="weui-flex">
             <div class="weui-flex__item fs10 ">
+                <!--<div><span class="text-muted">合计</span><span class="text-red">￥</span><b class="fs15 text-red" id="payables">{$cartPriceInfo['total_fee']}</b></div>-->
                 <div><span class="text-muted">合计</span><span class="text-red">￥</span><b class="fs15 text-red" id="payables">{$cartPriceInfo['total_fee']}</b></div>
             </div>
             <div class="weui-flex__item">
@@ -504,7 +505,7 @@
             success: function(data){
                 if(data.status == -3 || data.status == -4){
                     showErrorMsg(data.msg);
-                    refresh_price(data);
+                    //refresh_price(data);
                     $('.submit_price a').addClass("disable");
                 }else if(data.status != 1){
                     //执行有误
@@ -517,7 +518,7 @@
                     }
                 }else{
                     $('.submit_price a').removeClass("disable");
-                    refresh_price(data);
+                    // refresh_price(data);
                 }
 
             }
@@ -528,7 +529,7 @@
         $("#balance").text(data.result.balance);// 余额
         $("#pointsFee").text(data.result.pointsFee);// 积分支付
         $("#order_prom_amount").text(data.result.order_prom_amount);// 订单 优惠活动
-        $("#postFee").text(data.result.postFee); // 物流费
+        //$("#postFee").text(data.result.postFee); // 物流费
         if(data.result.couponFee == null){
             $("#couponFee").text(0);// 优惠券
         }else{
@@ -675,7 +676,7 @@
             success: function(data){
                 if(data.status == -3 || data.status == -4){
                     showErrorMsg(data.msg);
-                    refresh_price(data);
+                    // refresh_price(data);
                     $('.submit_price a').addClass("disable");
                 }else if(data.status != 1){
                     i.attr('checked',false);
@@ -690,7 +691,7 @@
                     }
                 }else{
                     $('.submit_price a').removeClass("disable");
-                    refresh_price(data);
+                    // refresh_price(data);
                 }
 
             }

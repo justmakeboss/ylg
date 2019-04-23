@@ -302,7 +302,6 @@ class User extends MobileBase
      */
     public function do_login()
     {
-
         $username = trim(I('post.username'));
         $password = trim(I('post.password'));
         //验证码验证
