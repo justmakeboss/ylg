@@ -265,11 +265,11 @@ class Cart extends MobileBase
         $cartPriceInfo['total_fee'] = $goods['shop_price'] + $goods['zip_price'];
         $this->assign('cartPriceInfo', $cartPriceInfo);//商品优惠总价
         //#RPG
-        foreach ($shippingList as $kk =>$item) {
-            if($item['name'] != '申通物流') {
-                unset($shippingList[$kk]);
-            }
-        }
+//        foreach ($shippingList as $kk =>$item) {
+//            if($item['name'] != '申通物流') {
+//                unset($shippingList[$kk]);
+//            }
+//        }
         $this->assign('shippingList', $shippingList); // 物流公司
         return $this->fetch();
     }
@@ -389,6 +389,18 @@ class Cart extends MobileBase
         $setmeal_id = empty($inputSetmeal) ? 0 : $inputSetmeal;// 套餐ID
 
 
+        ///
+        ///
+        ///
+        ///
+        /// 这里改成获取商品的物流费
+        $goods = Db::name('goods')->where('goods_id', $goods_id)->field('zip_price,shop_price')->find();
+        $goodsZipPrice = $goods['zip_price'];
+        ///
+        ///
+        ///
+
+
         $user_money = $user_money ? $user_money : 0;
         $cartLogic = new CartLogic();
 
@@ -428,11 +440,13 @@ class Cart extends MobileBase
         $result['result']['order_prom_id'] = $order_prom['order_prom_id'];
         $result['result']['order_prom_amount'] = $order_prom['order_prom_amount'];
         $car_price = array(
-            'postFee' => $result['result']['shipping_price'], // 物流费
+            //'postFee' => $result['result']['shipping_price'], // 物流费
+            'postFee' => $goodsZipPrice, // 物流费
             'couponFee' => $result['result']['coupon_price'], // 优惠券
             'balance' => $result['result']['user_money'], // 使用用户余额
             'pointsFee' => $result['result']['integral_money'], // 积分支付
-            'payables' => $result['result']['order_amount'], // 应付金额
+//            'payables' => $result['result']['order_amount'], // 应付金额
+            'payables' => $goodsZipPrice + $goods['shop_price'], // 应付金额
             'goodsFee' => $result['result']['goods_price'],// 商品价格
             'quota' => $result['result']['quota'],// 商品价格
             'goods_integral' => $result['result']['goods_integral'],// 商品消费积分
@@ -441,7 +455,6 @@ class Cart extends MobileBase
         );
         if (!$address_id) exit(json_encode(array('status' => -3, 'msg' => '请先填写收货人信息', 'result' => $car_price))); // 返回结果状态
         if (!$shipping_code) exit(json_encode(array('status' => -4, 'msg' => '请选择物流信息', 'result' => $car_price))); // 返回结果状态
-
         // 提交订单
         if ($_REQUEST['act'] == 'submit_order') {
             $pay_name = '';
@@ -492,6 +505,8 @@ class Cart extends MobileBase
             $orderLogic->setAction($action);
             $orderLogic->setCartList($order_goods);
             $result = $orderLogic->addOrder($this->user_id, $suppliers_id, $address_id, $shipping_code, $invoice_title, $coupon_id, $car_price, $user_note, $pay_name, $order_type, $start_server_time = 0, $end_server_time = 0, $type); // 添加订单
+//            header('content-type:text/html;charset=utf-8;');
+//            dump($result);die;
             exit(json_encode($result));
         }
         $return_arr = array('status' => 1, 'msg' => '计算成功', 'result' => $car_price); // 返回结果状态

@@ -448,7 +448,7 @@ class OrderLogic
 				'goods_price'      =>$car_price['goodsFee'],//'商品价格',
 				'shop_integral'      =>$car_price['goods_integral'],//'商品总消费积分',
 				'quota'      =>$car_price['quota'],//'商品总配额',
-				'shipping_price'   =>$car_price['postFee'],//'物流价格',
+                'shipping_price'   =>$car_price['postFee'],//'物流价格',
 				'user_money'       =>$car_price['balance'],//'使用余额',
 				'coupon_price'     =>$car_price['couponFee'],//'使用优惠券',
 				'integral'         =>($car_price['pointsFee'] * tpCache('shopping.point_rate')), //'使用积分',
@@ -467,7 +467,6 @@ class OrderLogic
 		$order = new Order();
 		$order->data($data,true);
 		$orderSaveResult = $order->save();
-
 		if($orderSaveResult === false){
             file_put_contents(ROOT_PATH.'/public/debug.txt', date('Y-m-d H:i:s'). '用户'. $user_id. '下单失败'."\n", 8);
 			return array('status'=>-8,'msg'=>'添加订单失败','result'=>NULL);
