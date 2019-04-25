@@ -1887,7 +1887,6 @@ function limitShopping($orderType, $userId)
 function getMy15DayShopPrice($userId)
 {
     $result = Db::name('order')->where(['user_id' => $userId, 'type' => 1, 'pay_status' => 1, 'pay_time' =>['egt', time() - 15 * 86400]])->sum('goods_price');
-    file_put_contents(MY_LOG.date('Ymd').'.txt', date('Y-m-d H:i:s'). ' '.$userId.' 15天内的活动区消费总额是：' . $result. "\r\n", 8);
     return $result > 0 ? $result : 0;
 }
 
