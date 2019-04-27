@@ -1908,7 +1908,7 @@ function get_bonus($order)
             //直推奖金
             $money = min($order['goods_price'], getMy15DayShopPrice($TIR_ID['user_id'])) * $config['daozhang'];
             Db::name('users')->where('user_id', $TIR_ID['user_id'])->setInc('user_money', $money);
-            balancelog($TIR_ID['user_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
+            balancelog($order['order_id'], $TIR_ID['user_id'], $money, 6, $TIR_ID['user_money'], $TIR_ID['user_money'] + $money);
             if ($TIR_ID['second_leader']) {
                 $tjstr = array_reverse(explode(',', $TIR_ID['second_leader']));
                 //区代理奖金
@@ -1938,7 +1938,7 @@ function get_bonus($order)
                         $myTeamHasMemberLevelEG3[] = $userId;
                         $money = min($order['goods_price'], getMy15DayShopPrice($user['user_id'])) * $p;
                         Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                        balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+                        balancelog($order['order_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                     }
                 }
 
@@ -1963,7 +1963,7 @@ function get_bonus($order)
                     $canGetBonus[] = $userId;
                     $money = min($order['goods_price'], getMy15DayShopPrice($user['user_id'])) * $bblili;
                     Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+                    balancelog($order['order_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
 
                 }
 
@@ -1979,7 +1979,7 @@ function get_bonus($order)
                     }
                     $money = $order['goods_price'] * 0.03;
                     Db::name('users')->where('user_id', $user['user_id'])->setInc('user_money', $money);
-                    balancelog($user['user_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
+                    balancelog($order['order_id'], $user['user_id'], $money, 6, $user['user_money'], $user['user_money'] + $money);
                 }
             }
         }
