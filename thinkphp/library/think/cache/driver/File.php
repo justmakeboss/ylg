@@ -51,7 +51,7 @@ class File extends Driver
     {
         // 创建项目缓存目录
         if (!is_dir($this->options['path'])) {
-            if (mkdir($this->options['path'], 0755, true)) {
+            if (mkdir($this->options['path'], 0777, true)) {
                 return true;
             }
         }
@@ -77,7 +77,7 @@ class File extends Driver
         $filename = $this->options['path'] . $name . '.php';
         $dir      = dirname($filename);
         if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            mkdir($dir, 0777, true);
         }
         return $filename;
     }

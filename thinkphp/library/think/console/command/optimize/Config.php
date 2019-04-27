@@ -39,7 +39,7 @@ class Config extends Command
         $content = '<?php ' . PHP_EOL . $this->buildCacheContent($module);
 
         if (!is_dir(RUNTIME_PATH . $module)) {
-            @mkdir(RUNTIME_PATH . $module, 0755, true);
+            @mkdir(RUNTIME_PATH . $module, 0777, true);
         }
 
         file_put_contents(RUNTIME_PATH . $module . 'init' . EXT, $content);

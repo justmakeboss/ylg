@@ -25,7 +25,7 @@ class Tools extends Base {
 		if(IS_POST && !empty($tables) && is_array($tables)){ //初始化
 			$path = C('DATA_BACKUP_PATH');
 			if(!is_dir($path)){
-				mkdir($path, 0755, true);
+				mkdir($path, 0777, true);
 			}
 			//读取备份配置
 			$config = array(
@@ -106,7 +106,7 @@ class Tools extends Base {
 	public function restore(){
 		$path = C('DATA_BACKUP_PATH');
 		if(!is_dir($path)){
-			mkdir($path, 0755, true);
+			mkdir($path, 0777, true);
 		}
 		$path = realpath($path);
 		$flag = \FilesystemIterator::KEY_AS_FILENAME;

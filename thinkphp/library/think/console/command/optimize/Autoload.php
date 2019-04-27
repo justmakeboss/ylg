@@ -64,7 +64,7 @@ EOF;
         $classmapFile .= "];\n";
 
         if (!is_dir(RUNTIME_PATH)) {
-            @mkdir(RUNTIME_PATH, 0755, true);
+            @mkdir(RUNTIME_PATH, 0777, true);
         }
 
         file_put_contents(RUNTIME_PATH . 'classmap' . EXT, $classmapFile);

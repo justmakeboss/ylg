@@ -34,7 +34,7 @@ class Schema extends Command
     protected function execute(Input $input, Output $output)
     {
         if (!is_dir(RUNTIME_PATH . 'schema')) {
-            @mkdir(RUNTIME_PATH . 'schema', 0755, true);
+            @mkdir(RUNTIME_PATH . 'schema', 0777, true);
         }
         if ($input->hasOption('module')) {
             $module = $input->getOption('module');
